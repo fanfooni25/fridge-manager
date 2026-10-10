@@ -104,13 +104,6 @@
           <p class="helper">个人信息只保存在当前设备，不会上传到服务器。</p>
         </div>
         <div class="form-card">
-          <div class="section-heading" style="margin:0 0 10px"><h2 style="margin:0">数据备份</h2></div>
-          <p class="helper" style="margin:0 0 12px">把冰箱数据导出成文件，换设备或换浏览器后导入即可恢复。</p>
-          <button class="secondary" id="export-backup" type="button" style="width:100%;margin:0 0 8px">导出备份（JSON）</button>
-          <button class="secondary" id="import-backup" type="button" style="width:100%;margin:0">导入备份（JSON）</button>
-          <input id="import-file" type="file" accept="application/json,.json" hidden>
-        </div>
-        <div class="form-card">
           <div class="section-heading" style="margin:0 0 6px"><h2 style="margin:0">饮食记录</h2></div>
           <div id="diet-calendar" style="margin:0 0 10px"></div>
           <button type="button" class="secondary" id="diet-delete" style="margin:0 0 12px;color:#a34b40;background:#f7eceb">删除当天记录</button>
@@ -122,6 +115,13 @@
           <div id="diet-advice"></div>
           <div class="section-heading" style="margin:16px 0 8px"><h2 style="margin:0">周期汇总</h2></div>
           <div id="diet-period-summary"></div>
+        </div>
+        <div class="form-card">
+          <div class="section-heading" style="margin:0 0 10px"><h2 style="margin:0">数据备份</h2></div>
+          <p class="helper" style="margin:0 0 12px">把冰箱数据导出成文件，换设备或换浏览器后导入即可恢复。</p>
+          <button class="secondary" id="export-backup" type="button" style="width:100%;margin:0 0 8px">导出备份（JSON）</button>
+          <button class="secondary" id="import-backup" type="button" style="width:100%;margin:0">导入备份（JSON）</button>
+          <input id="import-file" type="file" accept="application/json,.json" hidden>
         </div>
       </section>
     </main>
