@@ -459,7 +459,7 @@
       {name:'牛奶',weight:250,expiry:7,added:daysAgoAtNoon(12),color:'#e8eff1'}
     ];
     const readStore=()=>{try{return JSON.parse(localStorage.getItem('fridge-foods-v2'))||starter}catch{return starter}};
-    let inventory=readStore(), activeFilters=new Set(['all']), selectedRecipeIds=new Set();
+    let inventory=readStore(), activeFilters=new Set(['all']), selectedRecipeIds=new Set(),recipeShowAll=false;
     const $=id=>document.getElementById(id);
     const getFood=name=>foods.find(f=>f.name===name)||{name,emoji:'🥫',kcal:0,category:'其他',color:'#eff0e9'};
     function gramsPerUnit(unit,name){return unit==='kg'?1000:unit==='piece'?(foodPieceGrams[name]||1):1}
@@ -682,15 +682,15 @@
       const urgency=new Map();inventory.forEach(item=>urgency.set(item.name,(urgency.get(item.name)||0)+Math.max(0,5-remainingDays(item))));
       const ranked=available.map(recipe=>{const status=recipe.ingredients.map(([name,grams])=>{const need=Math.round(grams*mult),have=stock.get(name)||0;return {name,need,have,shortage:Math.max(0,need-have)}}),missing=status.filter(x=>x.shortage>0).length,needGrams=status.reduce((sum,x)=>sum+x.need,0),covered=status.reduce((sum,x)=>sum+Math.min(x.have,x.need),0),soon=status.reduce((sum,x)=>sum+(x.have>0?(urgency.get(x.name)||0):0),0);return {recipe,status,missing,coverage:needGrams?covered/needGrams:0,soon}}).sort((a,b)=>a.missing-b.missing||b.coverage-a.coverage||b.soon-a.soon||a.recipe.time-b.recipe.time);
       const topPicks=new Set(ranked.slice(0,dishCount).map(x=>x.recipe.id));
-      $('recommendation-meta').textContent=`${people} 人 · 推荐 ${Math.min(dishCount,ranked.length)} 道 · 共 ${ranked.length} 道可选`;
+      $('recommendation-meta').innerHTML=`${people} 人 · 推荐 ${Math.min(dishCount,ranked.length)} 道 · 共 ${ranked.length} 道可选 <button type="button" id="recipe-more-toggle" style="border:0;background:var(--mint);color:var(--green);border-radius:8px;padding:3px 8px;font-size:11px;font-weight:650;margin-left:4px">${recipeShowAll?'收起':'查看全部'}</button>`;
       $('recommendation-summary').textContent=inventory.length?`按冰箱库存优先排序；勾选菜品加入菜单，可查看每道菜用料和合并后的缺料清单。`:'冰箱目前没有食材；先展示所需食材较少的菜，添加库存后会自动重排。';
-      $('recipe-list').innerHTML=ranked.map(({recipe:r,status,missing})=>{
+      $('recipe-list').innerHTML=(recipeShowAll?ranked:ranked.slice(0,dishCount)).map(({recipe:r,status,missing})=>{
         const missingItems=status.filter(x=>x.shortage>0),haveNames=status.filter(x=>x.have>0).map(x=>x.name);
         const hint=missing===0?`冰箱食材齐全：${haveNames.join('、')}`:inventory.length?`还缺：${missingItems.map(x=>`${x.name} ${foodAmountText(x.name,x.shortage,false)}`).join('、')}`:'所需食材：'+status.map(x=>`${x.name} ${foodAmountText(x.name,x.need)}`).join('、');
         const selected=selectedRecipeIds.has(r.id),recommended=topPicks.has(r.id);
         return `<article class="recipe-card" data-recipe="${r.id}">${recipePhotoMarkup(r,'recipe-hero',`<span class="recipe-time">◷ ${r.time} 分钟</span>`)}<div class="recipe-content"><div class="recipe-top"><div class="recipe-title">${r.name}</div><div class="recipe-kcal">整道约 ${recipeTotalKcal(r,mult)} 千卡</div></div><div class="recipe-desc">${r.description}</div><div class="recipe-stock">${hint}</div><div class="recipe-bottom"><div class="tags">${r.label.map(x=>`<span class="tag">${x}</span>`).join('')}</div><span class="match">${missing===0?'库存可做':`缺 ${missing} 种`}</span></div><label class="recipe-choice"><input type="checkbox" data-select-recipe="${r.id}" ${selected?'checked':''}><span>${selected?'已加入菜单':'加入本次菜单'}</span>${recommended?'<small>优先推荐</small>':''}</label></div></article>`
       }).join('')||'<div class="empty">当前筛选下没有可推荐的菜谱</div>';
-      document.querySelectorAll('[data-recipe]').forEach(card=>card.addEventListener('click',e=>{if(e.target.closest('.recipe-choice'))return;openRecipe(card.dataset.recipe)}));
+      document.querySelectorAll('[data-recipe]').forEach(card=>card.addEventListener('click',e=>{if(e.target.closest('.recipe-choice'))return;openRecipe(card.dataset.recipe)}));const _mt=$('recipe-more-toggle');if(_mt)_mt.addEventListener('click',()=>{recipeShowAll=!recipeShowAll;renderRecipes()});
       updateMenuShortcut();
     }
     const menuPurchaseKey='fridge-menu-purchase-v1';
