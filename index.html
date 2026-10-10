@@ -450,14 +450,7 @@
     const regionalLightRecipeIds=new Set(['steamed-sea-bass','spinach-tofu-soup','shandong-salad','vinegar-cabbage','wood-ear-egg','northeast-cold-salad','jp-miso-salmon-soup','jp-salmon-grill','jp-chawanmushi','jp-hiyayakko','west-roasted-vegetables','west-pumpkin-soup','fr-ratatouille','fr-nicoise','fr-salmon-papillote','fr-lentil-salad','tr-menemen','tr-lentil-soup','tr-cacik','tr-eggplant-yogurt','tr-baked-seabass']);
     extraRegionalRecipes.forEach(item=>{const [region,id,name,emoji,time,style,description,ingredients]=item,seasonings=[...regionalSeasonings[style],...(region==='sichuan'?[['豆瓣酱',8],['辣椒油',3]]:region==='korean'?[['韩式辣酱',12],['香油',3]]:[]),...(regionalFlavorSeasonings[region]||[]),...(regionalSpecialSeasonings[id]||[])],tags=['regional',region],label=[regionalNames[region],regionalStyleNames[style]];if(style==='meatstir'){tags.push('stirfry','meat');label.push('肉菜')}if(style==='vegstir'){tags.push('stirfry','vegetarian');label.push('素菜');tags.push('light');label.push('减脂餐')}if(style==='soup'){tags.push('soup')}if(regionalLightRecipeIds.has(id)&&!tags.includes('light')){tags.push('light');label.push('减脂餐')}const steps=regionalMethod(item,seasonings);recipes.push({id,name,emoji,time,kcal:0,tags,label,description,ingredients,steps});recipeSeasonings[id]=seasonings;recipeMethods[id]=steps});
     const uniqueRecipesByName=new Map();recipes.forEach(recipe=>{const key=recipe.name.normalize('NFKC').toLocaleLowerCase().replace(/[\s·\-—]/g,'');const existing=uniqueRecipesByName.get(key);if(!existing){uniqueRecipesByName.set(key,recipe);return}recipe.tags.forEach(tag=>{if(!existing.tags.includes(tag))existing.tags.push(tag)});recipe.label.forEach(label=>{if(!existing.label.includes(label))existing.label.push(label)});delete recipeSeasonings[recipe.id];delete recipeMethods[recipe.id]});recipes.splice(0,recipes.length,...uniqueRecipesByName.values());
-    const daysAgoAtNoon = n => { const d = new Date(); d.setHours(12,0,0,0); d.setDate(d.getDate()-n); return d.getTime(); };
-    const starter = [
-      {name:'鸡胸肉',weight:320,expiry:1,added:daysAgoAtNoon(2),color:'#f6e9dc'},
-      {name:'菠菜',weight:160,expiry:2,added:daysAgoAtNoon(4),color:'#e1efdf'},
-      {name:'西兰花',weight:260,expiry:3,added:daysAgoAtNoon(6),color:'#e4f0df'},
-      {name:'番茄',weight:380,expiry:4,added:daysAgoAtNoon(8),color:'#f8e6df'},
-      {name:'牛奶',weight:250,expiry:7,added:daysAgoAtNoon(12),color:'#e8eff1'}
-    ];
+    const starter = [];
     const readStore=()=>{try{return JSON.parse(localStorage.getItem('fridge-foods-v2'))||starter}catch{return starter}};
     let inventory=readStore(), activeFilters=new Set(['all']), selectedRecipeIds=new Set(),recipeShowAll=false;
     const $=id=>document.getElementById(id);
