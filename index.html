@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#f6f7f2">
   <title>冰箱小管家</title>
   <link rel="manifest" href="manifest.webmanifest">
@@ -14,7 +14,7 @@
   <meta name="apple-mobile-web-app-title" content="冰箱小管家">
   <style>
     :root{--ink:#202821;--muted:#7a837b;--line:#e9ece5;--green:#286548;--mint:#e8f2e9;--paper:#fff;--bg:#f6f7f2;--orange:#dd8a45;--shadow:0 18px 55px #27382a12}
-    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;-webkit-font-smoothing:antialiased}
+    html,body{touch-action:manipulation}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;-webkit-font-smoothing:antialiased}
     button,input,select{font:inherit}button{cursor:pointer}.app{width:min(100%,480px);min-height:100dvh;margin:auto;background:var(--bg);position:relative;padding-bottom:92px;overflow:hidden}.topbar{padding:24px 24px 12px;display:flex;justify-content:space-between;align-items:center}.brand{font-size:14px;font-weight:700;letter-spacing:.08em;color:var(--green);display:flex;gap:8px;align-items:center}.brand-mark{width:26px;height:26px;border-radius:9px;background:#dcebdd;display:grid;place-items:center;font-size:15px}.date{font-size:12px;color:var(--muted)}
     main{padding:8px 20px 24px}.view{display:none;animation:rise .22s ease}.view.active{display:block}@keyframes rise{from{opacity:.4;transform:translateY(6px)}to{opacity:1;transform:none}}
     .headline{display:flex;justify-content:space-between;align-items:flex-end;margin:10px 4px 18px}.eyebrow{font-size:12px;color:var(--muted);margin-bottom:6px}.headline h1{font-size:27px;letter-spacing:-.04em;margin:0;font-weight:720}.round-add{border:0;background:var(--green);color:white;border-radius:14px;padding:11px 15px;font-size:13px;font-weight:650;box-shadow:0 5px 12px #28654820}
@@ -747,6 +747,8 @@
     init();
   </script>
   <script>
+    document.addEventListener('gesturestart', function (e) { e.preventDefault(); });
+    document.addEventListener('gesturechange', function (e) { e.preventDefault(); });
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function () {
         navigator.serviceWorker.register('sw.js').catch(function () {});
