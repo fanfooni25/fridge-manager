@@ -39,8 +39,11 @@
   <div class="app">
 <header class="topbar"><div class="brand"><span class="brand-mark"><svg width="16" height="18" viewBox="0 0 16 18" fill="none" stroke="#286548" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1.2" y="1" width="13.6" height="16" rx="2.5"></rect><line x1="1.2" y1="8.5" x2="14.8" y2="8.5"></line><line x1="12.3" y1="3.6" x2="12.3" y2="6.6"></line></svg></span>冰箱小管家</div><div class="date" id="today"></div></header>
     <main>
-      <section class="view" id="view-add">
-        <div class="headline"><div><div class="eyebrow">新鲜入库，心里有数</div><h1>添加食物</h1></div></div>
+
+
+      <section class="view" id="view-inventory">
+        <div class="headline"><div><div class="eyebrow">早上好，今天也好好吃饭</div><h1>我的冰箱</h1></div><button class="round-add" id="toggle-add">＋ 添加食物</button></div>
+        <div id="add-panel" hidden>
         <div class="form-card">
           <div class="food-title-row"><label class="form-label" for="food-select">食物名称</label><div class="food-search-wrap"><input class="food-search" id="food-search" type="search" placeholder="搜索食物" autocomplete="off" aria-label="搜索食物"><span class="search-mark" aria-hidden="true">⌕</span><div class="food-search-results" id="food-search-results" role="listbox" hidden></div></div></div>
           <select class="field" id="food-select"></select>
@@ -71,10 +74,7 @@
         </div>
         <div class="section-heading"><h2>已添加食材</h2></div>
         <div id="recent-list"></div>
-      </section>
-
-      <section class="view" id="view-inventory">
-        <div class="headline"><div><div class="eyebrow">早上好，今天也好好吃饭</div><h1>我的冰箱</h1></div><button class="round-add" data-go="add">＋ 添加食物</button></div>
+        </div>
         <div class="summary"><div class="summary-top"><span>冰箱食材</span><span>实时库存</span></div><div class="summary-number"><b id="food-count">0</b><small>种食物</small></div><div class="summary-foot" id="inventory-total">食材总重量 0 克</div><div class="summary-icon">🧺</div></div>
         <div class="section-heading"><h2>全部食材</h2><span class="subtle" id="inventory-caption">按保质期排序</span></div>
         <div class="inventory-list" id="inventory-list"></div>
@@ -95,10 +95,26 @@
         <p class="helper">查看每道菜所需食材，并核对合并后的库存和缺料。</p>
         <div id="selected-menu"></div>
       </section>
+      <section class="view" id="view-profile">
+        <div class="headline"><div><div class="eyebrow">关于你</div><h1>个人信息</h1></div></div>
+        <div class="form-card">
+          <label class="form-label" for="profile-name">称呼</label>
+          <input class="field" id="profile-name" type="text" maxlength="20" placeholder="例如：小明" autocomplete="off">
+          <button class="primary" id="save-profile" type="button">保存个人信息</button>
+          <p class="helper">个人信息只保存在当前设备，不会上传到服务器。</p>
+        </div>
+        <div class="form-card">
+          <div class="section-heading" style="margin:0 0 10px"><h2 style="margin:0">数据备份</h2></div>
+          <p class="helper" style="margin:0 0 12px">把冰箱数据导出成文件，换设备或换浏览器后导入即可恢复。</p>
+          <button class="secondary" id="export-backup" type="button" style="width:100%;margin:0 0 8px">导出备份（JSON）</button>
+          <button class="secondary" id="import-backup" type="button" style="width:100%;margin:0">导入备份（JSON）</button>
+          <input id="import-file" type="file" accept="application/json,.json" hidden>
+        </div>
+      </section>
     </main>
     <nav aria-label="主导航">
       <button class="menu-shortcut" id="menu-shortcut" type="button" aria-label="打开本次菜单"><span aria-hidden="true">🧺</span><b id="menu-count">0</b></button>
-      <button class="nav-btn" data-view="add"><svg class="nav-icon" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6"></circle><line x1="15" y1="15" x2="20" y2="20"></line><line x1="10.5" y1="7.5" x2="10.5" y2="13.5"></line><line x1="7.5" y1="10.5" x2="13.5" y2="10.5"></line></svg><span>添加</span></button>
+      <button class="nav-btn" data-view="profile"><svg class="nav-icon" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"></path></svg><span>个人信息</span></button>
       <button class="nav-btn" data-view="inventory"><span class="nav-icon fridge-icon" aria-hidden="true"></span><span>冰箱</span></button>
       <button class="nav-btn active" data-view="recipes"><span class="nav-icon">♨</span><span>菜谱</span></button>
     </nav>
@@ -721,13 +737,20 @@
     function cookSelectedMenu(){const mult=(Number($('servings').value)||2)/2,needs=new Map();recipes.filter(recipe=>selectedRecipeIds.has(recipe.id)).forEach(recipe=>recipe.ingredients.forEach(([name,grams])=>needs.set(name,(needs.get(name)||0)+Math.round(grams*mult))));const shortages=[...needs.entries()].map(([name,need])=>{const have=inventory.filter(item=>item.name===name).reduce((sum,item)=>sum+Number(item.weight),0);return {name,need,have}}).filter(item=>item.have<item.need);if(shortages.length){toast('库存不足：'+shortages.map(item=>`${item.name}缺${Math.round(item.need-item.have)}克`).join('、'));return}needs.forEach((need,name)=>{let remaining=need;for(const item of inventory.filter(x=>x.name===name)){const take=Math.min(Number(item.weight),remaining);item.weight-=take;remaining-=take;if(remaining<=0)break}});inventory=inventory.filter(item=>item.weight>0);save();renderInventory();renderRecent();selectedRecipeIds.clear();renderRecipes();showView('inventory');toast('本次菜单食材已从冰箱扣减')}
     function closeCustomFoodPanel(){const panel=$('custom-food-panel'),toggle=$('custom-food-toggle');panel.hidden=true;toggle.setAttribute('aria-expanded','false')}
     function saveCustomFood(){const name=$('custom-food-name').value.trim().replace(/\s+/g,' '),category=$('custom-food-category').value,kcal=Number($('custom-food-kcal').value),pieceGrams=Number($('custom-food-piece-grams').value)||0;if(!isValidCustomFoodName(name)){toast('请填写食材名称，暂不支持特殊符号');$('custom-food-name').focus();return}if(!customFoodCategories.includes(category)||!Number.isFinite(kcal)||kcal<0||kcal>900){toast('请检查分类和每 100 克热量');return}if(pieceGrams<0||pieceGrams>10000){toast('单个重量请填写 1 到 10000 克');return}const existing=foods.find(food=>food.name.toLocaleLowerCase()===name.toLocaleLowerCase());if(existing){$('food-select').value=existing.name;$('food-select').dispatchEvent(new Event('change'));closeCustomFoodPanel();toast('目录中已有这个名称，已为你选中');return}const meta=customFoodCategoryMeta[category],record={name,category,kcal,pieceGrams};customFoodRecords.push(record);foods.push({...record,emoji:meta.emoji,color:meta.color});if(pieceGrams>0)foodPieceGrams[name]=pieceGrams;localStorage.setItem(customFoodStorageKey,JSON.stringify(customFoodRecords));renderFoodOptions(name);$('food-select').value=name;$('food-select').dispatchEvent(new Event('change'));$('custom-food-name').value='';$('custom-food-kcal').value='0';$('custom-food-piece-grams').value='';closeCustomFoodPanel();toast(`${name}已保存；填写数量后点“加入冰箱”`)}
+    const profileStorageKey='fridge-profile-v1';
+    function readProfile(){try{const p=JSON.parse(localStorage.getItem(profileStorageKey)||'{}');return {name:typeof p.name==='string'?p.name.slice(0,20):''}}catch{return {name:''}}}
+    function saveProfile(p){localStorage.setItem(profileStorageKey,JSON.stringify(p))}
+    function setAddPanel(open){const p=$('add-panel');p.hidden=!open;$('toggle-add').textContent=open?'收起添加':'＋ 添加食物';if(open)setTimeout(()=>$('food-search').focus(),0)}
+    function exportBackup(){const backup={app:'fridge-manager',version:1,exportedAt:new Date().toISOString(),profile:readProfile(),inventory,customFoods:customFoodRecords,menuPurchase:readMenuPurchase()};const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`冰箱数据备份-${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('备份已导出')}
+    function importBackup(file){const reader=new FileReader();reader.onload=()=>{try{const d=JSON.parse(reader.result);if(!d||!Array.isArray(d.inventory))throw new Error('bad');const items=d.inventory.filter(x=>x&&typeof x.name==='string'&&Number.isFinite(Number(x.weight))&&Number(x.weight)>0).map(x=>({name:x.name,weight:Number(x.weight),unit:x.unit==='piece'?'piece':'g',expiry:Number.isFinite(Number(x.expiry))?Number(x.expiry):3,added:Number.isFinite(Number(x.added))?Number(x.added):Date.now()}));localStorage.setItem('fridge-foods-v2',JSON.stringify(items));if(Array.isArray(d.customFoods))localStorage.setItem(customFoodStorageKey,JSON.stringify(d.customFoods));if(d.menuPurchase)localStorage.setItem(menuPurchaseKey,JSON.stringify(d.menuPurchase));else localStorage.removeItem(menuPurchaseKey);if(d.profile&&typeof d.profile.name==='string')localStorage.setItem(profileStorageKey,JSON.stringify(d.profile));toast('导入成功，正在刷新');setTimeout(()=>location.reload(),600)}catch(e){toast('导入失败：文件格式不正确')}};reader.readAsText(file)}
+
     function init(){
       const d=new Date();$('today').textContent=`${d.getMonth()+1}月${d.getDate()}日 · ${['日','一','二','三','四','五','六'][d.getDay()]}`;
       renderFoodOptions(foods[0].name);updateFoodUnitOptions('g');
       $('custom-food-toggle').addEventListener('click',()=>{const panel=$('custom-food-panel'),open=panel.hidden;panel.hidden=!open;$('custom-food-toggle').setAttribute('aria-expanded',String(open));if(open)setTimeout(()=>$('custom-food-name').focus(),0)});$('cancel-custom-food').addEventListener('click',closeCustomFoodPanel);$('save-custom-food').addEventListener('click',saveCustomFood);$('custom-food-name').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();saveCustomFood()}});
       $('food-search').addEventListener('input',e=>renderFoodSearch(e.target.value));$('food-search').addEventListener('keydown',e=>{if(e.key==='Enter'){const first=$('food-search-results').querySelector('[data-food]');if(first){e.preventDefault();first.click()}}});$('food-search-results').addEventListener('click',e=>{const result=e.target.closest('[data-food]');if(!result)return;$('food-select').value=result.dataset.food;$('food-select').dispatchEvent(new Event('change'));$('food-search').value='';$('food-search-results').hidden=true});document.addEventListener('click',e=>{if(!e.target.closest('.food-search-wrap'))$('food-search-results').hidden=true});
       $('food-select').addEventListener('change',()=>{const name=$('food-select').value;updateFoodUnitOptions(foodPieceGrams[name]?'piece':'g');$('weight').value=foodPieceGrams[name]?'1':'300';calculateKcal();updateExpirySuggestion()});$('weight').addEventListener('input',calculateKcal);$('weight-unit').addEventListener('change',()=>{const input=$('weight'),select=$('weight-unit'),name=$('food-select').value,oldUnit=select.dataset.currentUnit||'g',amount=Number(input.value)||0,grams=amount*gramsPerUnit(oldUnit,name),newUnit=select.value;select.dataset.currentUnit=newUnit;select.setAttribute('aria-label',newUnit==='piece'?'数量单位':'重量单位');$('weight-label').textContent=newUnit==='piece'?'食物数量':'食物重量';input.min=newUnit==='kg'?'0.001':newUnit==='piece'?'1':'1';input.step=newUnit==='kg'?'0.001':newUnit==='piece'?'1':'1';input.value=grams?String(newUnit==='kg'?Number((grams/1000).toFixed(3)):newUnit==='piece'?Number((grams/gramsPerUnit(newUnit,name)).toFixed(2)):Math.round(grams)):'';calculateKcal()});$('expiry-slider').addEventListener('input',()=>{syncExpiryDisplay();const guide=getShelfGuide($('food-select').value);$('expiry-hint').textContent=`当前设置：${guide.range}。${guide.note} 商品包装标示优先。`});calculateKcal();updateExpirySuggestion();
-      $('add-food').addEventListener('click',()=>{const name=$('food-select').value,amount=Number($('weight').value),unit=$('weight-unit').value,weight=amount*gramsPerUnit(unit,name);if(!weight||weight<=0){toast('请输入有效数量');return}const days=Number($('expiry-slider').value);inventory.unshift({name,weight,unit:unit==='piece'?'piece':'g',expiry:days,added:Date.now()});save();renderFoodOptions(name);renderInventory();renderRecent();$('weight').value=unit==='piece'?'1':unit==='kg'?'0.3':'300';calculateKcal();toast(`${name} ${amount} ${unit==='piece'?'个':unit==='kg'?'千克':'克'}已加入冰箱`);showView('inventory')});
+      $('add-food').addEventListener('click',()=>{const name=$('food-select').value,amount=Number($('weight').value),unit=$('weight-unit').value,weight=amount*gramsPerUnit(unit,name);if(!weight||weight<=0){toast('请输入有效数量');return}const days=Number($('expiry-slider').value);inventory.unshift({name,weight,unit:unit==='piece'?'piece':'g',expiry:days,added:Date.now()});save();renderFoodOptions(name);renderInventory();renderRecent();$('weight').value=unit==='piece'?'1':unit==='kg'?'0.3':'300';calculateKcal();toast(`${name} ${amount} ${unit==='piece'?'个':unit==='kg'?'千克':'克'}已加入冰箱`);setAddPanel(false)});
       let swipeStart=null,suppressRecentClick=false;$('recent-list').addEventListener('pointerdown',e=>{const shell=e.target.closest('.recent-shell');if(!shell||e.target.closest('.delete-item'))return;swipeStart={shell,x:e.clientX,y:e.clientY}});$('recent-list').addEventListener('pointerup',e=>{if(!swipeStart)return;const dx=e.clientX-swipeStart.x,dy=e.clientY-swipeStart.y;if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>35){swipeStart.shell.classList.toggle('swiped',dx<0);suppressRecentClick=true;setTimeout(()=>suppressRecentClick=false,350)}swipeStart=null});$('recent-list').addEventListener('pointercancel',()=>swipeStart=null);$('recent-list').addEventListener('click',e=>{if(suppressRecentClick){e.preventDefault();return}const shell=e.target.closest('.recent-shell');if(!shell)return;if(e.target.closest('.delete-item')){const entry=Number(shell.dataset.entry);inventory=inventory.filter(x=>x.added!==entry);save();renderInventory();renderRecent();toast('食材已删除');return}if(!e.target.closest('button'))shell.classList.toggle('swiped')});
       document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
       document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.go)));
@@ -735,6 +758,12 @@
       $('subfilters').addEventListener('click',e=>{const b=e.target.closest('[data-subfilter]');if(!b)return;const parent=activeFilters.has('stirfry')?'stirfry':'regional',child=b.dataset.subfilter;activeFilters=child?new Set([parent,child]):new Set([parent]);renderSubfilters();renderRecipes()});
       $('recipe-list').addEventListener('change',e=>{const checkbox=e.target.closest('[data-select-recipe]');if(!checkbox)return;checkbox.checked?selectedRecipeIds.add(checkbox.dataset.selectRecipe):selectedRecipeIds.delete(checkbox.dataset.selectRecipe);renderRecipes()});$('servings').addEventListener('change',renderRecipes);$('dish-count').addEventListener('change',renderRecipes);$('close-sheet').addEventListener('click',()=>$('recipe-overlay').classList.remove('open'));$('recipe-overlay').addEventListener('click',e=>{if(e.target===$('recipe-overlay'))$('recipe-overlay').classList.remove('open')});
       $('menu-shortcut').addEventListener('click',()=>{renderSelectedMenu();showView('menu')});
+      $('toggle-add').addEventListener('click',()=>setAddPanel($('add-panel').hidden));
+      $('profile-name').value=readProfile().name;
+      $('save-profile').addEventListener('click',()=>{saveProfile({name:$('profile-name').value.trim().slice(0,20)});toast('个人信息已保存')});
+      $('export-backup').addEventListener('click',exportBackup);
+      $('import-backup').addEventListener('click',()=>$('import-file').click());
+      $('import-file').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(f)importBackup(f);e.target.value=''});
       renderInventory();renderRecent();
     }
     init();
