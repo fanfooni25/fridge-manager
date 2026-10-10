@@ -111,7 +111,8 @@
           <input id="import-file" type="file" accept="application/json,.json" hidden>
         </div>
         <div class="form-card">
-          <div class="section-heading" style="margin:0 0 10px"><h2 style="margin:0">今日饮食记录</h2><span class="subtle" id="diet-date"></span></div>
+          <div class="section-heading" style="margin:0 0 6px"><h2 style="margin:0">饮食记录</h2></div>
+          <select class="field" id="diet-date" style="margin:0 0 12px"></select>
           <div id="diet-meals"></div>
           <div class="calorie-box" style="margin-top:12px"><span>今日摄入</span><div class="calorie-value"><b id="diet-kcal">0</b> <small>千卡</small></div></div>
           <div class="section-heading" style="margin:16px 0 8px"><h2 style="margin:0">营养摄入</h2></div>
@@ -759,15 +760,16 @@
     function getFoodMacros(name){return categoryMacros[getFood(name).category]||categoryMacros['其他']}
     function recipeMacros(recipe,mult=1){let carbs=0,protein=0,fat=0;recipe.ingredients.forEach(([name,grams])=>{const m=getFoodMacros(name),g=grams*mult/100;carbs+=m.carbs*g;protein+=m.protein*g;fat+=m.fat*g});(recipeSeasonings[recipe.id]||[]).forEach(([name,grams])=>{if(name.includes('油'))fat+=grams*mult/100});return {carbs:Math.round(carbs),protein:Math.round(protein),fat:Math.round(fat)}}
     const dietTargets={kcal:2000,carbs:250,protein:75,fat:65};
-    const dietLogKey='fridge-diet-log-v1';
+    const dietLogKey='fridge-diet-log-v2';
     function todayStr(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
-    function readDietLog(){try{const l=JSON.parse(localStorage.getItem(dietLogKey)||'null');return (l&&l.date===todayStr()&&Array.isArray(l.meals))?l:{date:todayStr(),meals:[]}}catch{return {date:todayStr(),meals:[]}}}
-    function saveDietLog(l){localStorage.setItem(dietLogKey,JSON.stringify(l))}
-    function recordMeal(recipe,mult){const l=readDietLog(),m=recipeMacros(recipe,mult);l.meals.push({id:recipe.id,name:recipe.name,emoji:recipe.emoji,kcal:recipeTotalKcal(recipe,mult),carbs:m.carbs,protein:m.protein,fat:m.fat,at:Date.now()});saveDietLog(l)}
+    function readDietLogs(){try{const l=JSON.parse(localStorage.getItem(dietLogKey)||'{}');return (l&&typeof l==='object'&&!Array.isArray(l))?l:{}}catch{return {}}}
+    function saveDietLogs(logs){localStorage.setItem(dietLogKey,JSON.stringify(logs))}
+    function dietLogFor(date){const logs=readDietLogs();return {date,meals:(logs[date]||{}).meals||[]}}
+    function recordMeal(recipe,mult){const logs=readDietLogs(),d=todayStr(),day=logs[d]||{meals:[]},m=recipeMacros(recipe,mult);day.meals.push({id:recipe.id,name:recipe.name,emoji:recipe.emoji,kcal:recipeTotalKcal(recipe,mult),carbs:m.carbs,protein:m.protein,fat:m.fat,at:Date.now()});logs[d]=day;saveDietLogs(logs)}
     function dietTotals(log){return log.meals.reduce((a,m)=>({kcal:a.kcal+(m.kcal||0),carbs:a.carbs+(m.carbs||0),protein:a.protein+(m.protein||0),fat:a.fat+(m.fat||0)}),{kcal:0,carbs:0,protein:0,fat:0})}
     function macroGapRow(label,have,target){const gap=target-have,state=gap>0?`还差 ${Math.round(gap)} 克`:`超出 ${Math.round(-gap)} 克`;return `<div class="calorie-box" style="margin-top:8px"><span>${label}</span><div class="calorie-value" style="font-size:15px">${Math.round(have)}<small> / ${target} 克</small></div><span class="match" style="${gap>0?'color:#c07b3a':'color:var(--green)'}">${state}</span></div>`}
     function dietAdvice(log){const t=dietTargets,total=dietTotals(log),gaps=[['碳水','carbs'],['蛋白质','protein'],['脂肪','fat']].filter(([label,key])=>t[key]-total[key]>5).map(([label,key])=>({label,key,need:t[key]-total[key]})),logged=new Set(log.meals.map(m=>m.id));if(!gaps.length)return '<p class="helper">今日营养摄入基本达标，继续保持均衡饮食。</p>';const recs=[];gaps.forEach(g=>{recipes.filter(r=>!logged.has(r.id)).map(r=>({r,v:recipeMacros(r,1)[g.key]})).sort((a,b)=>b.v-a.v).slice(0,2).forEach(x=>{if(!recs.some(y=>y.id===x.r.id))recs.push({id:x.r.id,name:x.r.name,emoji:x.r.emoji})})});return `<p class="helper">${gaps.map(g=>`${g.label}还差约 ${Math.round(g.need)} 克`).join('、')}，可优先考虑：</p>${recs.slice(0,4).map(x=>`<button type="button" class="subchip" data-advice-recipe="${x.id}">${x.emoji} ${x.name}</button>`).join('')}`}
-    function renderDietSummary(){const log=readDietLog(),t=dietTargets,total=dietTotals(log);$('diet-date').textContent=log.date;$('diet-meals').innerHTML=log.meals.length?log.meals.map(m=>`<div class="menu-dish"><strong>${m.emoji} ${m.name}</strong><div>${m.kcal} 千卡 · 碳水 ${m.carbs}g · 蛋白 ${m.protein}g · 脂肪 ${m.fat}g</div></div>`).join(''):'<p class="helper">今天还没有记录；在菜谱页做菜后会自动记到这里。</p>';$('diet-kcal').textContent=total.kcal;$('diet-macros').innerHTML=macroGapRow('碳水',total.carbs,t.carbs)+macroGapRow('蛋白质',total.protein,t.protein)+macroGapRow('脂肪',total.fat,t.fat);$('diet-advice').innerHTML=dietAdvice(log)}
+    function renderDietSummary(){const logs=readDietLogs(),dates=[...new Set([todayStr(),...Object.keys(logs)])].sort().reverse(),sel=$('diet-date');const cur=sel.value&&dates.includes(sel.value)?sel.value:todayStr();sel.innerHTML=dates.map(d=>`<option value="${d}" ${d===cur?'selected':''}>${d}</option>`).join('');sel.value=cur;const log=dietLogFor(cur),t=dietTargets,total=dietTotals(log);$('diet-meals').innerHTML=log.meals.length?log.meals.map(m=>`<div class="menu-dish"><strong>${m.emoji} ${m.name}</strong><div>${m.kcal} 千卡 · 碳水 ${m.carbs}g · 蛋白 ${m.protein}g · 脂肪 ${m.fat}g</div></div>`).join(''):'<p class="helper">这一天还没有记录。</p>';$('diet-kcal').textContent=total.kcal;$('diet-macros').innerHTML=macroGapRow('碳水',total.carbs,t.carbs)+macroGapRow('蛋白质',total.protein,t.protein)+macroGapRow('脂肪',total.fat,t.fat);$('diet-advice').innerHTML=dietAdvice(log)}
 
     let adviceRecipeList=[];
     function dietAdvice(log){const t=dietTargets,total=dietTotals(log),gaps=[['碳水','carbs'],['蛋白质','protein'],['脂肪','fat']].filter(([label,key])=>t[key]-total[key]>5).map(([label,key])=>({label,key,need:t[key]-total[key]})),logged=new Set(log.meals.map(m=>m.id));if(!gaps.length){adviceRecipeList=[];return '<p class="helper">今日营养摄入基本达标，继续保持均衡饮食。</p>'};const recs=[];gaps.forEach(g=>{recipes.filter(r=>!logged.has(r.id)).map(r=>({r,v:recipeMacros(r,1)[g.key]})).sort((a,b)=>b.v-a.v).slice(0,2).forEach(x=>{if(!recs.some(y=>y.id===x.r.id))recs.push(x.r)})});adviceRecipeList=recs.slice(0,4);return `<p class="helper">${gaps.map(g=>`${g.label}还差约 ${Math.round(g.need)} 克`).join('、')}，可优先考虑：</p>${adviceRecipeList.map(x=>`<button type="button" class="subchip" data-advice-recipe="${x.id}">${x.emoji} ${x.name}</button>`).join('')}`}
@@ -799,6 +801,7 @@
       $('import-backup').addEventListener('click',()=>$('import-file').click());
       $('import-file').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(f)importBackup(f);e.target.value=''});
       document.addEventListener('click',e=>{const b=e.target.closest('[data-advice-recipe]');if(b){showView('recipes');openRecipe(b.dataset.adviceRecipe)}});
+      $('diet-date').addEventListener('change',renderDietSummary);
       renderDietSummary();
       renderInventory();renderRecent();
     }
