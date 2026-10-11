@@ -84,7 +84,7 @@
         <div class="headline"><div><div class="eyebrow">让现有食材，变成今天的一餐</div><h1>为你推荐</h1></div></div>
         <div class="summary"><div class="summary-top"><span>冰箱灵感</span><span>按库存搭配一桌菜</span></div><div class="summary-number" style="font-size:23px">几个人吃，想做几道？</div><div class="summary-foot">先推荐现有食材能做的菜，缺料时优先少缺几样</div><div class="summary-icon">🍲</div></div>
         <div class="section-heading"><h2>选择口味</h2><input class="food-search" id="recipe-search" type="search" placeholder="搜索菜谱" autocomplete="off" aria-label="搜索菜谱" style="width:132px;padding:7px 11px"></div>
-        <div class="filters" id="filters"><button class="chip selected" data-filter="all">全部菜谱</button><button class="chip" data-filter="light">减脂餐</button><button class="chip" data-filter="soup">煲汤</button><button class="chip" data-filter="hotpot">火锅</button><button class="chip" data-filter="stirfry">炒菜</button><button class="chip" data-filter="regional">地方菜</button></div><div class="subfilters" id="subfilters" hidden></div>
+        <div class="filters" id="filters"><button class="chip selected" data-filter="all">全部菜谱</button><button class="chip" data-filter="light">减脂餐</button><button class="chip" data-filter="soup">煲汤</button><button class="chip" data-filter="hotpot">火锅</button><button class="chip" data-filter="stirfry">炒菜</button><button class="chip" data-filter="regional">地方菜</button><button class="chip" data-filter="pastry">糕点</button></div><div class="subfilters" id="subfilters" hidden></div>
         <div class="servings"><span>用餐人数</span><select class="serving-select" id="servings"><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select><span>人</span><span style="margin-left:auto">想做</span><select class="serving-select" id="dish-count" aria-label="想做几道菜"><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select><span>道菜</span></div>
         <div class="section-heading"><h2>为你搭配</h2><span class="subtle" id="recommendation-meta"></span></div>
         <p class="helper" id="recommendation-summary" style="margin-top:-5px"></p>
@@ -540,7 +540,23 @@
     function dateValue(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
     function syncExpiryDisplay(){const days=Number($('expiry-slider').value),d=dateAfter(days);$('expiry-date').textContent=`${d.getMonth()+1}月${d.getDate()}日`;$('expiry-days').textContent=days===0?'今天':`${days} 天后`;return dateValue(d)}
     function updateExpirySuggestion(){const guide=getShelfGuide($('food-select').value);$('expiry-slider').value=guide.days;$('expiry-hint').textContent=`建议期限：${guide.range}。${guide.note} 商品包装标示优先；可滑动调整日期。`;syncExpiryDisplay()}
-    const primaryFilterTags=new Set(['all','light','soup','hotpot','stirfry','regional']);
+    const pastryRecipes=[
+      {id:'har-gow',name:'虾饺',emoji:'🥟',time:40,kcal:0,tags:['pastry','seafood'],label:['糕点','粤式点心'],description:'澄皮透亮、虾仁弹牙的广式早茶经典。',ingredients:[['虾仁',150],['面粉',100],['胡萝卜',30]],steps:['虾仁切丁、胡萝卜切末，加盐和少许淀粉拌匀成馅。','面粉用开水烫熟，揉成面团后擀成薄圆皮。','包入虾馅捏成饺子形，大火蒸 7 分钟。']},
+      {id:'siu-mai',name:'烧卖',emoji:'🥟',time:35,kcal:0,tags:['pastry','meat'],label:['糕点','粤式点心'],description:'肉馅鲜香、皮薄多汁的广式茶点。',ingredients:[['猪绞肉',120],['虾仁',60],['面粉',80],['蘑菇',30]],steps:['猪绞肉、虾仁和蘑菇末加盐、生抽拌匀上劲。','面粉加水和成较硬面团，擀成烧卖皮。','包入肉馅收口不封死，大火蒸 8 分钟。']},
+      {id:'cheung-fun',name:'肠粉',emoji:'🍜',time:30,kcal:0,tags:['pastry','light'],label:['糕点','粤式点心'],description:'滑嫩米香，配虾仁鸡蛋的经典肠粉。',ingredients:[['面粉',80],['鸡蛋',50],['虾仁',60],['生菜',30]],steps:['面粉加水调成稀糊，鸡蛋打散。','蒸盘刷油，倒入米浆铺平，放虾仁和生菜。','大火蒸 3 分钟卷起，淋豉油即可。']},
+      {id:'char-siu-bao',name:'叉烧包',emoji:'🥟',time:90,kcal:0,tags:['pastry','meat'],label:['糕点','粤式点心'],description:'松软面皮包裹甜咸叉烧馅。',ingredients:[['猪绞肉',100],['面粉',120]],steps:['猪绞肉加甜面酱炒成叉烧味肉馅，放凉。','面粉加酵母发酵，分成小剂子擀皮。','包入叉烧馅二次醒发，大火蒸 12 分钟。']},
+      {id:'custard-bao',name:'奶黄包',emoji:'🥟',time:90,kcal:0,tags:['pastry','vegetarian'],label:['糕点','粤式点心'],description:'奶香浓郁、绵密流心的甜包子。',ingredients:[['面粉',120],['鸡蛋',40],['牛奶',50],['黄油',20]],steps:['鸡蛋、牛奶、黄油和糖隔水加热成奶黄馅。','面粉加酵母发面，分成小剂子。','包入奶黄馅醒发后，大火蒸 10 分钟。']},
+      {id:'egg-tart',name:'蛋挞',emoji:'🥧',time:50,kcal:0,tags:['pastry','vegetarian'],label:['糕点','粤式点心'],description:'酥脆挞皮配嫩滑蛋奶馅。',ingredients:[['面粉',100],['鸡蛋',60],['牛奶',80],['黄油',20]],steps:['黄油和面粉搓成酥皮，压入挞模。','鸡蛋、牛奶和糖调成蛋挞液并过筛。','倒入挞皮，200 度烤 20 分钟。']},
+      {id:'ma-lai-go',name:'马拉糕',emoji:'🍰',time:45,kcal:0,tags:['pastry','vegetarian'],label:['糕点','粤式点心'],description:'松软弹润、红糖香气的蒸蛋糕。',ingredients:[['面粉',120],['鸡蛋',60],['牛奶',60],['黄油',15]],steps:['鸡蛋、牛奶、糖和面粉拌成面糊。','加入黄油拌匀后倒入模具。','大火蒸 25 分钟，放凉切块。']},
+      {id:'turnip-cake',name:'萝卜糕',emoji:'🍥',time:60,kcal:0,tags:['pastry','light'],label:['糕点','粤式点心'],description:'萝卜清甜，煎后外脆里软。',ingredients:[['白萝卜',250],['面粉',80],['虾仁',40]],steps:['白萝卜刨丝，虾仁切粒。','萝卜丝、面粉和水拌成糕浆蒸熟。','放凉切片，煎至两面金黄。']},
+      {id:'pork-bun',name:'肉包子',emoji:'🥟',time:90,kcal:0,tags:['pastry','meat'],label:['糕点','包子'],description:'暄软面皮包着多汁猪肉馅。',ingredients:[['猪绞肉',150],['面粉',200],['大白菜',100]],steps:['大白菜切末挤水，和猪绞肉拌成馅。','面粉加酵母发面，分成小剂子擀皮。','包入肉馅醒发后，大火蒸 15 分钟。']},
+      {id:'pork-dumpling',name:'猪肉饺子',emoji:'🥟',time:60,kcal:0,tags:['pastry','meat'],label:['糕点','饺子'],description:'皮薄馅大的家常猪肉水饺。',ingredients:[['猪绞肉',150],['面粉',200],['韭菜',50]],steps:['猪绞肉和韭菜末加盐、生抽调成饺子馅。','面粉加水和成面团，擀成饺子皮。','包好饺子，水开下锅煮至浮起即可。']},
+      {id:'chive-dumpling',name:'韭菜鸡蛋饺子',emoji:'🥟',time:60,kcal:0,tags:['pastry','vegetarian'],label:['糕点','饺子'],description:'清香韭菜配鸡蛋的经典素饺子。',ingredients:[['韭菜',150],['鸡蛋',100],['面粉',200]],steps:['鸡蛋炒熟打散，和韭菜末拌成馅。','面粉和成面团，擀成饺子皮。','包好饺子，水开下锅煮熟。']},
+      {id:'xiaolongbao',name:'小笼包',emoji:'🥟',time:90,kcal:0,tags:['pastry','meat'],label:['糕点','包子'],description:'皮薄汤汁足，一口一个的江南风味。',ingredients:[['猪绞肉',150],['面粉',180],['大白菜',60]],steps:['猪绞肉加姜末、盐和清水搅打上劲。','面粉和成软面，擀成薄皮。','包入肉馅，大火蒸 8 分钟。']}
+    ];
+    pastryRecipes.forEach(r=>recipes.push(r));
+
+    const primaryFilterTags=new Set(['all','light','soup','hotpot','stirfry','regional','pastry']);
     const recipePhotoById={
       'chicken-broccoli':'assets/recipes/chicken-broccoli.jpg',
       'tomato-egg':'assets/recipes/tomato-egg.jpg',
