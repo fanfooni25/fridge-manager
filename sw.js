@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fridge-v5';
+const CACHE_NAME = 'fridge-v6';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -11,8 +11,11 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => Promise.all(CORE_ASSETS.map((url) => cache.add(url).catch(() => null))))
-      .then(() => self.skipWaiting())
   );
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
