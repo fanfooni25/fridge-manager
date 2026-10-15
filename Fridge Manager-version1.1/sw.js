@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fridge-manager-version1-1';
+const CACHE_NAME = 'fridge-manager-version1-1-r2';
 const CORE_ASSETS = [
   './',
   './index.html',
