@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fridge-v7';
+const CACHE_NAME = 'fridge-v8';
 const CORE_ASSETS = [
   './',
   './index.html',
