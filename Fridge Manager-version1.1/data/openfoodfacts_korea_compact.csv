@@ -45,7 +45,7 @@
 8852756305197,Kellogg's Protein Bar,fr,Kellogg's,"Compléments alimentaires, Compléments pour le Bodybuilding, Barres protéinées","en:dietary-supplements,en:bodybuilding-supplements,en:protein-bars",,,,,,,,,,
 0728106522621,Ligo peanut butter,fr,,,,,,,,,,,,,
 5410291026538,Truffes au chocolat,fr,,"Snacks, Snacks sucrés, Cacao et dérivés, Confiseries, Confiseries chocolatées, Bonbons de chocolat, Truffes en chocolat","en:snacks,en:sweet-snacks,en:cocoa-and-its-products,en:confectioneries,en:chocolate-candies,en:bonbons,en:chocolate-truffles",150 g,,,,,,,,,
-8801062383986,치토스,ko,"롯데, lotte",과자,ko:과자,169g,169g,,,,,,,,
+8801062383986,치토스,ko,"롯데, lotte",과자,ko:과자,169g,169g,580,,,35,60,3,7,1.425
 3178530412567,8 Galettes au Beurre,fr,St Michel,,"en:snacks,en:sweet-snacks,en:biscuits-and-cakes,en:biscuits-and-crackers,en:biscuits,en:shortbread-cookies",52 g e,26g,472,1964.9568,,16,74,25,7,0.9
 2000000116914,오양 치즈스틱,ko,주-사조오양,-,,1키로그램,,,,,,,,,
 8801043014984,너구리,ko,nongshim,ko:ramen,ko:ramen,120g,120 g,,,,,,,,
@@ -93,7 +93,7 @@
 8801115114154,나 100% 1급A우유 1L,ko,seoul-milk,,,,100 ml,,,,,,,,
 8801094749491,,,,,,,,,,,,,,,
 8801043157735,AnSungTangMyun Noodle,en,Nongshim,,"en:plant-based-foods-and-beverages,en:plant-based-foods,en:cereals-and-potatoes,en:meals,en:cereals-and-their-products,en:dried-products,en:dried-products-to-be-rehydrated,en:pastas,en:noodles,en:instant-noodles,en:instant-noodle-soups,bg:полуготови",125 g,,423,1779,,14,66,2.9,8.2,4.7
-8801115111054,나 100% 1급A우유 2.3L,ko,seoul-milk,,,,100 ml,70,,,4,5,5,3,0.125
+8801115111054,나 100% 1급A우유 2.3L,ko,seoul-milk,,"en:dairies,en:milks-liquid-and-powder,en:milks",,100 ml,70,,,4,5,5,3,0.125
 8801062888146,Hershey's rich chocolate cake,fr,hershey-s,,,,,,,,,,,,
 2000000233413,Chocoholic cookies,en,,,,400 g,,,,,,,,,
 4809010272027,Dried Mangoes,en,7D,,"en:plant-based-foods-and-beverages,en:plant-based-foods,en:fruit-based-foods-and-beverages,en:fruits-and-vegetables-based-foods,en:fruit-based-foods,en:dried-products,en:dried-plant-based-foods,en:dried-fruits,en:dried-mangoes,fr:Aliments à base de plantes séchés",200g,42g,333.333333333333,,,,,,,
@@ -234,7 +234,7 @@
 0096619233939,,,kirkland,,,,,,,,,,,,
 8807001098744,홍쓰다쓰,ko,프롬바이오,건강식품,ko:건강식품,14포 238g,,,,,,,,,
 8801045422404,,,ottogi,,,,,,,,,,,,
-8801056049881,오아시스 8.0,fr,,,,,,,,,,,,,
+8801056049881,오아시스 8.0,fr,,,"en:beverages-and-beverages-preparations,en:beverages,en:waters,en:spring-waters,en:mineral-waters,en:natural-mineral-waters",,,,,,,,0,,
 01975438,,,,,,,,,,,,,,,
 0819457011015,,,,,,,,,,,,,,,
 8801382148449,옥수수수염차,ko,웅진,,,500ml,,,,,,,,,
@@ -551,7 +551,7 @@
 8802989004558,Coffee Peanut,en,no brand,,,,100.0g,,,,,,,,
 8801062879816,,,,,,,,,,,,,,,
 8802100309272,Levure chimique,en,alsa,,,,5.0g,,,,,,,,
-8801024054053,Chongga sliced wrapping wasabi radis,en,jongga,,,,50.0g,,,,,,,,
+8801024054053,Chongga sliced wrapping wasabi radis,en,jongga,,,,50.0g,10,,,0,2,1,0,
 8809502440459,Roasted dried filefish,en,bm-food,,,80 g,80.0g,,,,,,,,
 8801169072929,Sauce Chicken Breast,en,eat-now,,,,110.0g,,,,,,,,
 8801056028886,chilsung cider,en,lotte,Beverages,en:beverages,190 ml,,,,,,,,,
@@ -789,7 +789,7 @@
 8801117493103,단백질 바 크런치,en,dr-you-pro,,,,70 g,507.142857142857,,,,,,,
 8801073114036,Topokki ramen,en,samyang,,,,80.0g,,,,,,,,
 8801392051210,Seaweed snack sea salt,en,Bibigo,,"en:plant-based-foods-and-beverages,en:plant-based-foods,en:seafood,en:snacks,en:salty-snacks,en:seaweeds-and-their-products",4 g,4.0g,474,1966,,31,20,11,18,5.5
-8801007557700,Pomegranate Vinegar,en,cj-foods,,,,50.0g,,,,,,,,
+8801007557700,Pomegranate Vinegar,en,cj-foods,,"en:condiments,en:vinegars",,50.0g,58,,,0.100000001490116,14.3999996185303,,,
 8809386390321,Olive oil seasoned seeweed,en,,,,,30.0g,,,,,,,,
 8806428028518,,,,,,,,,,,,,,,
 8801005205115,Vinaigrette,en,semprio,,,,10.0g,,,,,,,,
@@ -914,7 +914,7 @@
 8801007872025,Scorched Rice Porridge With Chicken,en,hetban,,,,1.0 portion (420.0 g),,,,,,,,
 8809151140274,Topokki,en,Good Seoul,,,,113.0g,247,,,3,50.2999992370605,4.90000009536743,4.80000019073486,
 8801056083588,Cantata iced caramel macchiato,en,Cantana,,"en:beverages-and-beverages-preparations,en:beverages,en:coffee-drinks,en:iced-coffees",230ml,1 pouch (230 ml),50,209,,0.3,10.43,9.13043,1.3,0.21739
-0716270001745,Hawaiian Sea Salt in Strong Dark Chocolate,en,chocolove,,,,100.0 g (100.0 g),483.870967741935,,,13,13,8,2,0.375
+0716270001745,Hawaiian Sea Salt in Strong Dark Chocolate,en,chocolove,,"en:snacks,en:sweet-snacks,en:cocoa-and-its-products,en:confectioneries,en:chocolate-candies",,100.0 g (100.0 g),483.870967741935,,,13,13,8,2,0.375
 8809189923849,오리저널 나쵸,en,곰표,,,,1.0 bag (190.0 g),,,,,,,,
 8805479000252,Crispy cheese corn dog,en,chefs-story,,,,80.0g,,,,,,,,
 8801073310698,짱구,en,samyang,"Snacks, Salty snacks, Appetizers, Chips and fries, Crisps","en:snacks,en:salty-snacks,en:appetizers,en:chips-and-fries,en:crisps",115g,30 g,533.333333333333,,,,,,,
@@ -1301,7 +1301,7 @@
 880983803423020327,Original kimbap,en,7-11,,,,317.0g,,,,,,,,
 8801066056619,DEEP DISH PIZZA COMBINATION,en,sajo,,,,80 g,250,,,,,,,
 8809120444907,잔소리(아몬드초코맛),en,ohpily,,,,200.0g,,,,,,,,
-8801007949109,Kimchi,en,bibigo,,,500 g,1 portion (100 g),,,,,,,,
+8801007949109,Kimchi,en,bibigo,,"en:plant-based-foods-and-beverages,en:plant-based-foods,en:pickles,en:plant-based-pickles",500 g,1 portion (100 g),21,,,0.5,2.2,,1.5,1.3775
 8809276716392,Walnut 호두,en,,,,,25.0g,,,,,,,,
 8801007311197,Coconut And Grape Jello,en,petitzel,,,,90 g,,,,,,,,
 8806371308866,Mixed Grain Tofu Milk,en,pureumil,,,,190 ml,,,,,,,,
@@ -1520,7 +1520,7 @@
 8801052055312,Water Jelly Mango,en,cheongjeongwon,,,,100 g,,,,,,,,
 8801013810073,Coca Powder,en,emart,,,,1 bag (80 g),,,,,,,,
 8801033784491,,,,"en:Beverages and beverages preparations, 음료, en:Alcoholic beverages, 맥주, Ales, Pale ales, India Pale Ale (IPA), Hazy IPA, New England IPA, Milkshake IPA","en:beverages-and-beverages-preparations,en:beverages,en:alcoholic-beverages,en:beers,en:ales,en:pale-ales,ca:cervesa-ipa,en:hazy-ipa,en:new-england-ipa,en:milkshake-ipa",,,,,,,,,,
-8801392112485,고메 소바바 치킨,ko,cj,,,,100 g,,,,,,,,
+8801392112485,고메 소바바 치킨,ko,cj,,,,100 g,305,,,18,21,8,15,
 8801392081484,Chestnut Protein,en,cj-cheiljedang-corp,"Dietary supplements, Bodybuilding supplements, Protein shakes","en:dietary-supplements,en:bodybuilding-supplements,en:protein-shakes",250mL,250mL,,,,,,,,
 8801104666626,Plain Protein Yogurt,en,yoplait,"Beverages and beverages preparations, Beverages, Dairies, Fermented foods, Fermented milk products, Desserts, Dairy desserts, Dairy drinks, Fermented dairy desserts, Fermented drinks, Fermented milk drinks, Yogurts, Yogurt drinks","en:beverages-and-beverages-preparations,en:beverages,en:dairies,en:fermented-foods,en:fermented-milk-products,en:desserts,en:dairy-desserts,en:dairy-drinks,en:fermented-dairy-desserts,en:fermented-drinks,en:fermented-milk-drinks,en:yogurts,en:yogurt-drinks",210mL,210mL,,,,,,,,
 8809864140820,Saucisson,en,salt-house-crafts-meat,"Meats and their products, Prepared meats, Cured sausages, Salami","en:meats-and-their-products,en:prepared-meats,en:cured-sausages,en:salami",70g,70g,,,,,,,,
@@ -1561,7 +1561,7 @@
 0201671005091,93% Ground Beef,en,commissary,,,,1 portion (113.398 g),,,,,,,,
 0201400516287,Angus Strip Loin Steak (New York Strip),en,commissary,,,,260 fat cal. (113.398 g),,,,,,,,
 8801039002780,Feuilles d'algues,en,,,,,2.0g,,,,,,,,
-8809059296523,Seasoned seaweed snack,en,hosan,"Plant-based foods and beverages, Plant-based foods, Seafood, Snacks, Salty snacks, Appetizers, Seaweeds and their products","en:plant-based-foods-and-beverages,en:plant-based-foods,en:seafood,en:snacks,en:salty-snacks,en:appetizers,en:seaweeds-and-their-products",4 g,4.0g,,,,,,,,
+8809059296523,Seasoned seaweed snack,en,hosan,"Plant-based foods and beverages, Plant-based foods, Seafood, Snacks, Salty snacks, Appetizers, Seaweeds and their products","en:plant-based-foods-and-beverages,en:plant-based-foods,en:seafood,en:snacks,en:salty-snacks,en:appetizers,en:seaweeds-and-their-products",4 g,4.0g,300,,,50,25,,25,
 8801164142030,Чипсы нори васаби,en,,,,,4.5g,,,,,,,,
 8801157901293,Signature Greek Yogurt,en,peacock,,,,,,,,,,,,
 0665553225074,Classic AllWhey,en,allmax,,,907 g,1 portion (46 g),413.04347826087,,,,,,,
@@ -1647,7 +1647,7 @@
 8801068917291,Mushroom Risotto,en,kraft,,,,1 portion (250 g),,,,,,,,
 8809827860109,두유 그릭요거트,ko,dear-fine,,,,1 portion (100 g),,,,,,,,
 8801753113748,연세두유 : 무가당 검은콩,ko,연세유업,,,,190 ml,,,,,,,,
-8801104306928,떡붕어싸만코,ko,빙그레,,,,1 portion (94 g),,,,,,,,
+8801104306928,떡붕어싸만코,ko,빙그레,,"en:snacks,en:sweet-snacks,en:confectioneries",,1 portion (94 g),,,,,,,,
 8801045205885,치킨마살라,ko,오즈키친,,,,180 g,,,,,,,,
 8809226615775,Steam Chicken Breast,en,masitdak,,,,1 portion (100 g),,,,,,,,
 8801005118286,국산콩 양조간장,ko,샘표,,,,16 g,,,,,,,,
@@ -1961,7 +1961,7 @@
 8801115339250,Mango Juice,en,black-label,,,,,,,,,,,,
 8801115632009,짜지 않아 건강한치즈,ko,서울우유,,,,1 portion (18 g),,,,,,,,
 8801117780203,Muddukdduk Potato Chips,en,orion,,,,30 g,,,,,,,,
-8801492392633,블랙 페퍼 닭가슴살,ko,real-price,,,,100 g,,,,,,,,
+8801492392633,블랙 페퍼 닭가슴살,ko,real-price,,,,100 g,120,,,2.3,0.5,0.3,24,
 8801077684009,오리지널 후랑크,ko,cheonhajangsa,,,,1 portion (90 g),,,,,,,,
 8801392114335,서울식 소불고기전골,ko,비비고,,,,430 g,,,,,,,,
 8801136373318,Organic Soy Milk,en,kongkong-ai,,,,135 ml,,,,,,,,
@@ -2822,7 +2822,7 @@
 6924097913903,Peanut Butter Chocolate Filled Crispy Cone,en,hikinco,,,,55 g,,,,,,,,
 8809073737712,Meal It Protein Shake Cereal,en,Meal It,,,,1 packet (40 g),,,,,,,,
 8801115336143,아침에주스 오렌지,ko,서울우유,,,,1 portion (210 ml),,,,,,,,
-8801069421476,남양유업 맛있는 두유 GT,ko,남양유업,"en:Beverages and beverages preparations, 식물성 식품 및 음료, 음료, 식물성 음료","en:beverages-and-beverages-preparations,en:plant-based-foods-and-beverages,en:beverages,en:plant-based-beverages",1,,,,,,,,,
+8801069421476,남양유업 맛있는 두유 GT,ko,남양유업,"en:Beverages and beverages preparations, 식물성 식품 및 음료, 음료, 식물성 음료","en:beverages-and-beverages-preparations,en:plant-based-foods-and-beverages,en:beverages,en:plant-based-beverages",1,,,,63.2,,,,,
 8801068409062,풍미가득 촉촉 치즈케익,ko,samlip,,,,100 g,,,,,,,,
 8801068912463,빅스위트 데니쉬,ko,samlip,,,,100 g,,,,,,,,
 8801955016847,Fresh Day Apple Juice,en,cj-freshway,,,,100 ml,,,,,,,,
@@ -3364,3 +3364,7 @@
 8801068935165,주종발효,ko,SPC Samlip,,,,100 g,382,,,18,51,16,4,
 8804973312335,다크초콜릿 아몬드 코코넛바,ko,Be-Kind,,,,35 g,,,,,,,,
 8801392158940,CJ 바삭팝콘 스팸맛,ko,CJ,,,,55 g,,,,,,,,
+8801121020432,상하목장 유기농 그릭요거트,ko,매일유업,,,,,90,,,5,4.8,1.8,7,
+8801121109632,,,,,"en:dairies,en:milks-liquid-and-powder,en:milks",,,,,,,,,,
+8809599360517,치즈케이크 아이스크림,ko,Lalasweet,,,,474 ml,100,,,3.9,19,5,2,
+8809815272518,Oreo Ice Cream,en,Oreo,,,,1 portion (110 ml),,,,,,,,
