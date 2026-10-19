@@ -1,0 +1,1018 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#f6f7f2">
+  <title>冰箱小管家</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="冰箱小管家">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <style>
+    :root{--ink:#202821;--muted:#7a837b;--line:#e9ece5;--green:#286548;--mint:#e8f2e9;--paper:#fff;--bg:#f6f7f2;--orange:#dd8a45;--shadow:0 18px 55px #27382a12}
+    html,body{touch-action:manipulation}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;-webkit-font-smoothing:antialiased}
+    button,input,select{font:inherit}button{cursor:pointer}.app{width:min(100%,480px);min-height:100dvh;margin:auto;background:var(--bg);position:relative;padding-bottom:92px;overflow:hidden}.topbar{padding:24px 24px 12px;display:flex;justify-content:space-between;align-items:center}.brand{font-size:14px;font-weight:700;letter-spacing:.08em;color:var(--green);display:flex;gap:8px;align-items:center}.brand-mark{width:26px;height:26px;border-radius:9px;background:#dcebdd;display:grid;place-items:center;font-size:15px}.date{font-size:12px;color:var(--muted)}
+    main{padding:8px 20px 24px}.view{display:none;animation:rise .22s ease}.view.active{display:block}@keyframes rise{from{opacity:.4;transform:translateY(6px)}to{opacity:1;transform:none}}
+    .headline{display:flex;justify-content:space-between;align-items:flex-end;margin:10px 4px 18px}.eyebrow{font-size:12px;color:var(--muted);margin-bottom:6px}.headline h1{font-size:27px;letter-spacing:-.04em;margin:0;font-weight:720}.round-add{border:0;background:var(--green);color:white;border-radius:14px;padding:11px 15px;font-size:13px;font-weight:650;box-shadow:0 5px 12px #28654820}
+    .summary{background:var(--green);border-radius:22px;color:white;padding:18px 20px;margin-bottom:19px;position:relative;overflow:hidden}.summary:after{content:"";position:absolute;width:130px;height:130px;border-radius:50%;background:#ffffff0d;right:-30px;top:-50px}.summary-top{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#d4e6d8}.summary-number{font-size:31px;font-weight:700;letter-spacing:-.04em;margin:8px 0 2px}.summary-number small{font-size:13px;font-weight:500;letter-spacing:0;color:#d4e6d8;margin-left:5px}.summary-foot{font-size:12px;color:#d4e6d8}.summary-icon{font-size:28px;position:absolute;right:19px;bottom:17px}
+    .section-heading{display:flex;justify-content:space-between;align-items:center;margin:21px 3px 11px}.section-heading h2{font-size:16px;margin:0;font-weight:700}.subtle{font-size:12px;color:var(--muted)}.inventory-list{display:grid;gap:9px}.food-row{background:var(--paper);border-radius:17px;padding:13px 13px;display:flex;align-items:center;gap:12px;border:1px solid #eff1eb}.food-emoji{width:45px;height:45px;border-radius:14px;display:grid;place-items:center;font-size:23px;background:#f5f5eb;flex:0 0 auto}.food-info{min-width:0;flex:1}.food-name{font-size:14px;font-weight:650}.food-meta{font-size:11px;color:var(--muted);margin-top:5px}.food-qty{text-align:right;font-size:14px;font-weight:700;white-space:nowrap}.food-qty small{display:block;font-size:10px;color:var(--muted);font-weight:450;margin-top:4px}.expiry{color:#c07b3a!important}.empty{padding:26px;text-align:center;color:var(--muted);font-size:13px;background:white;border-radius:18px}
+    .form-card,.recipe-card{background:white;border:1px solid #eff1eb;border-radius:19px;padding:17px;margin-bottom:11px}.form-label{display:block;font-size:12px;color:#667168;margin:0 0 8px}.field{width:100%;border:1px solid var(--line);background:#fafbf8;border-radius:12px;padding:12px 13px;color:var(--ink);outline:none}.field:focus{border-color:#9cbea5;box-shadow:0 0 0 3px #e8f2e9}.field-row{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:13px}.unit-input{position:relative}.unit-input .field{padding-right:44px}.unit{position:absolute;right:13px;top:12px;color:var(--muted);font-size:12px}.calorie-box{background:#f2f6ee;border-radius:14px;padding:12px 14px;margin-top:14px;display:flex;align-items:center;justify-content:space-between}.calorie-box span{font-size:12px;color:#647166}.calorie-value{font-size:18px;font-weight:700;color:var(--green)}.calorie-value small{font-size:11px;font-weight:500}.helper{font-size:11px;line-height:1.6;color:#8a938b;margin:10px 2px}.primary{width:100%;border:0;border-radius:14px;padding:14px;background:var(--green);color:white;font-weight:700;margin-top:12px}.secondary{border:0;border-radius:12px;background:var(--mint);color:var(--green);padding:10px 13px;font-size:12px;font-weight:650}
+    .filters{display:flex;gap:7px;overflow:auto;margin:15px 0 8px;padding-bottom:2px;scrollbar-width:none}.chip{border:1px solid #e7eae3;background:white;color:#667168;border-radius:99px;padding:7px 11px;font-size:12px;white-space:nowrap}.chip.selected{background:#e6f0e6;border-color:#d8e8d9;color:var(--green);font-weight:700}.subfilters{display:flex;flex-wrap:wrap;gap:7px;overflow:visible;margin:0 0 12px;padding:2px 0 3px;scrollbar-width:none}.subchip{border:1px solid #e7eae3;background:#fbfcf9;color:#788178;border-radius:99px;padding:7px 11px;font-size:11px;white-space:nowrap}.subchip.selected{background:#eff4ec;border-color:#d9e7d5;color:var(--green);font-weight:700}.servings{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:12px;margin:12px 2px 14px}.serving-select{border:1px solid var(--line);border-radius:9px;background:white;padding:6px 9px;color:var(--ink)}
+    .recipe-card{padding:0;overflow:hidden;cursor:pointer;transition:transform .15s}.recipe-card:active{transform:scale(.99)}.recipe-hero{height:145px;background:linear-gradient(135deg,#e7f0de,#f8eddf);display:flex;align-items:center;justify-content:center;font-size:48px;position:relative;overflow:hidden}.recipe-hero img,.sheet-hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.recipe-photo-fallback{position:absolute;inset:0;display:grid;place-items:center;font-size:48px;background:linear-gradient(135deg,#e7f0de,#f8eddf)}.recipe-photo-fallback[hidden]{display:none}.recipe-time{position:absolute;right:12px;top:12px;background:#ffffffdc;border-radius:99px;padding:5px 9px;font-size:10px;color:#566057;z-index:1}.recipe-content{padding:13px 15px 14px}.recipe-top{display:flex;justify-content:space-between;align-items:flex-start}.recipe-title{font-size:15px;font-weight:700}.recipe-kcal{font-size:12px;color:var(--green);font-weight:700}.recipe-desc{font-size:11px;color:var(--muted);margin:6px 0 8px}.recipe-stock{font-size:10px;color:#657266;background:#f5f7f2;border-radius:9px;padding:7px 9px;margin-bottom:10px;line-height:1.5}.recipe-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px}.tags{display:flex;gap:6px;flex-wrap:wrap}.tag{font-size:10px;color:#647168;background:#f3f5f0;border-radius:99px;padding:5px 8px}.match{font-size:11px;color:var(--green);font-weight:650;text-align:right;white-space:nowrap}
+    .recipe-choice{display:flex;align-items:center;gap:7px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line);font-size:11px;color:var(--green);font-weight:650;cursor:pointer}.recipe-choice input{width:16px;height:16px;margin:0;accent-color:var(--green)}.recipe-choice small{margin-left:auto;color:var(--muted);font-size:10px;font-weight:500}.menu-plan{background:white;border:1px solid #e8eee5;border-radius:18px;padding:4px 14px 14px;margin:10px 0 18px}.menu-dishes{display:grid;gap:8px}.menu-dish{padding:10px 11px;background:#f5f7f2;border-radius:11px;font-size:11px;line-height:1.6}.menu-dish strong{display:block;font-size:12px;margin-bottom:4px}.menu-dish div{color:#667168}.menu-clear{border:0;background:#f3f5f0;color:#788178;border-radius:9px;padding:6px 10px;font-size:11px}.menu-empty{margin:10px 0 18px}.primary:disabled{opacity:.5;cursor:not-allowed}.menu-purchase-note{margin:10px 0;padding:11px 12px;border-radius:12px;background:#edf7ee;color:#386847;font-size:11px;line-height:1.65}.menu-purchase-note strong{display:block;margin-bottom:3px}.purchase-missing{width:100%;margin:12px 0 8px}.purchase-form{margin:12px 0;padding:14px;background:#f7f8f4;border:1px solid #e5eae0;border-radius:14px}.purchase-form h3{margin:0 0 5px;font-size:14px}.purchase-form>p,.purchase-need,.purchase-validation{font-size:11px;color:#687268;line-height:1.55}.purchase-form>p{margin:0 0 10px}.purchase-line{display:grid;grid-template-columns:1fr auto;align-items:center;gap:5px 10px;padding:10px 0;border-top:1px solid #e3e8df}.purchase-line>strong{font-size:12px}.purchase-need{text-align:right}.purchase-line .unit-input{grid-column:1/-1}.purchase-line .field{max-width:none}.purchase-actions{display:flex;gap:8px;margin-top:12px}.purchase-actions button{flex:1;margin:0}.purchase-validation{margin-top:7px;color:#a34b40}
+    nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(100%,480px);padding:10px 21px calc(10px + env(safe-area-inset-bottom));background:#fffF;border-top:1px solid #e9ece5;backdrop-filter:blur(16px);display:grid;grid-template-columns:repeat(5,1fr);z-index:5}.nav-btn{border:0;background:transparent;color:#929a92;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10px;padding:3px}.nav-btn .nav-icon{font-size:19px;line-height:1.2}.nav-btn.active{color:var(--green);font-weight:700}.nav-btn.active .nav-icon{transform:translateY(-1px)}.nav-btn .fridge-icon{display:block;position:relative;width:17px;height:23px;border:2px solid currentColor;border-radius:4px;line-height:1;margin:0 0 0}.fridge-icon::before{content:"";position:absolute;left:0;right:0;top:7px;border-top:1.5px solid currentColor}.fridge-icon::after{content:"";position:absolute;right:2px;top:3px;width:1.5px;height:3px;background:currentColor;box-shadow:0 7px 0 currentColor}.menu-shortcut{position:absolute;right:calc(21px + (100% - 42px)/6 - 22px);bottom:calc(100% + 8px);width:44px;height:44px;border:0;border-radius:16px;background:var(--green);color:white;display:grid;place-items:center;font-size:22px;box-shadow:0 7px 18px #28654835}.menu-shortcut.active{background:#194b34;transform:translateY(-1px)}.menu-shortcut b{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 4px;border-radius:99px;background:#d85e58;border:2px solid white;color:white;font-size:10px;line-height:14px;text-align:center}
+    .overlay{display:none;position:fixed;inset:0;background:#17201870;z-index:10;align-items:flex-end;justify-content:center}.overlay.open{display:flex}.sheet{width:min(100%,480px);max-height:86dvh;overflow:auto;background:var(--bg);border-radius:24px 24px 0 0;padding:19px 20px calc(24px + env(safe-area-inset-bottom));animation:rise .2s ease}.sheet-handle{width:38px;height:4px;border-radius:4px;background:#d6dbd3;margin:-6px auto 16px}.sheet-head{display:flex;justify-content:space-between;align-items:center}.sheet-head h2{font-size:20px;margin:0}.close{border:0;background:#e9ece5;width:30px;height:30px;border-radius:50%;font-size:17px}.sheet-hero{height:190px;border-radius:16px;overflow:hidden;position:relative;margin:10px 0 14px;background:linear-gradient(135deg,#e7f0de,#f8eddf)}.ingredient-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(135px,1.2fr);align-items:start;gap:8px;font-size:13px;padding:11px 2px;border-bottom:1px solid var(--line);text-align:left}.ingredient-row span:last-child{text-align:left}.ingredient-row em{font-style:normal;color:var(--muted)}.steps{font-size:12px;line-height:1.8;color:#626c63;padding-left:20px}.toast{position:fixed;bottom:92px;left:50%;transform:translate(-50%,10px);opacity:0;pointer-events:none;background:#253c2d;color:#fff;padding:11px 16px;border-radius:99px;font-size:12px;transition:.2s;z-index:20;white-space:nowrap}.toast.show{opacity:1;transform:translate(-50%,0)}
+    .update-notice{position:fixed;left:50%;bottom:78px;transform:translateX(-50%);width:min(calc(100% - 24px),456px);z-index:15;background:#fff;border:1px solid #dce8dc;border-radius:16px;padding:13px 14px;box-shadow:0 10px 35px #27382a24}.update-notice[hidden]{display:none}.update-notice-row{display:flex;align-items:center;gap:10px}.update-notice-copy{flex:1;font-size:12px;line-height:1.5}.update-notice-copy strong{display:block;color:var(--green);font-size:13px}.update-notice-content{margin:8px 2px 0;padding-left:19px;color:#667168;font-size:11px;line-height:1.65}.update-notice-content li+li{margin-top:3px}.update-notice-actions{display:flex;gap:6px}.update-notice-actions button{border:0;border-radius:10px;padding:9px 10px;font-size:11px;font-weight:650;white-space:nowrap}.update-apply{background:var(--green);color:#fff}.update-later{background:#f1f4ee;color:#667168}.update-log-item{padding:11px 0;border-top:1px solid var(--line);font-size:12px;line-height:1.7;color:#667168}.update-log-item:first-of-type{border-top:0}
+    @media(min-width:600px){body{padding:22px 0}.app{min-height:calc(100dvh - 44px);border-radius:28px;box-shadow:var(--shadow)}nav{bottom:22px;border-radius:0 0 28px 28px}.overlay{align-items:center}.sheet{border-radius:24px;max-height:80dvh}.toast{bottom:112px}}
+    body{background:#f1f3ed}.app{min-height:100dvh}.headline{margin-top:16px}.form-card{padding:20px}.calorie-box{padding:15px 16px}.primary{margin-top:15px}
+    .expiry-control{min-width:0}.expiry-readout{display:flex;align-items:baseline;justify-content:space-between;gap:5px}.expiry-readout .form-label{margin-bottom:8px}.expiry-readout strong{font-size:13px;white-space:nowrap}.expiry-days{font-size:10px;color:var(--green);background:var(--mint);border-radius:99px;padding:4px 7px;white-space:nowrap}.expiry-slider{width:100%;height:26px;margin:0;accent-color:var(--green);touch-action:pan-x}.range-caption{display:flex;justify-content:space-between;color:#8a938b;font-size:10px;margin-top:-1px}
+    .unit-input .field{padding-right:82px}.unit-select{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:#f0f3ed;color:var(--green);border-radius:8px;padding:6px 7px;font-size:11px;font-weight:650;outline:none}
+    .food-title-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}.food-title-row .form-label{margin:0;white-space:nowrap}.food-search-wrap{position:relative;width:min(66%,230px);z-index:4}.food-search{width:100%;border:1px solid var(--line);background:#fafbf8;border-radius:10px;padding:8px 29px 8px 11px;font-size:12px;color:var(--ink);outline:none}.food-search:focus{border-color:#9cbea5;box-shadow:0 0 0 3px #e8f2e9}.search-mark{position:absolute;right:10px;top:6px;color:#849087;font-size:16px;pointer-events:none}.food-search-results{position:absolute;top:calc(100% + 6px);right:0;left:0;max-height:210px;overflow:auto;background:white;border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 26px #27382a1c;padding:5px;z-index:9}.food-search-results[hidden]{display:none}.search-result{width:100%;border:0;background:white;text-align:left;padding:10px;border-radius:8px;color:var(--ink);font-size:12px}.search-result:hover,.search-result:focus{background:var(--mint);outline:none}.search-empty{padding:10px;color:var(--muted);font-size:12px}
+    .scan-actions{display:grid;gap:9px}.scan-actions>.secondary{width:100%;padding:12px}.barcode-entry{display:grid;grid-template-columns:1fr auto;gap:8px}.barcode-entry .field{min-width:0}.barcode-entry .secondary{padding:0 16px}.barcode-scanner{margin-top:12px;padding:10px;background:#f4f6f1;border-radius:14px;text-align:center}.barcode-scanner[hidden]{display:none}.barcode-camera-stage{position:relative;width:100%;max-width:360px;margin:0 auto;aspect-ratio:4/3;overflow:hidden;border-radius:10px;background:#202821}.barcode-camera-stage video{display:block;width:100%;height:100%;object-fit:cover}.barcode-scan-guide{position:absolute;left:50%;top:50%;width:min(72%,250px);aspect-ratio:3/2;transform:translate(-50%,-50%);border:2px solid #8ee08e;border-radius:12px;box-shadow:0 0 0 999px #10171066;pointer-events:none}.barcode-scan-guide:before,.barcode-scan-guide:after{content:"";position:absolute;left:50%;width:7px;height:7px;border-radius:50%;background:#8ee08e;transform:translateX(-50%)}.barcode-scan-guide:before{top:-5px}.barcode-scan-guide:after{bottom:-5px}.barcode-scan-instruction{margin:9px 0 10px;font-size:12px;color:#526253}.barcode-scanner .secondary{width:100%}
+    .recent-shell{position:relative;overflow:hidden;border-radius:17px;margin-bottom:8px;background:#d85e58;touch-action:pan-y}.recent-shell .food-row{position:relative;z-index:1;transition:transform .2s ease;margin:0;border-radius:17px;touch-action:pan-y}.recent-shell.swiped .food-row{transform:translateX(-76px)}.recent-shell.share-swiped .food-row{transform:translateX(76px)}.delete-item,.share-item-action{position:absolute;top:0;bottom:0;width:76px;border:0;color:#fff;font-size:12px;font-weight:700}.delete-item{right:0;background:#d85e58}.share-item-action{left:0;background:var(--green)}.inventory-list .recent-shell{margin-bottom:0}.food-row.inventory-expired-1{background:#eef6ed;border-color:#d5e7d3}.inventory-expired-1 .food-meta{color:#5d865e;font-weight:700}.food-row.inventory-expired-2{background:#dcebd9;border-color:#bfd8bd}.inventory-expired-2 .food-meta{color:#4d7a50;font-weight:700}.food-row.inventory-expired-3{background:#c1dcbf;border-color:#a0c79e}.inventory-expired-3 .food-meta{color:#3d7043;font-weight:700}.food-row.inventory-expired-4{background:#8fbc91;border-color:#75a879}.inventory-expired-4 .food-meta{color:#245d32;font-weight:700}.food-row.inventory-expired-5{background:#458152;border-color:#357043}.inventory-expired-5 .food-meta{color:#ffffff;font-weight:700}.food-row.inventory-due-0{background:#f2b5b0;border-color:#dc827a}.inventory-due-0 .food-meta{color:#8e2d27;font-weight:700}.food-row.inventory-due-1{background:#f9d8d5;border-color:#ebaaa4}.inventory-due-1 .food-meta{color:#a94c45;font-weight:650}.food-row.inventory-due-2{background:#fff0ee;border-color:#f0d3d0}.inventory-due-2 .food-meta{color:#b96f69;font-weight:650}
+    .custom-food-toggle{display:flex;align-items:center;gap:7px;margin:9px 0 1px;padding:8px 11px;border:1px dashed #cbdacb;border-radius:11px;background:#f8faf6;color:var(--green);font-size:11px;font-weight:650}.custom-food-toggle span{font-size:15px;line-height:1}.custom-food-panel{margin-top:10px;padding:13px;border:1px solid #e4ebe1;border-radius:14px;background:#f7f9f5}.custom-food-panel[hidden]{display:none}.custom-food-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}.custom-food-heading strong{font-size:12px}.custom-food-heading span{font-size:10px;color:var(--muted)}.custom-food-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.custom-food-grid .custom-food-name-field{grid-column:1/-1}.custom-food-grid .form-label{font-size:10px;margin-bottom:5px}.custom-food-grid .field{padding:10px;font-size:12px}.custom-food-note{margin:8px 1px 0;font-size:10px;line-height:1.5;color:var(--muted)}.custom-food-actions{display:flex;gap:8px;margin-top:10px}.custom-food-actions button{flex:1;margin:0;padding:10px}
+    .achievement-panel{margin:0 0 14px}.achievement-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}.achievement-card{min-width:0;appearance:none;color:var(--ink);background:#fff;border:1px solid #edf0e9;border-radius:15px;padding:12px 5px 10px;text-align:center;cursor:pointer}.achievement-medal{position:relative;width:52px;height:59px;margin:0 auto 5px;display:flex;justify-content:center;align-items:flex-start}.achievement-medal:before,.achievement-medal:after{content:"";position:absolute;top:33px;width:13px;height:24px;background:var(--ribbon,#72a982);clip-path:polygon(0 0,100% 0,85% 100%,50% 76%,15% 100%)}.achievement-medal:before{left:12px;transform:rotate(10deg)}.achievement-medal:after{right:12px;transform:rotate(-10deg)}.achievement-coin{position:relative;z-index:1;width:49px;height:49px;border:3px solid #fff9;border-radius:50%;display:flex;align-items:center;justify-content:center;text-align:center;padding:3px;background:radial-gradient(circle at 35% 30%,#fff8,var(--medal,#e6bd55));box-shadow:0 2px 6px #27382a25;color:#382b1f;line-height:1.15;font-size:8px;font-weight:800;overflow-wrap:anywhere}.achievement-card.unearned{background:#f5f6f2;opacity:.68}.achievement-card.unearned .achievement-coin{background:radial-gradient(circle at 35% 30%,#fff,#b7bdb5);box-shadow:none}.achievement-name{font-size:10px;font-weight:700;line-height:1.35;min-height:27px}.achievement-progress{font-size:9px;color:var(--muted);margin-top:3px;white-space:nowrap}.achievement-condition-row{display:flex;align-items:center;gap:10px;padding:10px 2px;border-bottom:1px solid var(--line);font-size:12px}.achievement-condition-row:last-child{border-bottom:0}.achievement-condition-rank{width:52px;flex:0 0 52px;font-weight:750}.achievement-condition-status{margin-left:auto;white-space:nowrap;font-size:10px;color:var(--muted)}.achievement-condition-status.done{color:var(--green);font-weight:700}
+    .nearby-share-actions{display:grid;gap:5px;flex:0 0 72px}.nearby-share-actions .secondary{margin:0;padding:7px 5px;font-size:10px;white-space:nowrap}.nearby-share-status{font-size:10px;color:var(--muted);white-space:nowrap}
+  </style>
+</head>
+<body>
+  <div class="app">
+<header class="topbar"><div class="brand"><span class="brand-mark"><svg width="16" height="18" viewBox="0 0 16 18" fill="none" stroke="#286548" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1.2" y="1" width="13.6" height="16" rx="2.5"></rect><line x1="1.2" y1="8.5" x2="14.8" y2="8.5"></line><line x1="12.3" y1="3.6" x2="12.3" y2="6.6"></line></svg></span>冰箱小管家</div><div class="date" id="today"></div></header>
+    <main>
+
+
+      <section class="view active" id="view-inventory">
+        <div class="headline"><div><div class="eyebrow">早上好，今天也好好吃饭</div><h1>我的冰箱</h1></div><button class="round-add" type="button" data-go="add-food">＋ 添加食物</button></div>
+        <div class="summary"><div class="summary-top"><span>冰箱食材</span><span>实时库存</span></div><div class="summary-number"><b id="food-count">0</b><small>种食物</small></div><div class="summary-foot" id="inventory-total">食材总重量 0 克</div><div class="summary-icon">🧺</div></div>
+        <div class="section-heading"><h2>全部食材</h2><span class="subtle" id="inventory-caption">按保质期排序</span></div>
+        <div class="inventory-list" id="inventory-list"></div>
+      </section>
+
+      <section class="view" id="view-nearby">
+        <div class="headline"><div><div class="eyebrow">邻里互助，减少食物浪费</div><h1>附近共享</h1></div></div>
+        <div class="form-card"><div id="share-connection" class="helper" style="margin:0 0 10px">正在连接共享服务…</div><button class="secondary" id="locate-nearby" type="button" style="width:100%;margin:0">⌖ 定位并查看附近</button><p class="helper">搜索当前位置 10 公里内的食材。共享点会模糊到约 1 公里精度；你的精确位置仅在本机地图显示。</p></div>
+        <div id="nearby-map" style="height:280px;border-radius:18px;overflow:hidden;background:#e7eee5;border:1px solid #e0e8dd"></div>
+        <div class="section-heading"><h2>可领取的食材</h2><button class="secondary" id="refresh-shares" type="button">刷新</button></div>
+        <div id="share-list" class="inventory-list"><div class="empty">先定位以查看附近共享</div></div>
+        <div class="section-heading"><h2>我发布的共享</h2></div>
+        <div id="my-share-list" class="inventory-list"><div class="empty">连接共享服务后显示你发布的食材</div></div>
+        <div class="section-heading"><h2>分享快过期的食品</h2></div>
+        <div class="form-card"><label class="form-label" for="share-item">选择冰箱里的食品（3 天内到期）</label><select class="field" id="share-item"></select><div class="field-row"><div><label class="form-label" for="share-quantity">分享数量</label><input class="field" id="share-quantity" type="number" min="1" step="1" value="1" inputmode="decimal"></div><div><label class="form-label" for="share-unit">单位</label><select class="field" id="share-unit"><option value="g">克</option><option value="piece">个</option></select></div></div><label class="form-label" for="share-note" style="margin-top:13px">取货说明（不要填写门牌、电话等隐私）</label><input class="field" id="share-note" maxlength="120" placeholder="例如：小区门口自取，今晚 8 点前"><label style="display:flex;gap:8px;align-items:flex-start;font-size:11px;line-height:1.5;color:#667168;margin-top:12px"><input type="checkbox" id="share-consent" style="margin:2px 0 0;accent-color:var(--green)"><span>我确认愿意公开食材名称、数量、到期时间和模糊位置，供附近用户查看。</span></label><button class="primary" id="publish-share" type="button">定位后发布共享</button><p class="helper">发布不会自动从你的冰箱库存扣除。领取交接完成后，请自行更新库存。</p></div>
+      </section>      <section class="view" id="view-add-food">
+        <div class="headline"><div><div class="eyebrow">记录新鲜食材</div><h1>添加食物</h1></div></div>
+        <div class="form-card">
+          <div class="section-heading" style="margin:0 0 10px"><h2>快速识别</h2></div>
+          <div class="scan-actions"><button class="secondary" id="start-barcode-scan" type="button">▦ 扫描条形码</button><div class="barcode-entry"><input class="field" id="barcode-input" type="text" inputmode="numeric" autocomplete="off" placeholder="也可手动输入条码" aria-label="商品条码"><button class="secondary" id="lookup-barcode" type="button">查询</button></div></div>
+          <div class="barcode-scanner" id="barcode-scanner" hidden><div class="barcode-camera-stage"><video id="barcode-video" playsinline muted></video><div class="barcode-scan-guide" aria-hidden="true"></div></div><p class="barcode-scan-instruction">把条形码横向放进中央绿色框内，完整露出条码和两侧数字并保持清晰</p><button class="secondary" id="stop-barcode-scan" type="button">关闭相机</button></div>
+          <p class="helper" id="barcode-status" hidden></p>
+          <p class="helper">扫描结果来自 Open Food Facts；商品资料可能不完整，添加前请核对。</p>
+        </div>
+        <div class="form-card">
+          <div class="food-title-row"><label class="form-label" for="food-select">食物名称</label><div class="food-search-wrap"><input class="food-search" id="food-search" type="search" placeholder="搜索食物" autocomplete="off" aria-label="搜索食物"><span class="search-mark" aria-hidden="true">⌕</span><div class="food-search-results" id="food-search-results" role="listbox" hidden></div></div></div>
+          <select class="field" id="food-select"></select>
+          <button class="custom-food-toggle" id="custom-food-toggle" type="button" aria-expanded="false" aria-controls="custom-food-panel"><span>＋</span>找不到？自定义添加食材</button>
+          <div class="custom-food-panel" id="custom-food-panel" hidden>
+            <div class="custom-food-heading"><strong>添加目录里没有的食材</strong><span>保存后可重复使用</span></div>
+            <div class="custom-food-grid">
+              <div class="custom-food-name-field"><label class="form-label" for="custom-food-name">食材名称</label><input class="field" id="custom-food-name" type="text" maxlength="60" placeholder="例如：紫甘蓝 / 바나나 / Banana" autocomplete="off"></div>
+              <div><label class="form-label" for="custom-food-category">分类</label><select class="field" id="custom-food-category"><option>蔬菜</option><option>水果</option><option>肉类</option><option>鱼类</option><option>海鲜</option><option>豆制品</option><option>蛋奶</option><option>饮料</option><option>主食</option><option>调味品</option><option>其他</option></select></div>
+              <div><label class="form-label" for="custom-food-unit">添加时单位</label><select class="field" id="custom-food-unit"><option value="g">克</option><option value="kg">千克</option></select></div>
+              <div><label class="form-label" for="custom-food-calorie-basis">热量填写方式</label><select class="field" id="custom-food-calorie-basis"><option value="per100">每 100 克热量</option><option value="package">整份/整包装总热量</option></select></div>
+              <div><label class="form-label" id="custom-food-kcal-label" for="custom-food-kcal">热量（千卡/100克）</label><input class="field" id="custom-food-kcal" type="number" min="0" max="900" step="1" value="0" inputmode="decimal"></div>
+              <div id="custom-food-calorie-reference-field" hidden><label class="form-label" id="custom-food-calorie-reference-label" for="custom-food-calorie-reference">总热量对应净含量</label><input class="field" id="custom-food-calorie-reference" type="number" min="0.001" step="any" placeholder="如：380" inputmode="decimal"></div>
+              <div id="custom-food-piece-grams-field"><label class="form-label" for="custom-food-piece-grams">单个重量（克，可选）</label><input class="field" id="custom-food-piece-grams" type="number" min="1" max="10000" step="1" placeholder="如：150"></div>
+            </div>
+            <p class="custom-food-note">名称支持中文、韩语和英语。选“饮料”后可选毫升。整份/整包装模式填写总热量和净含量即可；每 100 克模式可选填单个重量，以便添加库存时选择“个”。</p>
+            <div class="custom-food-actions"><button class="secondary" id="cancel-custom-food" type="button">取消</button><button class="primary" id="save-custom-food" type="button">保存并选择</button></div>
+          </div>
+          <div class="field-row">
+            <div><label class="form-label" id="weight-label" for="weight">食物重量</label><div class="unit-input"><input class="field" id="weight" type="number" min="1" step="1" value="300" inputmode="decimal"><select class="unit-select" id="weight-unit" aria-label="重量单位"><option value="g" selected>克</option><option value="kg">千克</option><option value="ml">毫升</option><option value="piece" disabled>个</option></select></div></div>
+            <div class="expiry-control">
+              <div class="expiry-readout"><label class="form-label" for="expiry-slider">建议食用日期</label><strong id="expiry-date">—</strong><span class="expiry-days" id="expiry-days">—</span></div>
+              <input class="expiry-slider" id="expiry-slider" type="range" min="0" max="60" step="1" value="1" aria-label="滑动选择建议食用日期">
+              <div class="range-caption"><span>今天</span><span>60 天内</span></div>
+            </div>
+          </div>
+          <p class="helper" id="expiry-hint" style="margin-top:8px">会按食材查询冷藏建议；商品包装日期优先。</p>
+          <div class="calorie-box"><span>预计热量 · 按生重估算</span><div class="calorie-value"><b id="calorie-total">—</b> <small>千卡</small></div></div>
+          <p class="helper" id="calorie-hint">营养数据为常见食物的估算值，实际热量会因品种和处理方式略有差异。</p>
+          <button class="primary" id="add-food">加入冰箱</button>
+        </div>
+        <div class="section-heading"><h2>最近添加</h2></div>
+        <div id="recent-list"></div>
+      </section>
+      <section class="view" id="view-recipes">
+        <div class="headline"><div><div class="eyebrow">让现有食材，变成今天的一餐</div><h1>为你推荐</h1></div></div>
+        <div class="summary"><div class="summary-top"><span>冰箱灵感</span><span>按库存搭配一桌菜</span></div><div class="summary-number" style="font-size:23px">几个人吃，想做几道？</div><div class="summary-foot">先推荐现有食材能做的菜，缺料时优先少缺几样</div><div class="summary-icon">🍲</div></div>
+        <div class="section-heading"><h2>选择口味</h2><input class="food-search" id="recipe-search" type="search" placeholder="搜索菜谱" autocomplete="off" aria-label="搜索菜谱" style="width:132px;padding:7px 11px"></div>
+        <div class="filters" id="filters"><button class="chip selected" data-filter="all">全部菜谱</button><button class="chip" data-filter="light">减脂餐</button><button class="chip" data-filter="soup">煲汤</button><button class="chip" data-filter="hotpot">火锅</button><button class="chip" data-filter="stirfry">炒菜</button><button class="chip" data-filter="regional">地方菜</button><button class="chip" data-filter="pastry">糕点</button></div><div class="subfilters" id="subfilters" hidden></div>
+        <div class="servings"><span>用餐人数</span><select class="serving-select" id="servings"><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select><span>人</span><span style="margin-left:auto">想做</span><select class="serving-select" id="dish-count" aria-label="想做几道菜"><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select><span>道菜</span></div>
+        <div class="section-heading"><h2>为你搭配</h2><span class="subtle" id="recommendation-meta"></span></div>
+        <p class="helper" id="recommendation-summary" style="margin-top:-5px"></p>
+        <div id="recipe-list"></div>
+      </section>
+      <section class="view" id="view-menu">
+        <div class="headline"><div><div class="eyebrow">勾选的菜品和食材清单</div><h1>本次菜单</h1></div><button class="secondary" data-go="recipes">继续选菜</button></div>
+        <p class="helper">查看每道菜所需食材，并核对合并后的库存和缺料。</p>
+        <div id="selected-menu"></div>
+      </section>
+      <section class="view" id="view-profile">
+        <div class="headline"><div><div class="eyebrow">关于你</div><h1>个人信息</h1></div></div>
+        <div class="achievement-panel">
+          <div class="section-heading" style="margin:0 3px 9px"><h2>我的成就</h2><span class="subtle" id="achievement-summary"></span></div>
+          <div class="achievement-grid" id="achievement-list" aria-live="polite"></div>
+        </div>
+        <div class="form-card">
+          <label class="form-label" for="profile-name">称呼</label>
+          <input class="field" id="profile-name" type="text" maxlength="20" placeholder="例如：小明" autocomplete="off">
+          <div class="field-row">
+            <div><label class="form-label" for="profile-height">身高（厘米）</label><input class="field" id="profile-height" type="number" min="80" max="250" step="1" placeholder="170" inputmode="decimal"></div>
+            <div><label class="form-label" for="profile-weight">体重（公斤）</label><input class="field" id="profile-weight" type="number" min="20" max="300" step="0.1" placeholder="65" inputmode="decimal"></div>
+          </div>
+          <div class="field-row">
+            <div><label class="form-label" for="profile-age">年龄</label><input class="field" id="profile-age" type="number" min="10" max="100" step="1" placeholder="30" inputmode="numeric"></div>
+            <div><label class="form-label" for="profile-gender">性别</label><select class="field" id="profile-gender"><option value="male">男</option><option value="female">女</option></select></div>
+          </div>
+          <label class="form-label" for="profile-activity" style="margin-top:13px">活动量</label>
+          <select class="field" id="profile-activity">
+            <option value="1.2">久坐（几乎不运动）</option>
+            <option value="1.375">轻度（每周运动1-3次）</option>
+            <option value="1.55" selected>中度（每周运动3-5次）</option>
+            <option value="1.725">高度（每周运动6-7次）</option>
+            <option value="1.9">极高（体力劳动/高强度训练）</option>
+          </select>
+          <label class="form-label" for="profile-goal" style="margin-top:13px">目标</label>
+          <select class="field" id="profile-goal">
+            <option value="cut">减脂</option>
+            <option value="maintain" selected>保持体重</option>
+            <option value="bulk">增肌</option>
+          </select>
+          <div id="profile-bmi"></div>
+          <button class="primary" id="save-profile" type="button">保存个人信息</button>
+        </div>
+        <div class="form-card">
+          <div class="section-heading" style="margin:0 0 6px"><h2 style="margin:0">饮食记录</h2></div>
+          <div id="diet-calendar" style="margin:0 0 10px"></div>
+          <button type="button" class="secondary" id="diet-delete" style="margin:0 0 12px;color:#a34b40;background:#f7eceb">删除当天记录</button>
+          <div class="calorie-box" id="diet-kcal-box" style="margin:0 0 10px;cursor:pointer"><span>当日摄入</span><div class="calorie-value" style="display:flex;align-items:center;gap:6px"><b id="diet-kcal">0</b> <small>千卡</small><span id="diet-kcal-arrow" style="font-size:16px;color:var(--muted)">▾</span></div></div>
+          <div id="diet-meals" hidden></div>
+          <div class="section-heading" style="margin:16px 0 8px"><h2 style="margin:0">营养摄入</h2></div>
+          <div id="diet-macros"></div>
+          <div class="section-heading" style="margin:16px 0 8px"><h2 style="margin:0">饮食建议</h2></div>
+          <div id="diet-advice"></div>
+          <div class="section-heading" style="margin:16px 0 8px"><h2 style="margin:0">周期汇总</h2></div>
+          <div id="diet-period-summary"></div>
+        </div>
+        <div class="form-card">
+          <div class="section-heading" style="margin:0 0 10px"><h2 style="margin:0">数据备份</h2></div>
+          <p class="helper" style="margin:0 0 12px">把冰箱数据导出成文件，换设备或换浏览器后导入即可恢复。</p>
+          <button class="secondary" id="export-backup" type="button" style="width:100%;margin:0 0 8px">导出备份（JSON）</button>
+          <button class="secondary" id="import-backup" type="button" style="width:100%;margin:0">导入备份（JSON）</button>
+          <input id="import-file" type="file" accept="application/json,.json" hidden>
+        </div>
+        <div class="form-card">
+          <div class="section-heading" style="margin:0 0 10px"><h2 style="margin:0">更新记录</h2></div>
+          <div class="update-log-item"><strong>v2.2 · 2026-10-19</strong><br>修正地图瓦片服务地址，补全 OpenStreetMap 署名并设置网页来源标识，改善地图底图被拦截的问题。</div>
+          <div class="update-log-item"><strong>v2.1 · 2026-10-19</strong><br>附近共享范围调整为 10 公里，并按距离由近到远排序；新增领取、撤下和已领取状态管理；共享成就改为读取云端记录。</div>
+          <div class="update-log-item"><strong>v1.2 · 2026-10-16</strong><br>修复 Edge 浏览器无法使用扫码的问题；缩小扫码预览并增加绿色定位框和操作提示；改善相机清晰度、自动对焦与扫码响应速度。</div>
+          <div class="update-log-item"><strong>v1.1 · 2026-10-15</strong><br>添加独立食物页面与条码扫描/查询；食材名称支持韩语和英语；饮料可选择毫升；自定义食材支持热量录入方式；新增网页版本更新提示和更新记录。</div>
+        </div>
+        <p class="helper" style="text-align:center;margin:10px 0 4px">Fridge Manager-version<span id="app-version">2.2</span></p>
+      </section>
+    </main>
+    <nav aria-label="主导航">
+      <button class="menu-shortcut" id="menu-shortcut" type="button" aria-label="打开本次菜单"><span aria-hidden="true">🧺</span><b id="menu-count">0</b></button>
+      <button class="nav-btn" data-view="recipes"><span class="nav-icon">♨</span><span>菜谱</span></button>
+      <button class="nav-btn active" data-view="inventory"><span class="nav-icon fridge-icon" aria-hidden="true"></span><span>冰箱</span></button>
+      <button class="nav-btn" data-view="add-food"><span class="nav-icon" aria-hidden="true">＋</span><span>添加食物</span></button>
+      <button class="nav-btn" data-view="nearby"><span class="nav-icon" aria-hidden="true">⌖</span><span>附近共享</span></button>
+      <button class="nav-btn" data-view="profile"><svg class="nav-icon" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"></path></svg><span>个人信息</span></button>
+    </nav>
+  </div>
+  <div class="overlay" id="recipe-overlay"><div class="sheet"><div class="sheet-handle"></div><div class="sheet-head"><h2 id="sheet-title"></h2><button class="close" id="close-sheet" aria-label="关闭">×</button></div><div id="sheet-body"></div></div></div>
+  <div class="toast" id="toast"></div>
+  <div class="update-notice" id="update-notice" role="status" aria-live="polite" hidden>
+    <div class="update-notice-row"><div class="update-notice-copy"><strong>发现新版本 <span id="update-version">v2.2</span></strong>本次更新内容：</div><div class="update-notice-actions"><button class="update-later" id="update-later" type="button">稍后</button><button class="update-apply" id="update-apply" type="button">立即更新</button></div></div>
+    <ol class="update-notice-content"><li>修正地图瓦片地址，提升地图加载兼容性。</li><li>补全 OpenStreetMap 版权署名，并设置网页来源标识。</li></ol>
+  </div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./nearby-config.js"></script>
+  <script>
+    const foods = [
+      {name:'鸡胸肉',emoji:'🍗',kcal:120,category:'肉类',color:'#f6e9dc'},
+      {name:'西兰花',emoji:'🥦',kcal:34,category:'蔬菜',color:'#e4f0df'},
+      {name:'鸡蛋',emoji:'🥚',kcal:144,category:'蛋奶',color:'#f6efdc'},
+      {name:'番茄',emoji:'🍅',kcal:18,category:'蔬菜',color:'#f8e6df'},
+      {name:'嫩豆腐',emoji:'◻️',kcal:57,category:'豆制品',color:'#f0eee4'},
+      {name:'菠菜',emoji:'🥬',kcal:23,category:'蔬菜',color:'#e1efdf'},
+      {name:'胡萝卜',emoji:'🥕',kcal:41,category:'蔬菜',color:'#f8e9d8'},
+      {name:'玉米',emoji:'🌽',kcal:86,category:'主食',color:'#f6f0d9'},
+      {name:'蘑菇',emoji:'🍄',kcal:22,category:'蔬菜',color:'#efe9df'},
+      {name:'牛奶',emoji:'🥛',kcal:54,category:'饮料',color:'#e8eff1'}
+    ];
+    const extraFoodGroups = [
+      {category:'水果',color:'#f7e8df',items:[
+        ['苹果',52,'🍎'],['香蕉',89,'🍌'],['橙子',47,'🍊'],['橘子',53,'🍊'],['梨',57,'🍐'],['桃子',39,'🍑'],['油桃',44,'🍑'],['李子',46,'🫐'],['葡萄',69,'🍇'],['草莓',32,'🍓'],['蓝莓',57,'🫐'],['树莓',52,'🍓'],['西瓜',30,'🍉'],['哈密瓜',34,'🍈'],['香瓜',36,'🍈'],['菠萝',50,'🍍'],['芒果',60,'🥭'],['猕猴桃',61,'🥝'],['牛油果',160,'🥑'],['柠檬',29,'🍋'],['青柠',30,'🍋'],['樱桃',63,'🍒'],['石榴',83,'🍎'],['火龙果',60,'🐉'],['木瓜',43,'🍈'],
+        ['柚子',42,'🍊'],['柿子',74,'🍅'],['枣',79,'🍒'],['冬枣',105,'🍒'],['荔枝',66,'🍒'],['龙眼',71,'🍇'],['杨梅',30,'🍒'],['枇杷',41,'🍑'],['山楂',95,'🍒'],['椰子肉',354,'🥥'],['榴莲',147,'🍈'],['山竹',72,'🍇'],['百香果',97,'🍋'],['桑葚',43,'🫐'],['无花果',74,'🫐'],['杏子',48,'🍑'],['柑橘',47,'🍊'],['青提',69,'🍇'],['红提',69,'🍇'],['蜜瓜',36,'🍈'],['黄桃',39,'🍑'],['梨子',57,'🍐'],['脐橙',47,'🍊'],['柑子',47,'🍊']
+      ]},
+      {category:'蔬菜',color:'#e6f0e2',items:[
+        ['黄瓜',15,'🥒'],['生菜',15,'🥬'],['罗马生菜',17,'🥬'],['卷心菜',25,'🥬'],['花椰菜',25,'🥦'],['青椒',20,'🫑'],['红椒',31,'🫑'],['洋葱',40,'🧅'],['大葱',32,'🌱'],['蒜头',149,'🧄'],['土豆',77,'🥔'],['红薯',86,'🍠'],['茄子',25,'🍆'],['西葫芦',17,'🥒'],['芦笋',20,'🌱'],['四季豆',31,'🫛'],['豌豆',81,'🫛'],['芹菜',14,'🥬'],['白萝卜',16,'🥕'],['甜菜根',43,'🫜'],['南瓜',26,'🎃'],['小白菜',13,'🥬'],['大白菜',16,'🥬'],['空心菜',19,'🥬'],['羽衣甘蓝',35,'🥬'],['荷兰豆',42,'🫛'],['莲藕',74,'🪷'],['苦瓜',17,'🥒'],['冬瓜',13,'🍈'],['芋头',112,'🥔'],['生姜',80,'🫚'],['香葱',32,'🌿'],['绿豆芽',30,'🌱'],['竹笋',27,'🎋'],['秋葵',33,'🌱'],['油麦菜',15,'🥬'],['韭菜',26,'🌿'],['莴笋',15,'🥬'],['茼蒿',21,'🌿'],['山药',56,'🥔'],['菜心',20,'🥬'],['豆苗',40,'🌱'],
+        ['紫甘蓝',31,'🥬'],['娃娃菜',12,'🥬'],['上海青',15,'🥬'],['油菜',23,'🥬'],['芥菜',27,'🥬'],['芥蓝',19,'🥬'],['芥菜心',25,'🥬'],['苋菜',25,'🥬'],['木耳菜',20,'🥬'],['荠菜',31,'🌿'],['香菜',23,'🌿'],['蒜苗',40,'🌿'],['蒜薹',34,'🌿'],['韭黄',28,'🌿'],['红洋葱',40,'🧅'],['小葱',32,'🌿'],['蒜瓣',149,'🧄'],['金针菇',32,'🍄'],['香菇',34,'🍄'],['平菇',28,'🍄'],['杏鲍菇',31,'🍄'],['蟹味菇',25,'🍄'],['木耳',25,'🍄'],['口蘑',22,'🍄'],['彩椒',31,'🫑'],['尖椒',27,'🌶️'],['线椒',27,'🌶️'],['红薯叶',34,'🥬'],['紫薯',86,'🍠'],['荸荠',59,'🫜'],['茭白',26,'🎋'],['笋尖',27,'🎋'],['黄豆芽',47,'🌱'],['豆芽',30,'🌱'],['豇豆',34,'🫛'],['毛豆',125,'🫛'],['玉米笋',26,'🌽'],['水果玉米',86,'🌽'],['板栗南瓜',91,'🎃'],['贝贝南瓜',91,'🎃'],['紫皮茄子',25,'🍆'],['长茄子',25,'🍆'],['丝瓜',20,'🥒'],['瓠瓜',16,'🥒'],['佛手瓜',19,'🥒'],['红萝卜',41,'🥕'],['青萝卜',16,'🥕'],['心里美萝卜',26,'🥕'],['胡葱',32,'🌿'],['芹菜叶',14,'🌿']
+      ]},
+      {category:'肉类',color:'#f6e9dc',items:[
+        ['猪里脊',143,'🥩'],['猪五花肉',518,'🥓'],['猪梅花肉',196,'🥩'],['猪排骨',277,'🍖'],['猪绞肉',297,'🥩'],['牛里脊',145,'🥩'],['牛腩',250,'🥩'],['牛西冷',206,'🥩'],['牛绞肉',254,'🥩'],['羊腿肉',206,'🍖'],['羊排',282,'🍖'],['鸡腿肉',177,'🍗'],['鸡翅',203,'🍗'],['鸭胸肉',135,'🦆'],['火鸡胸肉',135,'🍗'],['牛腱子',155,'🥩'],['猪肝',134,'🥩'],['鸡胗',94,'🍗'],
+        ['肥牛卷',250,'🥩'],['牛上脑',250,'🥩'],['牛肩肉',200,'🥩'],['牛板腱',190,'🥩'],['牛小排',330,'🍖'],['牛肋条',330,'🍖'],['牛尾',147,'🍖'],['牛百叶',70,'🥩'],['毛肚',70,'🥩'],['牛肚',85,'🥩'],['黄喉',100,'🥩'],['牛舌',224,'🥩'],['牛肉片',200,'🥩'],['肥牛片',250,'🥩'],['牛肉丸',180,'🍡'],['羊肉卷',250,'🍖'],['肥羊卷',250,'🍖'],['羊肩肉',200,'🍖'],['羊蝎子',200,'🍖'],['猪肉片',250,'🥩'],['猪五花片',518,'🥓'],['猪肩肉',186,'🥩'],['猪前腿肉',190,'🥩'],['猪后腿肉',190,'🥩'],['猪梅花片',196,'🥩'],['猪颈肉',250,'🥩'],['猪蹄',260,'🍖'],['猪耳朵',234,'🥩'],['猪肚',110,'🥩'],['猪血',55,'🩸'],['猪肉丸',180,'🍡'],['鸡腿',181,'🍗'],['鸡小腿',181,'🍗'],['鸡翅根',203,'🍗'],['鸡翅中',203,'🍗'],['鸡翅尖',203,'🍗'],['鸡爪',254,'🍗'],['鸡架',150,'🍗'],['鸡里脊',120,'🍗'],['鸭腿',180,'🦆'],['鸭翅',200,'🦆'],['鸭胗',94,'🦆'],['鸭血',55,'🩸'],['羊肉片',250,'🍖']
+      ]},
+      {category:'鱼类',color:'#e4eef1',items:[
+        ['三文鱼',208,'🐟'],['鳕鱼',82,'🐟'],['鲈鱼',97,'🐟'],['鲫鱼',108,'🐟'],['草鱼',113,'🐟']
+      ]},
+      {category:'主食',color:'#f1ecdf',items:[['大米',346,'🍚'],['米饭',116,'🍚'],['面条',286,'🍜'],['面粉',364,'🌾'],['粉条',337,'🍜'],['年糕',235,'🍡']]},
+      {category:'蔬菜',color:'#e6f0e2',items:[['泡菜',23,'🥬'],['酸菜',20,'🥬']]},
+      {category:'鱼类',color:'#e4eef1',items:[['鲤鱼',127,'🐟']]},
+      {category:'海鲜',color:'#e4eef1',items:[['虾仁',99,'🦐'],['蟹肉',97,'🦀'],['鱼饼',113,'🍥']]},
+      {category:'豆制品',color:'#f0eee4',items:[['豆腐皮',200,'◻️']]},
+      {category:'坚果',color:'#f7eadc',items:[['花生',567,'🥜']]}
+    ];
+    extraFoodGroups.forEach(group=>group.items.forEach(([name,kcal,emoji])=>foods.push({name,emoji,kcal,category:group.category,color:group.color})));
+    const cuisineFoods=[
+      {category:'乳制品',color:'#e8eff1',items:[['奶酪',350,'🧀'],['淡奶油',340,'🥛'],['黄油',717,'🧈']]},
+      {category:'饮料',color:'#e8eff1',items:[['酸奶',63,'🥣'],['矿泉水',0,'💧'],['纯净水',0,'💧'],['可乐',42,'🥤'],['无糖可乐',0,'🥤'],['雪碧',42,'🥤'],['橙汁',45,'🧃'],['苹果汁',46,'🧃'],['豆浆',31,'🥛'],['无糖绿茶',0,'🍵'],['黑咖啡',2,'☕']]},
+      {category:'主食',color:'#f1ecdf',items:[['面包',265,'🍞'],['面包糠',395,'🍞'],['意大利面',353,'🍝'],['通心粉',353,'🍝'],['披萨饼底',260,'🍕'],['粗麦粉',342,'🌾'],['细面条',365,'🍜'],['海苔',188,'🍙']]},
+      {category:'肉类',color:'#f6e9dc',items:[['培根',541,'🥓']]},
+      {category:'调味品',color:'#f2ead6',items:[['蜂蜜',304,'🍯']]},
+      {category:'海鲜',color:'#e4eef1',items:[['金枪鱼罐头',116,'🐟']]},
+      {category:'豆类',color:'#eee8d9',items:[['红扁豆',329,'🫘']]}
+    ];
+    cuisineFoods.forEach(group=>group.items.forEach(([name,kcal,emoji])=>foods.push({name,emoji,kcal,category:group.category,color:group.color})));
+    const customFoodStorageKey='fridge-custom-foods-v1',barcodeFoodStorageKey='fridge-barcode-foods-v1',customFoodCategories=['蔬菜','水果','肉类','鱼类','海鲜','豆制品','蛋奶','饮料','主食','调味品','其他'];
+    let pendingBarcodeFoodCode='';
+    function readBarcodeFoodNames(){try{const saved=JSON.parse(localStorage.getItem(barcodeFoodStorageKey)||'{}');return saved&&typeof saved==='object'&&!Array.isArray(saved)?saved:{}}catch{return {}}}
+    function openManualBarcodeFood(code){pendingBarcodeFoodCode=code;$('custom-food-name').value='';const panel=$('custom-food-panel'),toggle=$('custom-food-toggle');panel.hidden=false;toggle.setAttribute('aria-expanded','true');setTimeout(()=>$('custom-food-name').focus(),0)}
+    const customFoodCategoryMeta={'蔬菜':{emoji:'🥬',color:'#e6f0e2'},'水果':{emoji:'🍎',color:'#f7e8df'},'肉类':{emoji:'🥩',color:'#f6e9dc'},'鱼类':{emoji:'🐟',color:'#e4eef1'},'海鲜':{emoji:'🦐',color:'#e4eef1'},'豆制品':{emoji:'◻️',color:'#f0eee4'},'蛋奶':{emoji:'🥚',color:'#f6efdc'},'饮料':{emoji:'🥤',color:'#e8eff1'},'主食':{emoji:'🍚',color:'#f1ecdf'},'调味品':{emoji:'🧂',color:'#f2ead6'},'其他':{emoji:'🥫',color:'#eff0e9'}};
+    function isValidCustomFoodName(name){return typeof name==='string'&&name.trim().length>0&&name.trim().length<=60&&/^[\u1100-\u11ff\u3130-\u318f\uac00-\ud7af\u3400-\u9fffA-Za-z0-9 \u3000·（）()_.,&'’+\-/]+$/.test(name.trim())}
+    function readCustomFoodRecords(){try{const records=JSON.parse(localStorage.getItem(customFoodStorageKey)||'[]');return Array.isArray(records)?records.filter(food=>isValidCustomFoodName(food.name)&&customFoodCategories.includes(food.category)&&Number.isFinite(Number(food.kcal))&&Number(food.kcal)>=0&&(food.calorieBasis==='package'?Number(food.kcal)<=100000&&Number(food.calorieReferenceAmount)>0:Number(food.kcal)<=900)).map(food=>{const category=food.category==='蛋奶'&&/milk|yogurt|dairy|salim|奶|乳/i.test(food.name)?'饮料':food.category,defaultUnit=food.defaultUnit==='ml'&&category==='饮料'?'ml':food.defaultUnit==='kg'?'kg':food.defaultUnit==='g'?'g':category==='饮料'?'ml':'g',referenceAmount=Number(food.calorieReferenceAmount)||0,referenceUnit=['g','kg','ml'].includes(food.calorieReferenceUnit)&&!(food.calorieReferenceUnit==='ml'&&category!=='饮料')?food.calorieReferenceUnit:defaultUnit,calorieBasis=food.calorieBasis==='package'&&referenceAmount>0?'package':'per100';return {name:food.name.trim(),category,kcal:Number(food.kcal),pieceGrams:Number(food.pieceGrams)>0?Number(food.pieceGrams):0,defaultUnit,calorieBasis,calorieReferenceAmount:calorieBasis==='package'?referenceAmount:0,calorieReferenceUnit:referenceUnit}}):[]}catch{return []}}
+    const customFoodRecords=readCustomFoodRecords();localStorage.setItem(customFoodStorageKey,JSON.stringify(customFoodRecords));customFoodRecords.forEach(food=>{if(!foods.some(item=>item.name===food.name)){const meta=customFoodCategoryMeta[food.category];foods.push({...food,emoji:meta.emoji,color:meta.color})}});
+
+    const foodPieceGrams={'番茄':150,'鸡蛋':50,'玉米':150,'水果玉米':150,'玉米笋':20,'苹果':180,'香蕉':120,'橙子':130,'橘子':80,'梨':180,'桃子':150,'油桃':140,'李子':60,'猕猴桃':80,'黄瓜':150,'土豆':150,'洋葱':100,'青椒':80,'红椒':120,'茄子':250,'胡萝卜':100,'红薯':200,'牛油果':150,'柠檬':60,'西葫芦':200,'白萝卜':500,'南瓜':800,'冬瓜':1500,'木瓜':500,'火龙果':300,'柚子':700,'柿子':150,'梨子':180,'脐橙':130,'黄桃':150,'香瓜':500,'哈密瓜':1000,'西瓜':3000,'鸡胸肉':200,'鸡腿肉':150,'鸡翅':50,'鸡腿':180,'鸡小腿':120,'鸡翅根':60,'鸡翅中':40,'鸡翅尖':20,'鸡爪':50,'鸡架':300,'鸡里脊':50,'鸭胸肉':200,'火鸡胸肉':200,'鸭腿':180,'鸭翅':80,'牛里脊':180,'牛西冷':200,'牛小排':150,'羊排':150,'猪排骨':80,'猪蹄':300,'牛肉丸':25,'猪肉丸':25,'香菇':20};
+    customFoodRecords.forEach(food=>{if(food.pieceGrams>0&&!foodPieceGrams[food.name])foodPieceGrams[food.name]=food.pieceGrams});
+    const foodSearchSynonyms={
+      '鸡胸肉':['鸡肉','鸡胸','禽肉'],'鸡腿肉':['鸡肉','鸡腿','禽肉'],'鸡翅':['鸡肉','鸡翅膀','禽肉'],'鸡胗':['鸡肉','鸡内脏','禽肉'],
+      '火鸡胸肉':['火鸡','禽肉'],'鸭胸肉':['鸭肉','禽肉'],'猪肝':['猪肉','猪内脏'],'牛腱子':['牛肉','牛腱'],'猪里脊':['猪肉'],'猪五花肉':['猪肉'],'猪梅花肉':['猪肉'],'猪排骨':['猪肉'],'猪绞肉':['猪肉'],
+      '牛里脊':['牛肉'],'牛腩':['牛肉'],'牛西冷':['牛肉'],'牛绞肉':['牛肉'],'羊腿肉':['羊肉'],'羊排':['羊肉'],
+      '肥牛卷':['牛肉','肥牛','火锅肉'],'牛上脑':['牛肉','火锅肉'],'牛肩肉':['牛肉','火锅肉'],'牛板腱':['牛肉','火锅肉'],'牛小排':['牛肉','牛排','火锅肉'],'牛肋条':['牛肉','火锅肉'],'牛尾':['牛肉','牛骨','煲汤'],'牛百叶':['牛肉','牛杂','火锅肉'],'毛肚':['牛肉','牛杂','火锅肉'],'牛肚':['牛肉','牛杂','火锅肉'],'黄喉':['牛肉','火锅肉'],'牛舌':['牛肉','牛杂'],'牛肉片':['牛肉','火锅肉'],'肥牛片':['牛肉','肥牛','火锅肉'],'牛肉丸':['牛肉','火锅肉'],'羊肉卷':['羊肉','火锅肉'],'肥羊卷':['羊肉','肥羊','火锅肉'],'羊肩肉':['羊肉','火锅肉'],'羊蝎子':['羊肉','羊骨','煲汤'],'猪肉片':['猪肉','火锅肉'],'猪五花片':['猪肉','五花肉','火锅肉'],'猪肩肉':['猪肉'],'猪前腿肉':['猪肉'],'猪后腿肉':['猪肉'],'猪梅花片':['猪肉','梅花肉','火锅肉'],'猪颈肉':['猪肉'],'猪蹄':['猪肉','猪脚','煲汤'],'猪耳朵':['猪肉','猪耳'],'猪肚':['猪肉','猪杂','煲汤'],'猪血':['猪肉','血旺','火锅'],'猪肉丸':['猪肉','火锅肉'],'鸡腿':['鸡肉','鸡腿肉'],'鸡小腿':['鸡肉','鸡腿肉'],'鸡翅根':['鸡肉','鸡翅'],'鸡翅中':['鸡肉','鸡翅'],'鸡翅尖':['鸡肉','鸡翅'],'鸡爪':['鸡肉','凤爪','煲汤'],'鸡架':['鸡肉','鸡骨','煲汤'],'鸡里脊':['鸡肉','鸡柳'],'鸭腿':['鸭肉'],'鸭翅':['鸭肉'],'鸭胗':['鸭肉','鸭杂'],'鸭血':['鸭肉','血旺','火锅'],'牛腱子':['牛肉','牛腱'],'猪肝':['猪肉','猪内脏'],'火锅肉':['肥牛卷','羊肉卷','猪肉片'],
+      '香菜':['芫荽'],'大白菜':['白菜'],'小白菜':['青菜'],'卷心菜':['包菜','圆白菜','甘蓝'],'紫甘蓝':['紫包菜'],'上海青':['青菜','小白菜'],'油菜':['青菜'],'油麦菜':['莜麦菜'],'芥蓝':['盖菜'],'蒜薹':['蒜苔'],'韭黄':['韭菜'],'蒜苗':['青蒜'],'生姜':['姜'],'金针菇':['菌菇'],'香菇':['菌菇'],'平菇':['菌菇'],'杏鲍菇':['菌菇'],'蟹味菇':['菌菇'],'口蘑':['菌菇'],'黄豆芽':['豆芽'],'豇豆':['长豆角'],'毛豆':['青豆'],'荸荠':['马蹄'],'茭白':['茭笋'],'佛手瓜':['合掌瓜'],'心里美萝卜':['心里美'],'紫薯':['地瓜'],'柚子':['文旦'],'柿子':['水果'],'荔枝':['水果'],'龙眼':['桂圆','水果'],'杨梅':['水果'],'枇杷':['水果'],'山楂':['水果'],'椰子肉':['椰肉','水果'],'榴莲':['水果'],'山竹':['水果'],'百香果':['西番莲','水果'],'桑葚':['桑椹','水果'],'无花果':['水果'],'杏子':['杏','水果'],'柑橘':['水果'],'青提':['葡萄'],'红提':['葡萄'],'黄桃':['桃子'],'冬枣':['枣子'],'脐橙':['橙子'] ,
+      '番茄':['西红柿'],'土豆':['马铃薯'],'红薯':['地瓜','甘薯'],'猕猴桃':['奇异果'],'牛油果':['鳄梨'],'卷心菜':['包菜','圆白菜'],'花椰菜':['菜花'],'青椒':['柿子椒'],'玉米':['苞米'],'香葱':['小葱'],'白萝卜':['萝卜']
+    };
+    function foodSearchTerms(food){const terms=[food.name,food.category,...(foodSearchSynonyms[food.name]||[])];if(food.category==='肉类'){terms.push('肉');if(food.name.startsWith('鸡'))terms.push('鸡肉','鸡','禽肉');if(food.name.startsWith('猪'))terms.push('猪肉','猪');if(food.name.startsWith('牛'))terms.push('牛肉','牛');if(food.name.startsWith('羊'))terms.push('羊肉','羊');if(food.name.startsWith('鸭'))terms.push('鸭肉','鸭');if(food.name.startsWith('火鸡'))terms.push('火鸡肉','禽肉')}if(food.category==='鱼类')terms.push('鱼','鱼肉','水产');if(food.category==='蔬菜')terms.push('菜');if(food.category==='水果')terms.push('果');return terms}
+    // Household refrigerator guidance. Defaults use the shorter end of the published range.
+    // Food-specific starting points; packaging and opened state still take precedence.
+    const shelfLifeDatabase = {
+      '鸡胸肉': {days:1,range:'冷藏 1–2 天',note:'按生鸡肉、购入后及时冷藏估算。'},
+      '西兰花': {days:3,range:'冷藏约 3–5 天',note:'按新鲜、未切开的蔬菜估算。'},
+      '鸡蛋': {days:21,range:'冷藏 3–5 周',note:'按带壳生鸡蛋估算；包装日期优先。'},
+      '番茄': {days:5,range:'约 5 天（成熟番茄）',note:'成熟度和是否切开会影响期限，请按状态调整。'},
+      '嫩豆腐': {days:3,range:'约 3 天（开封后参考）',note:'未开封/开封后的期限因包装而异，请以包装标示为准。'},
+      '菠菜': {days:2,range:'冷藏约 1–2 天',note:'按新鲜叶菜的保守期限估算；袋装/已洗产品请看包装。'},
+      '胡萝卜': {days:14,range:'冷藏约 2–3 周',note:'按完整、新鲜胡萝卜估算。'},
+      '玉米': {days:3,range:'约 3 天（新鲜玉米）',note:'甜玉米形态及采后时间差异较大，请参考包装并按状态调整。'},
+      '蘑菇': {days:3,range:'冷藏约 3–7 天',note:'按新鲜蘑菇估算，取建议范围较短端。'},
+      '蜂蜜': {days:180,range:'开封后参考（以包装说明为准）',note:'蜂蜜通常密封常温保存，不一定需要冷藏；请优先参考包装标示。'},
+      '牛奶': {days:7,range:'约 7 天（开封后参考）',note:'未开封看包装日期；开封后按包装说明调整。'}
+    };
+    function getShelfGuide(name){if(shelfLifeDatabase[name])return shelfLifeDatabase[name];const food=getFood(name);if(food.category==='肉类')return {days:1,range:'冷藏约 1–2 天（生鲜参考）',note:'按生鲜肉及时冷藏估算，商品包装标示优先。'};if(food.category==='鱼类')return {days:1,range:'冷藏约 1–2 天（生鲜参考）',note:'按生鲜鱼类及时冷藏估算，商品包装标示优先。'};if(food.category==='水果')return {days:5,range:'冷藏约 5 天（参考值）',note:'成熟度和包装状态会影响期限，商品包装标示优先。'};if(food.category==='蔬菜')return {days:3,range:'冷藏约 3 天（参考值）',note:'是否切开、包装和新鲜度会影响期限，商品包装标示优先。'};return {days:3,range:'冷藏约 3 天（参考值）',note:'实际期限因包装和开封状态而异，商品包装标示优先。'}}
+    const recipes = [
+      {id:'chicken-broccoli',name:'香煎鸡胸肉配西兰花',emoji:'🍗',time:20,kcal:286,tags:['light'],label:['减脂餐','香煎'],description:'高蛋白低负担，清爽的一人份晚餐。',ingredients:[['鸡胸肉',150],['西兰花',150]],steps:['鸡胸肉切片，用少许盐和黑胡椒腌 10 分钟。','西兰花掰小朵，焯水 2 分钟后沥干。','少油煎熟鸡胸肉，搭配西兰花装盘。']},
+      {id:'tomato-egg',name:'番茄炒蛋',emoji:'🍳',time:15,kcal:198,tags:['stirfry','vegetarian'],label:['家常菜','炒菜','素菜'],description:'酸甜开胃，搭配米饭刚刚好。',ingredients:[['番茄',200],['鸡蛋',100]],steps:['番茄切块，鸡蛋打散。','鸡蛋炒至凝固后盛出，番茄炒软出汁。','倒回鸡蛋翻炒，加盐调味即可。']},
+      {id:'tofu-soup',name:'番茄豆腐汤',emoji:'🍲',time:25,kcal:156,tags:['light','soup'],label:['减脂餐','煲汤'],description:'暖胃又轻盈，适合想喝一碗热汤的时候。',ingredients:[['番茄',180],['嫩豆腐',200],['菠菜',60]],steps:['番茄切块，豆腐切小块。','番茄炒出汁后加清水煮开。','放入豆腐煮 5 分钟，最后加入菠菜和少许盐。']},
+      {id:'corn-soup',name:'玉米胡萝卜鸡汤',emoji:'🥣',time:45,kcal:238,tags:['soup'],label:['煲汤','暖心汤'],description:'清甜家常汤，炖煮时香气慢慢出来。',ingredients:[['鸡胸肉',120],['玉米',150],['胡萝卜',80]],steps:['食材洗净切块，鸡肉焯水。','所有食材放入锅中，加水没过。','小火炖 35 分钟，加盐调味。']},
+      {id:'mushroom-spinach',name:'蘑菇菠菜滑蛋',emoji:'🍄',time:15,kcal:205,tags:['light','stirfry','vegetarian'],label:['减脂餐','炒菜','素菜'],description:'鲜香软嫩，几分钟就能端上桌。',ingredients:[['蘑菇',120],['菠菜',100],['鸡蛋',100]],steps:['蘑菇切片，菠菜洗净，鸡蛋打散。','蘑菇炒软，加入菠菜翻炒。','倒入蛋液，凝固后轻轻翻匀。']},
+      {id:'beef-tomato-stew',name:'番茄土豆炖牛腩',emoji:'🍲',time:70,kcal:390,tags:['soup'],label:['煲汤','家常炖菜'],description:'酸甜浓郁，适合把牛腩和根茎菜慢慢炖软。',ingredients:[['牛腩',250],['番茄',200],['土豆',180]],steps:['牛腩切块焯水，番茄和土豆切块。','牛腩加水炖约 45 分钟，再放番茄和土豆。','炖至软烂后加盐调味。']},
+      {id:'beef-enoki-hotpot',name:'肥牛金针菇娃娃菜锅',emoji:'🍲',time:25,kcal:330,tags:['soup','hotpot','light'],label:['火锅','煲汤','一锅出'],description:'肥牛、菌菇和娃娃菜一锅煮，暖和又省事。',ingredients:[['肥牛卷',220],['金针菇',150],['娃娃菜',200]],steps:['金针菇去根，娃娃菜切块。','锅中加清水或高汤煮开，先放娃娃菜和金针菇。','放入肥牛卷煮熟，按口味加盐。']},
+      {id:'tomato-beef-hotpot',name:'番茄肥牛锅',emoji:'🍅',time:25,kcal:360,tags:['hotpot'],label:['火锅','番茄锅'],description:'番茄煮出酸甜汤底，肥牛和菌菇吸足汤汁。',ingredients:[['肥牛卷',180],['番茄',250],['金针菇',100],['娃娃菜',150]],steps:['番茄切块，金针菇去根，娃娃菜切段。','锅中加少量油炒软番茄，加约 600 毫升清水煮开并压出番茄汁。','先放娃娃菜和金针菇煮熟，再分批放入肥牛卷，煮至完全熟透。','加盐调味；喜欢浓汤可加入少量番茄酱。']},
+      {id:'mushroom-chicken-hotpot',name:'菌菇鸡肉锅',emoji:'🍄',time:35,kcal:330,tags:['hotpot','light'],label:['火锅','清汤锅','减脂餐'],description:'鸡肉搭配多种菌菇和娃娃菜，清鲜耐吃。',ingredients:[['鸡腿肉',180],['香菇',100],['金针菇',100],['娃娃菜',180]],steps:['鸡腿肉切薄片，香菇切片，金针菇去根，娃娃菜切段。','锅中加入约 800 毫升清水、姜片和料酒煮开。','先下香菇和娃娃菜煮 5 分钟，再放鸡肉片煮至完全熟透。','最后放金针菇煮 2–3 分钟，加盐调味。']},
+      {id:'sauerkraut-pork-hotpot',name:'酸菜白肉锅',emoji:'🥘',time:35,kcal:420,tags:['hotpot'],label:['火锅','东北风味'],description:'酸菜爽口解腻，五花肉和豆腐让汤底更香。',ingredients:[['猪五花片',150],['酸菜',180],['嫩豆腐',150],['大白菜',150]],steps:['酸菜冲洗后挤干切丝，五花肉片和豆腐准备好。','锅中加约 700 毫升清水或清汤，放入酸菜煮 10 分钟。','加入五花肉片，煮至完全熟透，再放豆腐和白菜煮 5 分钟。','加少量盐调味；酸菜本身有咸味，先尝味再加盐。']},
+      {id:'spicy-tripe-hotpot',name:'麻辣毛肚肥牛锅',emoji:'🌶️',time:25,kcal:450,tags:['hotpot'],label:['火锅','麻辣锅'],description:'毛肚脆爽、肥牛鲜香，麻辣程度可按口味调整。',ingredients:[['毛肚',150],['肥牛卷',120],['娃娃菜',150],['嫩豆腐',150]],steps:['毛肚洗净切片，娃娃菜切段，豆腐切块。','锅中加约 700 毫升水，放入火锅底料煮沸并搅匀。','先放娃娃菜和豆腐煮熟，再下肥牛卷煮至熟透。','最后放毛肚烫熟即可；毛肚不宜久煮，以免变韧。']},
+      {id:'chaoshan-beef-hotpot',name:'潮汕牛肉清汤锅',emoji:'🥩',time:30,kcal:340,tags:['hotpot'],label:['火锅','潮汕风味','清汤锅'],description:'清汤突出牛肉鲜味，搭配萝卜和玉米，蘸料可自选。',ingredients:[['牛上脑',180],['白萝卜',200],['玉米',100],['香菜',10]],steps:['白萝卜切片，玉米切段，牛肉片分开备用。','锅中加约 900 毫升清水和姜片，放萝卜、玉米煮至熟软。','转中火，牛肉片分批涮煮至完全熟透后夹出。','撒香菜，加少量盐调味；可按喜好另配沙茶或普宁豆酱蘸料。']},
+      {id:'lamb-radish-soup',name:'羊肉白萝卜汤',emoji:'🥣',time:45,kcal:350,tags:['soup','hotpot'],label:['煲汤','羊肉'],description:'清甜萝卜搭配羊肉，热乎的一锅汤。',ingredients:[['羊肉卷',220],['白萝卜',250],['香菜',10]],steps:['白萝卜切片，香菜切段。','白萝卜加水煮至半透明。','放入羊肉卷煮熟，撒香菜并调味。']},
+      {id:'mushroom-chicken',name:'香菇鸡腿肉',emoji:'🍗',time:30,kcal:360,tags:[],label:['家常菜','焖菜'],description:'鸡腿肉和香菇一起焖，鲜香下饭。',ingredients:[['鸡腿肉',250],['香菇',150],['胡萝卜',80]],steps:['鸡腿肉切块，香菇和胡萝卜切片。','鸡肉煎至表面变色，加入香菇和胡萝卜。','加少量水焖熟，最后调味。']},
+      {id:'pork-cabbage-tofu',name:'白菜猪肉炖豆腐',emoji:'🥘',time:35,kcal:370,tags:['soup'],label:['家常炖菜','暖心菜'],description:'白菜、猪肉和豆腐炖成一锅，适合多人分享。',ingredients:[['猪肉片',180],['大白菜',250],['嫩豆腐',200]],steps:['猪肉切片，白菜切块，豆腐切大块。','猪肉片炒至变色，放入白菜翻炒。','加水和豆腐炖 15 分钟，调味即可。']},
+      {id:'pepper-beef',name:'彩椒牛肉片',emoji:'🫑',time:18,kcal:310,tags:['light','stirfry','meat'],label:['减脂餐','炒菜','肉菜'],description:'牛肉和彩椒大火快炒，清爽有嚼劲。',ingredients:[['牛肉片',200],['彩椒',180],['洋葱',60]],steps:['牛肉片用少许盐抓匀，彩椒和洋葱切条。','少油先炒牛肉至变色后盛出。','炒香洋葱和彩椒，倒回牛肉翻匀。']},
+      {id:'garlic-broccoli-mushroom',name:'蒜香西兰花炒蘑菇',emoji:'🥦',time:15,kcal:170,tags:['light','stirfry','vegetarian'],label:['减脂餐','炒菜','素菜'],description:'蔬菜为主，少油快炒，适合清淡一餐。',ingredients:[['西兰花',200],['蘑菇',150],['蒜头',8]],steps:['西兰花掰小朵焯水，蘑菇切片，蒜切末。','少油炒香蒜末和蘑菇。','加入西兰花翻炒，加少许盐即可。']},
+      {id:'pork-rib-potato-soup',name:'土豆排骨汤',emoji:'🍖',time:70,kcal:410,tags:['soup'],label:['煲汤','家常汤'],description:'排骨炖出香味，再加入土豆炖至软糯。',ingredients:[['猪排骨',250],['土豆',220],['胡萝卜',80]],steps:['排骨焯水，土豆和胡萝卜切块。','排骨加水炖约 45 分钟。','加入蔬菜再炖至软熟，调味即可。']},
+      {id:'eggplant-pork',name:'茄子炒猪肉片',emoji:'🍆',time:20,kcal:300,tags:['stirfry','meat'],label:['家常菜','炒菜','肉菜'],description:'茄子吸收肉香，软嫩入味。',ingredients:[['猪肉片',160],['茄子',250],['青椒',60]],steps:['猪肉切片，茄子和青椒切条。','少油煸软茄子后盛出。','炒熟猪肉片，加入茄子和青椒翻匀调味。']},
+      {id:'mushroom-egg',name:'菌菇炒鸡蛋',emoji:'🍳',time:15,kcal:230,tags:['light','stirfry','vegetarian'],label:['减脂餐','炒菜','素菜'],description:'菌菇鲜香、鸡蛋软嫩，十几分钟就能做好。',ingredients:[['鸡蛋',150],['香菇',100],['平菇',100]],steps:['鸡蛋打散，香菇和平菇切片。','先炒鸡蛋至凝固后盛出，再把菌菇炒软。','倒回鸡蛋翻匀，加盐调味。']},
+      {id:'fruit-bowl',name:'时令水果拼盘',emoji:'🍉',time:10,kcal:190,tags:['light'],label:['水果','免开火'],description:'把冰箱里的新鲜水果组合成一份轻食。',ingredients:[['苹果',120],['香蕉',100],['葡萄',100]],steps:['水果洗净，苹果切块，香蕉切片。','葡萄去梗，和其他水果一起装盘。','可按库存替换成草莓、橙子或梨。']},
+      {id:'fish-fragrant-pork',name:'鱼香肉丝',emoji:'🥢',time:25,kcal:345,tags:['regional','sichuan','stirfry','meat'],label:['川菜','炒菜','肉菜'],description:'泡椒风味的酸甜咸香，肉丝嫩、配菜爽脆。',ingredients:[['猪里脊',160],['木耳',60],['竹笋',100],['青椒',60]],steps:['猪里脊切丝，木耳泡发切丝，竹笋和青椒切丝。','肉丝用生抽和淀粉抓匀，热锅滑炒至变色后盛出。','炒香豆瓣酱，放入配菜翻炒，再倒回肉丝，加入糖醋汁炒匀。']},
+      {id:'mapo-tofu',name:'麻婆豆腐',emoji:'🌶️',time:25,kcal:330,tags:['regional','sichuan','stirfry','meat'],label:['川菜','炒菜','肉菜'],description:'豆腐嫩滑，豆瓣酱香浓，麻辣度可按口味调整。',ingredients:[['嫩豆腐',250],['猪绞肉',100],['蒜头',10]],steps:['豆腐切块，蒜切末；猪绞肉准备好。','炒香肉末和豆瓣酱，加少量水煮开，轻轻放入豆腐。','小火煮 5 分钟，加入生抽和辣椒油调味，轻推收汁。']},
+      {id:'twice-cooked-pork',name:'回锅肉',emoji:'🥩',time:35,kcal:420,tags:['regional','sichuan','stirfry','meat'],label:['川菜','炒菜','肉菜'],description:'五花肉先煮后回锅，搭配青椒和豆瓣酱香辣下饭。',ingredients:[['猪五花肉',180],['青椒',100],['蒜头',10]],steps:['五花肉冷水下锅煮至七八成熟，放凉后切薄片。','肉片下锅煸出少量油脂，加入豆瓣酱炒香。','放青椒和蒜片大火翻炒至断生，加生抽调味。']},
+      {id:'mushu-pork',name:'木须肉',emoji:'🍳',time:22,kcal:320,tags:['regional','shandong','stirfry','meat'],label:['鲁菜','炒菜','肉菜'],description:'猪肉、鸡蛋、木耳和黄瓜清爽同炒，是经典家常鲁菜。',ingredients:[['猪里脊',120],['鸡蛋',100],['木耳',60],['黄瓜',100]],steps:['木耳泡发，黄瓜切片，里脊切片，鸡蛋打散。','先炒鸡蛋至凝固盛出，再滑炒肉片至变色。','放木耳和黄瓜炒熟，倒回鸡蛋，加生抽和盐翻匀。']},
+      {id:'sweet-sour-pork',name:'糖醋里脊',emoji:'🍍',time:30,kcal:430,tags:['regional','shandong','meat'],label:['鲁菜','酸甜口'],description:'外酥里嫩，糖醋汁酸甜适口。',ingredients:[['猪里脊',200],['鸡蛋',30],['青椒',60]],steps:['里脊切条，加入蛋液和淀粉抓匀。','锅中放油，将肉条分批炸至金黄后捞出。','另锅调糖醋汁煮至微稠，放肉条和青椒快速裹匀。']},
+      {id:'scallion-tofu',name:'葱烧豆腐',emoji:'🧅',time:20,kcal:280,tags:['regional','shandong','stirfry','vegetarian'],label:['鲁菜','炒菜','素菜'],description:'豆腐煎出焦香，再与大葱烧至入味。',ingredients:[['嫩豆腐',250],['大葱',40]],steps:['豆腐切厚片，大葱切段。','少油将豆腐两面煎至金黄，先盛出。','锅中炒香大葱，放回豆腐，加生抽和蚝油及少量水烧 5 分钟。']},
+      {id:'cantonese-choy-sum',name:'蒜蓉白灼菜心',emoji:'🥬',time:15,kcal:150,tags:['regional','cantonese','vegetarian'],label:['粤菜','素菜','清淡'],description:'菜心焯至爽嫩，淋上蒜香豉油和热油。',ingredients:[['菜心',220],['蒜头',10]],steps:['菜心洗净，蒜切末；锅中烧开水。','菜心焯 1–2 分钟至翠绿熟透，捞出沥水摆盘。','淋生抽，蒜末放在菜心上，浇热油即可。']},
+      {id:'cantonese-soy-chicken',name:'粤式豉油鸡腿',emoji:'🍗',time:40,kcal:390,tags:['regional','cantonese','meat'],label:['粤菜','肉菜','焖煮'],description:'鸡腿用豉油汁慢火焖熟，咸鲜带甜。',ingredients:[['鸡腿',260],['香菇',80],['香葱',20]],steps:['鸡腿擦干，香菇泡发，香葱打结。','锅中放少量油，将鸡腿表皮煎至微黄，加入生抽、老抽、料酒、姜和水。','小火加盖焖 25–30 分钟，中途翻面；放香菇同焖，收汁后切块。']},
+      {id:'cantonese-steamed-ribs',name:'广式蒜蓉蒸排骨',emoji:'🍖',time:35,kcal:390,tags:['regional','cantonese','meat'],label:['粤菜','肉菜','蒸菜'],description:'排骨用蒜蓉和豉油腌入味，蒸到软嫩鲜香。',ingredients:[['猪排骨',250],['蒜头',15]],steps:['排骨洗净沥干，蒜切末。','排骨加入蒜末、生抽、料酒和淀粉抓匀，腌 15 分钟。','水开后上锅蒸 25–30 分钟，确认排骨熟透即可。']},
+      {id:'garlic-water-spinach',name:'蒜蓉炒空心菜',emoji:'🥬',time:12,kcal:155,tags:['stirfry','vegetarian'],label:['炒菜','素菜','快手'],description:'大火快炒保留空心菜的清脆，蒜香简单下饭。',ingredients:[['空心菜',250],['蒜头',12]],steps:['空心菜洗净切段，蒜头拍碎切末。','锅烧热加入少量油，先炒香蒜末。','放入空心菜大火翻炒至变软，加盐调味即出锅。']},
+      {id:'shiitake-bokchoy',name:'香菇炒小白菜',emoji:'🍄',time:18,kcal:190,tags:['stirfry','vegetarian'],label:['炒菜','素菜','家常菜'],description:'香菇鲜香配小白菜清甜，少量蚝油提鲜。',ingredients:[['香菇',120],['小白菜',220],['蒜头',8]],steps:['香菇切片，小白菜洗净切段，蒜切末。','锅中放油炒香蒜末和香菇，炒至香菇变软。','加入小白菜大火翻炒，加蚝油和少许盐调味。']},
+      {id:'celery-beef',name:'芹菜牛肉',emoji:'🥩',time:20,kcal:305,tags:['stirfry','meat'],label:['炒菜','肉菜','家常菜'],description:'牛肉滑嫩，芹菜爽脆，适合配米饭。',ingredients:[['牛肉片',180],['芹菜',160],['红椒',50]],steps:['牛肉片加生抽和淀粉抓匀，芹菜切段，红椒切条。','热锅滑炒牛肉至七成熟后盛出。','炒芹菜和红椒至断生，倒回牛肉大火翻匀。']},
+      {id:'garlic-chicken-wings',name:'蒜香鸡翅',emoji:'🍗',time:30,kcal:360,tags:['stirfry','meat'],label:['炒菜','肉菜','家常菜'],description:'鸡翅煎香后加蒜和酱油焖熟，外香里嫩。',ingredients:[['鸡翅',250],['蒜头',15]],steps:['鸡翅擦干，两面划浅口；蒜切末。','少油煎鸡翅至两面金黄，放入蒜末炒香。','加入生抽、蜂蜜和少量水，加盖焖 12–15 分钟至熟透，开盖收汁。']}
+    ];
+    const extraRegionalRecipes=[
+      ['sichuan','kungpao-chicken','宫保鸡丁','🍗',25,'meatstir','鸡丁滑嫩，花生香脆，咸甜微辣。',[['鸡胸肉',180],['黄瓜',100],['花生',25],['红椒',40]]],
+      ['sichuan','water-boiled-beef','水煮牛肉','🌶️',35,'soup','牛肉片嫩而入味，汤底麻辣鲜香。',[['牛肉片',180],['生菜',150],['豆芽',120],['芹菜',60]]],
+      ['sichuan','fish-fragrant-eggplant','鱼香茄子','🍆',25,'meatstir','茄子软糯吸汁，豆瓣、糖醋调出鱼香风味。',[['茄子',250],['猪绞肉',80],['青椒',50]]],
+      ['sichuan','dry-fried-beans','干煸四季豆','🫛',25,'meatstir','四季豆煸至皱皮，再用肉末和豆瓣酱提香。',[['四季豆',250],['猪绞肉',70],['蒜头',10]]],
+      ['sichuan','sour-spicy-potato','酸辣土豆丝','🥔',18,'vegstir','土豆丝爽脆，醋香和辣味开胃。',[['土豆',250],['红椒',40],['蒜头',8]]],
+      ['sichuan','chongqing-chicken','辣子鸡','🍗',35,'meatstir','鸡块煎炸后与辣椒、花椒风味调料同炒。',[['鸡腿肉',220],['青椒',60],['蒜头',10]]],
+      ['sichuan','dry-pot-cauliflower','干锅花菜','🥦',25,'meatstir','花菜边缘微焦，搭配五花肉和豆瓣酱。',[['花椰菜',250],['猪五花肉',100],['青椒',60]]],
+      ['sichuan','sauerkraut-fish','酸菜鱼','🐟',35,'soup','鱼片鲜嫩，酸菜汤开胃爽口。',[['鲈鱼',220],['酸菜',150],['豆芽',100]]],
+      ['sichuan','mala-xiangguo','麻辣香锅','🥘',35,'meatstir','肉片、菌菇和蔬菜一锅炒香，麻辣浓郁。',[['肥牛卷',120],['鸡翅根',120],['土豆',100],['金针菇',100]]],
+      ['sichuan','water-boiled-fish','水煮鱼','🐟',35,'soup','鱼片嫩滑，麻辣汤底可按喜好调整辣度。',[['草鱼',220],['大白菜',150],['豆芽',100]]],
+      ['sichuan','mouthwatering-chicken','口水鸡','🍗',40,'cold','鸡肉煮熟后配麻辣鲜香的凉拌汁。',[['鸡腿',280],['黄瓜',100],['花生',15]]],
+      ['sichuan','garlic-pork-slices','蒜泥白肉','🥩',45,'cold','五花肉薄切，蘸蒜泥豉油，肥而不腻。',[['猪五花肉',220],['黄瓜',100],['蒜头',15]]],
+      ['shandong','sweet-sour-carp','糖醋鲤鱼','🐟',40,'meatstir','鲤鱼炸至外酥，再淋酸甜浓汁。',[['鲤鱼',350],['鸡蛋',30],['青椒',50]]],
+      ['shandong','four-joy-meatballs','四喜丸子','🍖',60,'braise','大肉丸先煎后红烧，寓意团圆喜庆。',[['猪绞肉',220],['鸡蛋',30],['大白菜',100]]],
+      ['shandong','dezhou-chicken','德州扒鸡','🍗',70,'braise','鸡腿在香料豉油汁中慢炖至酥软入味。',[['鸡腿',350],['香菇',60],['胡萝卜',80]]],
+      ['shandong','oil-braised-shrimp','油焖大虾','🦐',22,'braise','大虾煎出虾油，再用酱汁焖至鲜甜。',[['虾仁',220],['洋葱',40]]],
+      ['shandong','wok-collapsed-tofu','锅塌豆腐','◻️',25,'meatstir','豆腐裹蛋煎香，再烧入咸鲜汤汁。',[['嫩豆腐',220],['鸡蛋',80],['香菇',50]]],
+      ['shandong','scallion-lamb','葱爆羊肉','🍖',18,'meatstir','羊肉大火快炒，大葱香气浓郁。',[['羊肉片',200],['大葱',80]]],
+      ['shandong','yellow-braised-chicken','黄焖鸡','🍗',45,'braise','鸡腿肉与香菇、土豆焖煮，酱香浓郁。',[['鸡腿肉',220],['香菇',80],['土豆',120]]],
+      ['shandong','shandong-salad','山东大拌菜','🥗',15,'cold','多种清脆蔬菜拌成酸甜爽口凉菜。',[['黄瓜',100],['生菜',100],['胡萝卜',50],['紫甘蓝',60]]],
+      ['shandong','spinach-tofu-soup','菠菜豆腐汤','🥣',20,'soup','菠菜与豆腐煮成清鲜家常汤。',[['菠菜',120],['嫩豆腐',180],['鸡蛋',50]]],
+      ['shandong','braised-pork-trotter','红烧猪蹄','🍖',80,'braise','猪蹄慢炖至软糯，酱色红亮。',[['猪蹄',300],['大葱',30],['生姜',10]]],
+      ['shandong','vinegar-cabbage','醋溜白菜','🥬',18,'vegstir','白菜爽脆，米醋提味，酸香清口。',[['大白菜',250],['红椒',30],['蒜头',8]]],
+      ['shandong','wood-ear-egg','木耳炒鸡蛋','🍳',15,'vegstir','木耳爽脆，鸡蛋软嫩，家常快手。',[['木耳',80],['鸡蛋',120],['青椒',40]]],
+      ['cantonese','steamed-sea-bass','清蒸鲈鱼','🐟',30,'steam','清蒸保留鱼肉鲜味，葱姜豉油简单提鲜。',[['鲈鱼',350],['香葱',20],['生姜',12]]],
+      ['cantonese','white-cut-chicken','白切鸡','🍗',50,'soup','鸡肉浸熟后斩件，搭配姜葱蘸汁。',[['鸡腿',350],['香葱',25],['生姜',15]]],
+      ['cantonese','wintermelon-rib-soup','冬瓜排骨汤','🥣',70,'soup','排骨汤清甜，冬瓜吸收肉香后软嫩。',[['猪排骨',220],['冬瓜',250],['生姜',10]]],
+      ['cantonese','beef-broccoli','芥蓝牛肉','🥩',22,'meatstir','牛肉滑嫩，芥蓝清爽，豉油调味。',[['牛肉片',160],['芥蓝',180],['蒜头',8]]],
+      ['cantonese','pineapple-sweet-pork','咕噜肉','🍍',35,'meatstir','炸肉块裹上酸甜汁，搭配菠萝和青椒。',[['猪里脊',180],['菠萝',100],['青椒',60],['鸡蛋',30]]],
+      ['cantonese','shrimp-scrambled-egg','虾仁炒蛋','🍳',15,'meatstir','虾仁鲜甜，蛋液滑嫩，清淡家常。',[['虾仁',120],['鸡蛋',150],['香葱',10]]],
+      ['cantonese','ginger-scallion-fish','姜葱蒸鱼','🐟',30,'steam','鱼肉清蒸后淋热油，姜葱香气突出。',[['鲈鱼',300],['生姜',15],['香葱',25]]],
+      ['cantonese','chicken-congee','鸡丝粥','🥣',55,'soup','大米熬至绵滑，再加入鸡丝和姜丝。',[['大米',100],['鸡胸肉',120],['生姜',8],['香葱',10]]],
+      ['cantonese','soy-tofu','豉油蒸水蛋豆腐','🍮',25,'steam','蛋羹搭配嫩豆腐，口感细软，豉油提鲜。',[['鸡蛋',120],['嫩豆腐',150],['香葱',10]]],
+      ['cantonese','braised-beef-brisket','萝卜牛腩','🍲',90,'braise','牛腩炖软后加入萝卜，汤汁浓郁。',[['牛腩',220],['白萝卜',180],['生姜',10]]],
+      ['cantonese','black-bean-ribs','豉汁蒸排骨','🍖',40,'steam','排骨以豉汁蒜香腌透后蒸至软嫩。',[['猪排骨',250],['蒜头',12],['豆腐皮',30]]],
+      ['cantonese','cantonese-fried-rice','虾仁蛋炒饭','🍚',18,'rice','米饭炒至粒粒分明，虾仁鸡蛋鲜香。',[['米饭',250],['虾仁',80],['鸡蛋',80],['胡萝卜',40]]],
+      ['northeast','guobaorou','锅包肉','🥩',35,'meatstir','里脊炸至酥脆，裹上东北风味酸甜汁。',[['猪里脊',220],['胡萝卜',40],['大葱',20]]],
+      ['northeast','di-san-xian','地三鲜','🍆',30,'meatstir','土豆、茄子和青椒分别煎香后烧汁。',[['土豆',150],['茄子',180],['青椒',70]]],
+      ['northeast','pork-vermicelli','猪肉炖粉条','🥘',55,'braise','猪肉和粉条吸足炖汁，暖胃饱腹。',[['猪五花肉',150],['粉条',100],['大白菜',150]]],
+      ['northeast','chicken-mushroom-stew','小鸡炖蘑菇','🍲',60,'braise','鸡肉和香菇慢炖，汤汁鲜香。',[['鸡腿肉',220],['香菇',120],['粉条',60]]],
+      ['northeast','northeast-stew','东北乱炖','🥘',50,'braise','肉类和时令蔬菜同锅炖煮，家常丰盛。',[['猪肉片',120],['土豆',120],['茄子',100],['大白菜',100]]],
+      ['northeast','sauerkraut-pork','酸菜白肉','🥘',45,'soup','酸菜解腻，白肉汤鲜，东北家常经典。',[['酸菜',180],['猪五花肉',160],['粉条',60]]],
+      ['northeast','liu-rou-duan','溜肉段','🥩',30,'meatstir','肉段外酥里嫩，青椒豉油汁咸鲜。',[['猪里脊',200],['青椒',80],['红椒',40]]],
+      ['northeast','harvest-stew','东北大丰收','🌽',55,'braise','玉米、南瓜、土豆与排骨一起炖，香甜浓厚。',[['猪排骨',160],['玉米',120],['南瓜',120],['土豆',100]]],
+      ['northeast','blood-sausage-stew','杀猪菜家常炖','🥘',55,'soup','猪肉、酸菜和猪血同炖，酸香暖身。',[['猪五花肉',120],['酸菜',180],['猪血',100]]],
+      ['northeast','sauce-bones','东北酱骨头','🍖',80,'braise','排骨慢炖入味，酱香浓郁。',[['猪排骨',300],['大葱',30],['生姜',10]]],
+      ['northeast','sauerkraut-ribs','酸菜炖排骨','🍲',70,'soup','酸菜与排骨慢火炖煮，汤鲜肉软。',[['猪排骨',220],['酸菜',180],['粉条',50]]],
+      ['northeast','eggplant-potato-stew','茄子土豆炖豆角','🥘',40,'braise','茄子土豆和四季豆炖至软糯入味。',[['茄子',120],['土豆',120],['四季豆',120]]],
+      ['northeast','egg-sauce-vegetables','鸡蛋酱蘸菜','🥚',18,'meatstir','鸡蛋炒成咸香酱，配黄瓜和生菜蘸食。',[['鸡蛋',120],['黄瓜',100],['生菜',100]]],
+      ['northeast','northeast-cold-salad','东北家常凉菜','🥗',18,'cold','黄瓜、白菜和粉条拌成酸甜爽口凉菜。',[['黄瓜',100],['大白菜',100],['粉条',80],['胡萝卜',40]]],
+      ['northeast','corn-rib-stew','玉米炖排骨','🌽',65,'soup','玉米清甜，排骨炖出浓郁肉汤。',[['猪排骨',220],['玉米',180],['胡萝卜',60]]],
+      ['northeast','northeast-chicken-potato','东北鸡块炖土豆','🍗',50,'braise','鸡块与土豆在酱香汤汁中炖至入味。',[['鸡腿肉',220],['土豆',180],['青椒',50]]],
+      ['shanghai','hongshao-pork','本帮红烧肉','🥓',90,'braise','五花肉小火焖烧，酱色红亮，咸甜适口。',[['猪五花肉',250],['大葱',25],['生姜',10]]],
+      ['shanghai','oil-braised-bamboo','油焖春笋','🎋',25,'braise','竹笋先煸后焖，脆嫩鲜甜。',[['竹笋',250],['香葱',15]]],
+      ['shanghai','shanghai-sweet-ribs','上海糖醋小排','🍖',50,'braise','排骨烧至酥软，醋糖汁浓亮挂味。',[['猪排骨',250],['生姜',8],['香葱',10]]],
+      ['shanghai','shanghai-smoked-fish','上海熏鱼风味煎鱼','🐟',35,'meatstir','鱼块煎香后浸入甜咸酱汁，冷吃热吃都合适。',[['草鱼',250],['生姜',8],['香葱',10]]],
+      ['shanghai','scallion-oil-chicken','葱油鸡','🍗',45,'soup','鸡肉浸熟后淋上滚热葱油，葱香浓郁。',[['鸡腿',300],['香葱',35],['生姜',10]]],
+      ['shanghai','shanghai-greens-mushroom','香菇炒上海青','🥬',18,'vegstir','上海青爽嫩，香菇提鲜，简单快手。',[['上海青',220],['香菇',100],['蒜头',8]]],
+      ['shanghai','shanghai-borscht','上海罗宋汤','🍲',65,'soup','牛肉与番茄、卷心菜慢煮，汤酸甜浓郁。',[['牛腩',150],['番茄',120],['卷心菜',100],['土豆',80]]],
+      ['shanghai','yanduxian-home','腌笃鲜家常版','🍲',75,'soup','咸鲜肉香配春笋和百叶结，汤味醇厚。',[['猪排骨',180],['竹笋',150],['豆腐皮',80]]],
+      ['shanghai','crab-tofu','蟹肉豆腐','🦀',22,'meatstir','蟹肉鲜甜，豆腐细嫩，清淡鲜美。',[['蟹肉',100],['嫩豆腐',200],['香菇',40]]],
+      ['shanghai','shrimp-egg','虾仁炒蛋','🍳',15,'meatstir','虾仁和鸡蛋滑炒，鲜香柔嫩。',[['虾仁',120],['鸡蛋',120],['香葱',10]]],
+      ['shanghai','shanghai-rice','上海菜饭','🍚',45,'rice','大米与青菜、肉丁同煮，米饭吸收菜香。',[['大米',180],['上海青',120],['猪五花肉',60]]],
+      ['shanghai','scallion-noodles','葱油拌面','🍜',18,'rice','面条拌入葱油和豉油，简单鲜香。',[['面条',200],['香葱',40]]],
+      ['shanghai','oil-fried-shrimp','上海油爆虾仁','🦐',20,'meatstir','虾仁快速煎炒，酱汁咸甜提鲜。',[['虾仁',180],['香葱',15]]],
+      ['shanghai','green-pepper-pork','青椒肉丝','🥢',20,'meatstir','猪肉丝滑嫩，青椒爽脆，家常下饭。',[['猪里脊',160],['青椒',120],['木耳',40]]],
+      ['shanghai','shanghai-braised-ribs','上海酱烧排骨','🍖',55,'braise','排骨裹上浓油赤酱，慢炖至软嫩。',[['猪排骨',250],['大葱',20],['生姜',10]]],
+      ['korean','bulgogi','韩式烤牛肉','🥩',30,'meatstir','牛肉以梨香豉油汁腌制后煎烤，甜咸鲜香。',[['牛肉片',200],['洋葱',70],['胡萝卜',50]]],
+      ['korean','spicy-pork','韩式辣炒猪肉','🌶️',25,'meatstir','猪肉与洋葱裹上韩式辣酱汁，微甜微辣。',[['猪肉片',200],['洋葱',80],['红椒',50]]],
+      ['korean','kimchi-pork','泡菜炒五花肉','🥓',22,'meatstir','泡菜酸辣开胃，与五花肉同炒香气十足。',[['泡菜',160],['猪五花肉',150],['洋葱',50]]],
+      ['korean','bibimbap','韩式拌饭','🍚',30,'rice','米饭配蔬菜、鸡蛋和牛肉，拌入辣酱食用。',[['米饭',250],['牛肉片',80],['菠菜',60],['鸡蛋',50]]],
+      ['korean','tteokbokki','韩式辣炒年糕','🍡',25,'braise','年糕在辣酱汁中煮软，甜辣浓郁。',[['年糕',220],['鱼饼',80],['大白菜',60]]],
+      ['korean','soft-tofu-stew','韩式嫩豆腐锅','🍲',30,'soup','嫩豆腐与猪肉、泡菜煮成热辣汤锅。',[['嫩豆腐',220],['猪肉片',80],['泡菜',80],['鸡蛋',50]]],
+      ['korean','korean-fried-chicken','韩式蒜香鸡翅','🍗',35,'meatstir','鸡翅煎炸后裹上蒜香甜辣酱。',[['鸡翅',250],['蒜头',12],['蜂蜜',10]]],
+      ['korean','japchae','韩式杂菜粉条','🍜',30,'meatstir','粉条与牛肉、蔬菜炒匀，芝麻香浓。',[['粉条',150],['牛肉片',80],['菠菜',80],['胡萝卜',60]]],
+      ['korean','korean-egg-roll','韩式鸡蛋卷','🍳',18,'meatstir','蛋液卷入胡萝卜和香葱，柔软清香。',[['鸡蛋',180],['胡萝卜',30],['香葱',15]]],
+      ['korean','seafood-pancake','韩式虾仁煎饼','🦐',25,'meatstir','面糊裹虾仁和葱段煎至两面金黄。',[['虾仁',100],['香葱',50],['鸡蛋',50],['面粉',40]]],
+      ['korean','kimchi-fried-rice','韩式泡菜炒饭','🍚',18,'rice','隔夜饭与泡菜、鸡蛋快速炒香。',[['米饭',250],['泡菜',100],['鸡蛋',50],['猪肉片',50]]],
+      ['korean','steamed-egg','韩式蒸蛋羹','🍮',22,'steam','鸡蛋加温水蒸至蓬松细嫩，撒葱花。',[['鸡蛋',180],['香葱',10]]],
+      ['korean','korean-bbq-pork','韩式烤五花肉','🥓',25,'meatstir','五花肉煎烤出油，搭配生菜和蒜片。',[['猪五花肉',200],['生菜',100],['蒜头',10]]],
+      ['korean','potato-pancake','韩式土豆饼','🥔',25,'meatstir','土豆擦丝后煎成外脆内软的薄饼。',[['土豆',220],['鸡蛋',40],['洋葱',40]]],
+      ['korean','fishcake-soup','韩式鱼饼汤','🍢',25,'soup','鱼饼与萝卜清汤煮开，清淡鲜香。',[['鱼饼',150],['白萝卜',120],['香葱',15]]],
+      ['japanese','jp-teriyaki-chicken','日式照烧鸡腿','🍗',30,'grill','鸡腿肉煎至焦香，再裹上咸甜照烧汁。',[['鸡腿肉',220],['洋葱',60]]],
+      ['japanese','jp-oyakodon','日式亲子丼','🍚',25,'rice','鸡肉、鸡蛋和洋葱在清甜酱汁中煮熟，盖在热米饭上。',[['鸡腿肉',140],['鸡蛋',100],['洋葱',70],['米饭',200]]],
+      ['japanese','jp-gyudon','日式牛肉饭','🍚',20,'rice','牛肉与洋葱薄煮入味，连同汤汁浇在米饭上。',[['牛肉片',150],['洋葱',90],['米饭',220]]],
+      ['japanese','jp-tonkatsu','日式炸猪排','🍖',30,'deepfry','猪里脊裹蛋液和面包糠炸至金黄，搭配卷心菜丝。',[['猪里脊',180],['鸡蛋',35],['面包糠',35],['卷心菜',100]]],
+      ['japanese','jp-curry-chicken','日式咖喱鸡','🍛',40,'braise','鸡肉、土豆和胡萝卜炖至软熟，咖喱汁浓厚顺滑。',[['鸡腿肉',160],['土豆',140],['胡萝卜',70],['洋葱',80]]],
+      ['japanese','jp-nikujaga','日式土豆炖牛肉','🥘',40,'braise','牛肉片、土豆和洋葱以日式咸甜汤汁慢炖入味。',[['牛肉片',120],['土豆',160],['胡萝卜',60],['洋葱',70]]],
+      ['japanese','jp-salmon-grill','日式盐烤三文鱼','🐟',20,'grill','三文鱼撒盐煎烤至外层微焦、鱼肉仍然细嫩。',[['三文鱼',180],['芦笋',100],['柠檬',20]]],
+      ['japanese','jp-miso-salmon-soup','日式三文鱼味噌汤','🥣',25,'soup','三文鱼、豆腐和蔬菜在味噌汤底中煮熟，咸鲜暖胃。',[['三文鱼',120],['嫩豆腐',120],['大白菜',80],['香菇',40]]],
+      ['japanese','jp-yakisoba','日式炒面','🍜',20,'meatstir','面条与猪肉、卷心菜和胡萝卜大火炒匀，酱香十足。',[['面条',180],['猪肉片',70],['卷心菜',100],['胡萝卜',40]]],
+      ['japanese','jp-tempura-shrimp','日式虾仁天妇罗','🍤',25,'deepfry','虾仁和蔬菜裹薄面糊炸至轻脆，趁热蘸汁食用。',[['虾仁',120],['茄子',60],['南瓜',60],['面粉',35],['鸡蛋',25]]],
+      ['japanese','jp-karaage','日式炸鸡块','🍗',30,'deepfry','鸡腿肉以姜蒜酱油腌入味，裹粉炸至外酥里嫩。',[['鸡腿肉',200],['面粉',30],['生姜',8],['蒜头',6]]],
+      ['japanese','jp-okonomiyaki','日式大阪烧','🥞',25,'griddle','卷心菜、面糊和猪肉煎成厚饼，表面刷酱并撒葱花。',[['卷心菜',160],['鸡蛋',60],['面粉',55],['猪肉片',70],['香葱',10]]],
+      ['japanese','jp-tuna-onigiri','金枪鱼饭团','🍙',20,'rice','温热米饭包入金枪鱼馅捏成饭团，外层包上海苔。',[['米饭',220],['金枪鱼罐头',60],['海苔',4]]],
+      ['japanese','jp-chawanmushi','日式茶碗蒸','🍮',25,'steam','蛋液过滤后与虾仁、香菇一同蒸至凝固嫩滑。',[['鸡蛋',100],['虾仁',40],['香菇',25]]],
+      ['japanese','jp-hiyayakko','日式冷豆腐','◻️',10,'cold','嫩豆腐冰镇后淋酱油，撒上葱花和姜末即可。',[['嫩豆腐',180],['香葱',10],['生姜',5]]],
+
+      ['western','west-pepper-steak','西式黑椒牛排','🥩',25,'grill','牛排煎至喜爱的熟度，配芦笋和煎土豆。',[['牛西冷',200],['土豆',120],['芦笋',80]]],
+      ['western','west-beef-pasta','番茄牛肉意面','🍝',30,'pasta','牛肉末与番茄熬成肉酱，拌入煮好的意大利面。',[['意大利面',100],['牛绞肉',100],['番茄',150],['洋葱',40]]],
+      ['western','west-mushroom-pasta','奶油蘑菇意面','🍝',25,'pasta','蘑菇和淡奶油煮成香浓酱汁，裹住意大利面。',[['意大利面',100],['蘑菇',120],['淡奶油',50],['奶酪',15]]],
+      ['western','west-carbonara','培根蛋奶意面','🍝',25,'pasta','培根煎香后与蛋奶酱拌入热意面，口感浓郁。',[['意大利面',100],['培根',45],['鸡蛋',50],['淡奶油',30],['奶酪',15]]],
+      ['western','west-caesar-salad','凯撒鸡肉沙拉','🥗',20,'cold','煎熟鸡胸肉切片，与生菜、面包丁和酱汁拌匀。',[['鸡胸肉',120],['罗马生菜',120],['面包',30],['奶酪',10]]],
+      ['western','west-fish-chips','西式炸鱼薯条','🍟',35,'deepfry','鳕鱼裹薄面衣炸脆，搭配薯条和柠檬角。',[['鳕鱼',180],['土豆',180],['面粉',30],['鸡蛋',25],['面包糠',25]]],
+      ['western','west-chicken-pizza','鸡肉蘑菇披萨','🍕',30,'bake','披萨底铺番茄、鸡肉、蘑菇和奶酪，烤至饼边上色。',[['披萨饼底',150],['鸡胸肉',70],['蘑菇',50],['番茄',50],['奶酪',45]]],
+      ['western','west-shepherd-pie','西式牛肉土豆派','🥧',55,'bake','牛肉蔬菜馅铺上土豆泥和奶酪，烤至表面金黄。',[['牛绞肉',120],['土豆',180],['胡萝卜',50],['洋葱',40],['奶酪',25]]],
+      ['western','west-roast-chicken','香草烤鸡腿配蔬菜','🍗',50,'bake','鸡腿与土豆、胡萝卜一起烤制，外皮焦香、内部熟透。',[['鸡腿',220],['土豆',100],['胡萝卜',60],['西兰花',60]]],
+      ['western','west-salmon-asparagus','香煎三文鱼配芦笋','🐟',20,'grill','三文鱼煎至两面金黄，芦笋快速煎熟后挤柠檬汁。',[['三文鱼',160],['芦笋',120],['柠檬',15]]],
+      ['western','west-pumpkin-soup','奶油南瓜汤','🥣',30,'soup','南瓜煮软后与牛奶、淡奶油打成细滑浓汤。',[['南瓜',220],['牛奶',100],['淡奶油',30],['洋葱',30]]],
+      ['western','west-tuna-melt','金枪鱼芝士三明治','🥪',15,'griddle','金枪鱼和奶酪夹入面包，煎至两面酥脆、奶酪融化。',[['面包',80],['金枪鱼罐头',60],['奶酪',30],['番茄',30]]],
+      ['western','west-shrimp-mac','虾仁芝士通心粉','🧀',30,'pasta','通心粉煮熟后拌入奶酪白酱和虾仁，热透即可。',[['通心粉',100],['虾仁',80],['淡奶油',40],['奶酪',35]]],
+      ['western','west-roasted-vegetables','西式烤蔬菜拼盘','🥗',35,'bake','多种时蔬拌油和香料，烤至边缘微焦、中心软熟。',[['西葫芦',100],['茄子',100],['红椒',70],['洋葱',50]]],
+      ['western','west-meatball-spaghetti','意式肉丸番茄意面','🍝',35,'pasta','牛肉丸煎上色后与番茄酱汁炖煮，拌入意大利面。',[['牛绞肉',100],['意大利面',90],['番茄',130],['洋葱',30],['鸡蛋',20]]],
+
+      ['french','fr-onion-soup','法式洋葱汤','🥣',55,'soup','洋葱慢炒至焦糖色，加汤炖煮后放面包片和奶酪烤融。',[['洋葱',220],['面包',35],['奶酪',25]]],
+      ['french','fr-bourguignon','勃艮第红酒炖牛肉','🍲',120,'braise','牛肉与胡萝卜、蘑菇先煎香，再用红酒小火慢炖至软嫩。',[['牛腩',180],['胡萝卜',70],['蘑菇',70],['洋葱',50]]],
+      ['french','fr-ratatouille','普罗旺斯炖菜','🍆',40,'braise','番茄、茄子、西葫芦和甜椒分层慢炖，蔬菜软而不散。',[['番茄',120],['茄子',100],['西葫芦',100],['红椒',50],['洋葱',30]]],
+      ['french','fr-quiche-lorraine','法式洛林咸派','🥧',55,'bake','培根和洋葱铺入面饼，倒入蛋奶液烤至中心凝固。',[['培根',50],['鸡蛋',80],['淡奶油',50],['洋葱',30],['面粉',60]]],
+      ['french','fr-mushroom-soup','法式奶油蘑菇汤','🍄',30,'soup','蘑菇与洋葱炒香后煮软，加入奶油打成细滑汤羹。',[['蘑菇',150],['洋葱',30],['牛奶',100],['淡奶油',35]]],
+      ['french','fr-meuniere','柠檬黄油煎鳕鱼','🐟',20,'grill','鳕鱼裹薄粉煎至金黄，淋上融化黄油和柠檬汁。',[['鳕鱼',180],['面粉',15],['柠檬',20],['芦笋',80]]],
+      ['french','fr-mustard-chicken','法式芥末奶油鸡','🍗',35,'braise','鸡胸肉煎上色后与蘑菇、淡奶油和芥末酱焖熟。',[['鸡胸肉',180],['蘑菇',80],['淡奶油',45],['洋葱',30]]],
+      ['french','fr-gratin-dauphinois','法式奶油焗土豆','🥔',55,'bake','薄土豆片层叠摆入奶油和奶酪，烤至表面金黄、中心软熟。',[['土豆',220],['淡奶油',60],['奶酪',30]]],
+      ['french','fr-crepes','法式可丽饼','🥞',25,'griddle','面粉、牛奶和鸡蛋调成稀面糊，薄摊煎熟后配草莓。',[['面粉',55],['牛奶',80],['鸡蛋',40],['草莓',60],['黄油',8]]],
+      ['french','fr-nicoise','法式尼斯沙拉','🥗',25,'cold','生菜、番茄、鸡蛋、土豆和金枪鱼组合，淋柠檬油醋汁。',[['罗马生菜',80],['番茄',70],['鸡蛋',50],['土豆',70],['金枪鱼罐头',50]]],
+      ['french','fr-orange-duck','橙香鸭胸','🦆',30,'grill','鸭胸皮面煎出油脂后煎熟，配橙汁收成清亮酱汁。',[['鸭胸肉',180],['橙子',80],['胡萝卜',60]]],
+      ['french','fr-salmon-papillote','法式纸包三文鱼','🐟',30,'bake','三文鱼与芦笋、柠檬包入烘焙纸，烤至鱼肉刚熟。',[['三文鱼',160],['芦笋',80],['柠檬',15],['洋葱',20]]],
+      ['french','fr-lentil-salad','法式温扁豆沙拉','🥗',35,'cold','红扁豆煮至软而完整，趁温热与洋葱、胡萝卜油醋汁拌匀。',[['红扁豆',100],['胡萝卜',50],['洋葱',30]]],
+      ['french','fr-herb-chicken','法式香草烤鸡腿','🍗',50,'bake','鸡腿抹香草和黄油，与土豆、胡萝卜一起烤熟。',[['鸡腿',220],['土豆',100],['胡萝卜',60],['黄油',8]]],
+      ['french','fr-apple-tart','法式苹果挞','🍎',50,'bake','苹果片铺在薄挞皮上，刷黄油后烤至边缘酥脆。',[['苹果',140],['面粉',55],['黄油',18],['鸡蛋',20]]],
+
+      ['turkish','tr-menemen','土耳其番茄炒蛋','🍳',18,'meatstir','番茄和青椒炒软出汁，再倒入鸡蛋炒至嫩凝固。',[['番茄',150],['青椒',60],['鸡蛋',100],['洋葱',30]]],
+      ['turkish','tr-adana-kebab','土耳其阿达纳羊肉烤串','🍢',30,'grill','羊肉末与香料拌匀串烤，搭配烤甜椒和洋葱。',[['羊腿肉',180],['红椒',60],['洋葱',50]]],
+      ['turkish','tr-kofte','土耳其香料牛肉丸','🍖',35,'bake','牛肉末、洋葱和面包糠搓成肉丸，烤至熟透多汁。',[['牛绞肉',150],['洋葱',30],['面包糠',20],['鸡蛋',25]]],
+      ['turkish','tr-iskender','土耳其伊斯肯德烤肉','🥙',25,'grill','薄切牛肉煎香铺在面包上，配番茄酱汁和酸奶。',[['牛肉片',140],['面包',60],['番茄',70],['酸奶',40]]],
+      ['turkish','tr-imam-bayildi','土耳其橄榄油焖茄子','🍆',50,'braise','茄子填入洋葱番茄馅，以橄榄油焖至软嫩。',[['茄子',180],['番茄',80],['洋葱',50],['蒜头',8]]],
+      ['turkish','tr-lentil-soup','土耳其红扁豆汤','🥣',35,'soup','红扁豆与胡萝卜、洋葱煮软打碎，撒孜然和红椒粉。',[['红扁豆',100],['胡萝卜',40],['洋葱',40]]],
+      ['turkish','tr-chicken-shish','土耳其鸡肉烤串','🍢',30,'grill','鸡肉、彩椒和洋葱串起腌香后烤熟，表面微焦即可。',[['鸡胸肉',180],['彩椒',80],['洋葱',50]]],
+      ['turkish','tr-pide','土耳其牛肉奶酪船形饼','🫓',45,'bake','面团拉成长船形，铺牛肉末和奶酪烤至饼边金黄。',[['面粉',90],['牛绞肉',70],['奶酪',35],['洋葱',25]]],
+      ['turkish','tr-stuffed-peppers','土耳其肉馅彩椒','🫑',50,'bake','彩椒填入牛肉、米饭和番茄馅，烤至椒肉软熟。',[['红椒',160],['牛绞肉',80],['大米',45],['番茄',50]]],
+      ['turkish','tr-cacik','土耳其酸奶黄瓜','🥒',10,'cold','黄瓜切丁与酸奶、蒜和薄荷拌匀，冰凉上桌。',[['黄瓜',120],['酸奶',100],['蒜头',4]]],
+      ['turkish','tr-eggplant-yogurt','土耳其酸奶茄子','🍆',25,'cold','茄子烤软后放凉，拌入蒜香酸奶和少量橄榄油。',[['茄子',160],['酸奶',80],['蒜头',5]]],
+      ['turkish','tr-bulgur-pilaf','土耳其番茄粗麦饭','🍚',30,'rice','粗麦粉与洋葱、番茄炒香后加水焖熟，颗粒松散。',[['粗麦粉',100],['番茄',70],['洋葱',30]]],
+      ['turkish','tr-rice-pilaf','土耳其黄油米饭','🍚',25,'rice','大米以黄油炒香后焖熟，静置片刻再翻松。',[['大米',100],['黄油',8],['细面条',20]]],
+      ['turkish','tr-baked-seabass','土耳其香料烤鲈鱼','🐟',35,'bake','鲈鱼与土豆、番茄和洋葱同烤，撒孜然、红椒粉和柠檬。',[['鲈鱼',220],['土豆',100],['番茄',60],['洋葱',30]]],
+      ['turkish','tr-spinach-borek','土耳其菠菜奶酪酥饼','🥧',40,'bake','菠菜和奶酪包入薄面皮，刷蛋液烤至酥脆金黄。',[['菠菜',100],['奶酪',45],['面粉',60],['鸡蛋',25]]]
+    ];
+    const seasoningKcal={食用油:884,盐:0,黑胡椒:251,白胡椒:296,生抽:53,老抽:54,蚝油:51,料酒:43,白糖:400,香油:884,米醋:31,辣椒油:900,玉米淀粉:381,姜:80,蒜:149,葱:32,豆瓣酱:90,芝麻酱:630,柠檬汁:22,蜂蜜:304,韩式辣酱:230,橄榄油:884,百里香:101,孜然粉:375,红椒粉:282,照烧汁:110,日式咖喱块:510,味噌:192,红酒:83,芥末酱:66,橙汁:45,火锅底料:500};
+    const seasoningTeaspoonGrams={食用油:4.5,盐:5,黑胡椒:2,白胡椒:2,生抽:5,老抽:5,蚝油:5,料酒:5,白糖:4,香油:4.5,米醋:5,辣椒油:4.5,玉米淀粉:3,姜:4,蒜:3,葱:3,豆瓣酱:6,芝麻酱:5,柠檬汁:5,蜂蜜:7,韩式辣酱:6,橄榄油:4.5,百里香:1,孜然粉:2,红椒粉:2,照烧汁:5,日式咖喱块:10,味噌:6,红酒:5,芥末酱:5,橙汁:5,火锅底料:5};
+    const recipeSeasonings={
+      'chicken-broccoli':[['食用油',5],['盐',2],['黑胡椒',0.5],['生抽',5]],
+      'tomato-egg':[['食用油',8],['盐',2],['白糖',3]],
+      'tofu-soup':[['食用油',3],['盐',2],['白胡椒',0.5],['香油',2]],
+      'corn-soup':[['姜',5],['料酒',5],['盐',2]],
+      'mushroom-spinach':[['食用油',5],['盐',2],['生抽',5]],
+      'beef-tomato-stew':[['食用油',8],['姜',8],['生抽',10],['盐',3],['白糖',3]],
+      'beef-enoki-hotpot':[['生抽',10],['米醋',5],['香油',3],['盐',2]],
+      'tomato-beef-hotpot':[['食用油',5],['盐',2]],
+      'mushroom-chicken-hotpot':[['姜',6],['料酒',8],['盐',2]],
+      'sauerkraut-pork-hotpot':[['姜',6],['料酒',8],['盐',1]],
+      'spicy-tripe-hotpot':[['火锅底料',20]],
+      'chaoshan-beef-hotpot':[['姜',6],['盐',2]],
+      'lamb-radish-soup':[['姜',8],['料酒',8],['盐',2],['白胡椒',0.5]],
+      'mushroom-chicken':[['食用油',8],['生抽',10],['蚝油',5],['料酒',8],['玉米淀粉',4]],
+      'pork-cabbage-tofu':[['食用油',8],['姜',5],['生抽',10],['盐',3]],
+      'pepper-beef':[['食用油',8],['生抽',10],['蚝油',5],['玉米淀粉',4],['黑胡椒',0.5]],
+      'garlic-broccoli-mushroom':[['食用油',5],['盐',2]],
+      'pork-rib-potato-soup':[['姜',8],['料酒',10],['盐',3]],
+      'eggplant-pork':[['食用油',10],['生抽',8],['蚝油',5],['白糖',2]],
+      'mushroom-egg':[['食用油',6],['盐',2],['生抽',5]],
+      'fruit-bowl':[['柠檬汁',5],['蜂蜜',5]],
+      'fish-fragrant-pork':[['食用油',8],['豆瓣酱',8],['生抽',8],['米醋',8],['白糖',6],['玉米淀粉',5]],
+      'mapo-tofu':[['食用油',8],['豆瓣酱',12],['生抽',8],['辣椒油',3]],
+      'twice-cooked-pork':[['食用油',5],['豆瓣酱',10],['生抽',5]],
+      'mushu-pork':[['食用油',8],['生抽',8],['盐',2]],
+      'sweet-sour-pork':[['食用油',12],['米醋',12],['白糖',12],['玉米淀粉',10],['生抽',5]],
+      'scallion-tofu':[['食用油',8],['生抽',10],['蚝油',5]],
+      'cantonese-choy-sum':[['食用油',5],['生抽',10]],
+      'cantonese-soy-chicken':[['食用油',3],['生抽',20],['老抽',8],['料酒',8],['白糖',5],['姜',8],['葱',10]],
+      'cantonese-steamed-ribs':[['生抽',8],['料酒',5],['玉米淀粉',5]],
+      'garlic-water-spinach':[['食用油',5],['盐',2]],
+      'shiitake-bokchoy':[['食用油',5],['蚝油',5],['盐',1]],
+      'celery-beef':[['食用油',8],['生抽',8],['玉米淀粉',5]],
+      'garlic-chicken-wings':[['食用油',5],['生抽',10],['蜂蜜',8],['黑胡椒',1]]
+    };
+    const recipeMethods={
+      'chicken-broccoli':['鸡胸肉擦干后切成约 1 厘米厚片，加入生抽 5 克、盐 1 克和黑胡椒 0.5 克，抓匀腌 10 分钟。','西兰花掰成小朵，沸水中焯 1–2 分钟，捞出沥干。','平底锅加食用油 5 克，中火将鸡胸肉每面煎约 3 分钟，中心熟透后盛出。','用锅中余油翻炒西兰花约 2 分钟，补剩余盐，和鸡胸肉一起装盘。'],
+      'tomato-egg':['番茄切块，鸡蛋打散；准备食用油 8 克、盐 2 克和白糖 3 克。','锅烧热后倒入约一半食用油，炒熟鸡蛋至蓬松，盛出备用。','加入剩余食用油和番茄，中火翻炒 3–4 分钟至出汁，可加少量清水。','倒回鸡蛋，加盐和白糖翻炒约 1 分钟，尝味后出锅。'],
+      'tofu-soup':['番茄切块，豆腐切约 2 厘米小块，菠菜洗净切段。','锅中加食用油 3 克炒软番茄约 3 分钟，加入约 600 毫升清水煮开。','放入豆腐小火煮 5 分钟，再放菠菜煮 1 分钟。','加盐 2 克、白胡椒 0.5 克；关火后淋香油 2 克。'],
+      'corn-soup':['鸡胸肉切块，玉米切段，胡萝卜切滚刀块；鸡肉冷水下锅焯至变色后捞出。','锅中放鸡肉、玉米、胡萝卜、姜 5 克和约 1 升清水，加入料酒 5 克。','水开后撇去浮沫，转小火加盖炖 30–35 分钟。','出锅前加盐 2 克调味；若用带骨鸡肉，炖煮时间延长至约 45 分钟。'],
+      'mushroom-spinach':['蘑菇切片，菠菜洗净切段，鸡蛋加少量清水打散。','锅中加入食用油 5 克，蛋液炒至刚凝固后盛出。','用锅中余油炒蘑菇 3 分钟至出水变软，加入菠菜翻炒约 1 分钟。','倒回鸡蛋，加生抽 5 克和盐 2 克翻匀，菠菜变软即可关火。'],
+      'beef-tomato-stew':['牛腩切块冷水下锅，煮沸 2 分钟后捞出冲净；番茄切块，土豆切滚刀块。','锅中加食用油 8 克，放姜 8 克和牛腩翻炒 2 分钟，加入生抽 10 克。','加约 800 毫升热水，小火加盖炖 45 分钟；再放番茄和土豆继续炖 20–25 分钟。','牛腩软烂、土豆熟透后加入盐 3 克和白糖 3 克调味。'],
+      'beef-enoki-hotpot':['娃娃菜切块，金针菇去根洗净；肥牛卷提前解冻并分散。','锅中加入约 700 毫升清水或无盐高汤，烧开后下娃娃菜煮 3 分钟。','放入金针菇煮 2 分钟，再分批下肥牛卷，煮至变色熟透约 1–2 分钟。','蘸料用生抽 10 克、米醋 5 克、香油 3 克和盐 2 克调匀；想清淡可不蘸完。'],
+      'tomato-beef-hotpot':['番茄切块，金针菇去根，娃娃菜切段；准备食用油 5 克和盐 2 克。','锅中加食用油炒软番茄约 3 分钟，加入约 600 毫升清水，煮沸后用勺压出番茄汁。','先放娃娃菜煮 3 分钟，再放金针菇煮 2 分钟；肥牛卷分批下锅。','肥牛卷煮至完全熟透后加盐调味。番茄本身偏酸时可少量加糖，但额外糖未计入热量。'],
+      'mushroom-chicken-hotpot':['鸡腿肉切薄片，香菇切片，金针菇去根，娃娃菜切段；姜切片。','锅中加约 800 毫升清水、姜 6 克和料酒 8 克煮开。','放入香菇和娃娃菜煮 5 分钟，加入鸡腿肉片，分散煮至完全熟透。','最后放金针菇煮 2–3 分钟，加盐 2 克调味。'],
+      'sauerkraut-pork-hotpot':['酸菜冲洗后挤干切丝；豆腐切块，五花肉片解冻分开。','锅中加入约 700 毫升清水、姜 6 克和料酒 8 克，放入酸菜小火煮 10 分钟。','放入五花肉片煮至完全熟透，再加入豆腐和白菜煮 5 分钟。','酸菜自带咸味，先尝汤再决定是否加入盐 1 克。'],
+      'spicy-tripe-hotpot':['毛肚洗净切片，娃娃菜切段，嫩豆腐切块；准备火锅底料 20 克。','锅中加入约 700 毫升清水和火锅底料，煮沸并搅匀。','先下娃娃菜和豆腐煮熟，再放肥牛卷煮至完全熟透。','最后放毛肚烫至熟透即可；避免久煮，口感会变韧。底料品牌不同，热量和咸度会有差异。'],
+      'chaoshan-beef-hotpot':['白萝卜切片、玉米切段，牛肉片提前解冻；准备姜 6 克和盐 2 克。','锅中加约 900 毫升清水和姜片，放入萝卜、玉米煮至熟软。','转中火，将牛上脑分批放入汤中煮至完全熟透。','加盐调味并撒香菜；沙茶酱或普宁豆酱可另作蘸料，未计入本次热量。'],
+      'lamb-radish-soup':['白萝卜切片，姜切片，香菜切段；羊肉卷分开备用。','锅中加约 800 毫升水、姜 8 克和料酒 8 克，放白萝卜煮 10–12 分钟。','转中火放入羊肉卷，撇去浮沫，煮至肉片完全变色熟透。','加盐 2 克和白胡椒 0.5 克，关火后撒香菜。'],
+      'mushroom-chicken':['鸡腿肉切块，香菇切片，胡萝卜切薄片；玉米淀粉 4 克加少量水调开。','鸡肉加生抽 10 克、料酒 8 克和淀粉水抓匀，腌 10 分钟。','锅中加食用油 8 克，中火把鸡肉煎至表面金黄，再加入香菇和胡萝卜翻炒 2 分钟。','加约 100 毫升水和蚝油 5 克，盖锅焖 8–10 分钟至鸡肉熟透、汤汁收浓。'],
+      'pork-cabbage-tofu':['猪肉片切成适口大小，白菜切块，豆腐切厚片，姜切丝。','锅中加食用油 8 克和姜 5 克炒香，放入猪肉片炒至完全变色。','加入白菜和生抽 10 克翻炒，加约 300 毫升水；放入豆腐后小火炖 12–15 分钟。','白菜变软后加盐 3 克调味，轻轻翻动避免豆腐碎裂。'],
+      'pepper-beef':['牛肉片加入生抽 10 克、玉米淀粉 4 克和黑胡椒 0.5 克抓匀，腌 10 分钟；彩椒、洋葱切条。','锅烧热加入食用油 8 克，大火快速滑炒牛肉约 1 分钟，刚变色即盛出。','用锅中余油炒洋葱和彩椒 2–3 分钟，保持蔬菜爽脆。','倒回牛肉，加蚝油 5 克，大火翻匀约 30 秒后关火。'],
+      'garlic-broccoli-mushroom':['西兰花掰小朵焯水 1 分钟后沥干，蘑菇切片，蒜头切末。','锅中加入食用油 5 克，中火炒香蒜末约 20 秒，避免焦糊。','加入蘑菇翻炒 3 分钟至变软，再加入西兰花大火翻炒 2 分钟。','加盐 2 克调味，可加 1–2 汤匙焯菜水帮助挂味，炒匀出锅。'],
+      'pork-rib-potato-soup':['排骨冷水下锅煮沸 2 分钟，捞出洗净浮沫；土豆和胡萝卜切块。','排骨、姜 8 克、料酒 10 克和约 1.2 升清水入锅，煮开后撇沫。','转小火加盖炖 45 分钟，加入土豆和胡萝卜再炖 20 分钟。','确认排骨和蔬菜熟软后加盐 3 克；可撇去表面浮油再喝汤。'],
+      'eggplant-pork':['猪肉片加生抽 8 克抓匀，茄子切条、青椒切片。','锅中加入食用油 10 克，先把茄子中火煸至变软并盛出。','用锅中余油炒猪肉片至完全变色，加入青椒翻炒 1 分钟。','倒回茄子，加蚝油 5 克和白糖 2 克翻炒 1–2 分钟；若偏干可加少量水。'],
+      'mushroom-egg':['鸡蛋打散，香菇和平菇切片；准备食用油 6 克、生抽 5 克和盐 2 克。','锅中加一半食用油，蛋液炒至八成熟后盛出。','加入剩余食用油炒香菌菇 3–4 分钟，炒至出水后收干一些。','倒回鸡蛋，加生抽和盐翻匀约 1 分钟，确保鸡蛋完全熟透。'],
+      'fruit-bowl':['苹果、香蕉和葡萄洗净；苹果去核切块，香蕉切片，葡萄去梗。','柠檬汁 5 克与蜂蜜 5 克加 1 茶匙温水调匀，做成轻薄果汁酱。','水果装盘后淋上果汁酱，拌匀即可；想控制糖分可省略蜂蜜。','水果品种可按库存替换；替换后热量会按当前菜谱用料估算。'],
+      'fish-fragrant-pork':['里脊切细丝，加入玉米淀粉 5 克和生抽 3 克抓匀；木耳泡发，竹笋、青椒切丝。','用米醋 8 克、白糖 6 克、生抽 5 克和少量清水调成碗汁。','锅中加食用油 8 克，先滑炒肉丝至变色盛出；锅中炒香豆瓣酱 8 克。','加入木耳、竹笋和青椒炒熟，倒回肉丝，淋入碗汁大火翻匀收汁。'],
+      'mapo-tofu':['豆腐切约 2 厘米块，蒜切末；猪绞肉准备好。','锅中加食用油 8 克炒熟肉末，加入豆瓣酱 12 克和蒜末炒香。','加约 180 毫升水、生抽 8 克和辣椒油 3 克，放入豆腐小火煮 5 分钟。','轻轻翻动避免豆腐碎裂，汤汁收至合适浓度后关火。'],
+      'twice-cooked-pork':['五花肉整块冷水下锅，煮约 20 分钟至熟透，放凉后切薄片。','青椒切片、蒜切片；锅中不放油，放肉片煸出部分油脂。','加入豆瓣酱 10 克炒出红油，放蒜片和青椒翻炒。','加生抽 5 克调味，青椒断生即可出锅。'],
+      'mushu-pork':['木耳泡发，黄瓜切片，里脊切片并用少许淀粉抓匀，鸡蛋打散。','锅中加食用油 8 克炒鸡蛋至凝固，盛出备用。','滑炒里脊至变色，加入木耳和黄瓜炒熟。','倒回鸡蛋，加生抽 8 克和盐 2 克翻匀即可。'],
+      'sweet-sour-pork':['里脊切条，加入蛋液和玉米淀粉 10 克抓匀；用生抽 5 克简单调味。','锅中放食用油 12 克，中火分批煎炸肉条至金黄熟透，捞出沥油。','另锅加米醋 12 克、白糖 12 克和少量水，小火煮至糖溶化。','汁液微稠时放入肉条和青椒，快速翻匀裹汁后出锅。'],
+      'scallion-tofu':['豆腐切厚片，大葱切段；锅中加食用油 8 克。','豆腐两面煎至金黄，取出备用；用锅中余油把大葱煸香。','加生抽 10 克、蚝油 5 克和约 100 毫升水煮开。','放回豆腐，小火烧 5 分钟，中途翻面一次，汤汁略收后装盘。'],
+      'cantonese-choy-sum':['菜心洗净，蒜头切末；锅中烧足量水至沸腾。','加入菜心焯 1–2 分钟，梗部熟而仍爽脆时捞出沥水。','菜心淋生抽 10 克，顶部放蒜末。','另锅将食用油 5 克烧热后淋在蒜末上，趁热上桌。'],
+      'cantonese-soy-chicken':['鸡腿擦干，香菇泡发，香葱打结，姜切片。','锅中加食用油 3 克，将鸡腿表面煎至微黄。','加生抽 20 克、老抽 8 克、料酒 8 克、白糖 5 克、姜 8 克、葱 10 克和约 250 毫升水。','小火加盖焖 25–30 分钟，中途翻面并加入香菇；确认熟透后开盖收汁切块。'],
+      'cantonese-steamed-ribs':['排骨冲洗沥干，蒜头切末；加入生抽 8 克、料酒 5 克和玉米淀粉 5 克抓匀腌 15 分钟。','蒸锅加水烧开，把排骨平铺在浅盘中，避免堆叠过厚。','水开后大火蒸 25–30 分钟，视排骨块大小延长时间。','确认排骨熟透后撒葱花即可食用。'],
+      'garlic-water-spinach':['空心菜洗净切段，蒜头拍碎切末。','锅烧热后加入食用油 5 克，放蒜末炒香但不要炒焦。','先放菜梗翻炒约 30 秒，再放菜叶大火翻炒。','菜叶变软后加盐 2 克，快速翻匀出锅。'],
+      'shiitake-bokchoy':['香菇切片，小白菜洗净切段，蒜头切末。','锅中加食用油 5 克炒香蒜末和香菇，炒至香菇变软。','先放小白菜梗翻炒，再加入菜叶炒至断生。','加蚝油 5 克和盐 1 克调味，翻匀后立即出锅。'],
+      'celery-beef':['牛肉片加入生抽 8 克和玉米淀粉 5 克抓匀腌 10 分钟；芹菜切段，红椒切丝。','锅烧热加食用油 8 克，快速滑炒牛肉至七成熟后盛出。','用锅中余油炒芹菜和红椒 2–3 分钟，保留爽脆口感。','倒回牛肉大火翻炒至熟透，尝味后出锅。'],
+      'garlic-chicken-wings':['鸡翅擦干，两面划两刀；蒜头切末。','锅中加食用油 5 克，将鸡翅两面煎至金黄。','加入蒜末、生抽 10 克、蜂蜜 8 克、黑胡椒 1 克和少量水。','加盖小火焖 12–15 分钟，中途翻面；确认鸡翅熟透后开盖收汁。']
+    };
+    const regionalNames={sichuan:'川菜',shandong:'鲁菜',cantonese:'粤菜',northeast:'东北菜',shanghai:'上海菜',korean:'韩国料理',japanese:'日本菜',western:'西餐',french:'法餐',turkish:'土耳其菜'};
+    const regionalStyleNames={meatstir:'炒菜·肉菜',vegstir:'炒菜·素菜',braise:'炖烧',soup:'汤菜',steam:'蒸菜',rice:'主食',cold:'凉菜',grill:'煎烤',deepfry:'炸物',bake:'烤箱菜',pasta:'意面',griddle:'煎制'};
+    const regionalSeasonings={meatstir:[['食用油',8],['生抽',8],['玉米淀粉',4],['盐',1]],vegstir:[['食用油',6],['生抽',5],['盐',2]],braise:[['食用油',6],['生抽',10],['老抽',4],['白糖',4],['姜',5]],soup:[['姜',6],['料酒',6],['盐',2]],steam:[['生抽',8],['姜',5],['葱',5]],rice:[['食用油',6],['生抽',6],['盐',1]],cold:[['生抽',8],['米醋',8],['香油',5],['白糖',3]],grill:[['食用油',5],['盐',2],['黑胡椒',1],['柠檬汁',5]],deepfry:[['食用油',12],['盐',2],['黑胡椒',1]],bake:[['食用油',5],['盐',2],['黑胡椒',1]],pasta:[['橄榄油',6],['盐',2],['黑胡椒',1]],griddle:[['食用油',6],['盐',2],['生抽',5]]};
+    const regionalFlavorSeasonings={japanese:[['生抽',5],['料酒',5]],western:[['橄榄油',5],['黑胡椒',1]],french:[['黄油',5],['百里香',1]],turkish:[['橄榄油',5],['孜然粉',2],['红椒粉',2]]};
+    const regionalSpecialSeasonings={'jp-teriyaki-chicken':[['照烧汁',15]],'jp-curry-chicken':[['日式咖喱块',20]],'jp-miso-salmon-soup':[['味噌',12]],'fr-bourguignon':[['红酒',35]],'fr-mustard-chicken':[['芥末酱',8]],'fr-orange-duck':[['橙汁',10]]};
+    const regionalMethod=(item,seasonings)=>{const names=item[7].map(([name])=>name),seasoningText=seasonings.map(([name,grams])=>`${name} ${grams} 克`).join('、'),prep=`将${names.join('、')}洗净并按菜式切配；肉类切片或切块，叶菜沥干。`;if(item[5]==='meatstir')return [prep,'肉类用少量生抽和玉米淀粉抓匀腌 10 分钟；热锅加油，先把肉炒至变色盛出。','用锅中余油炒香蔬菜，按耐熟程度依次下锅。',`倒回主料，加入${seasoningText}调味；肉类彻底熟透后翻匀出锅。`];if(item[5]==='vegstir')return [prep,'锅中加少量清水，先将耐炒食材焯至半熟后沥干。','热锅加油，炒香配菜并保持大火翻炒。',`加入${seasoningText}调味，食材熟透后出锅。`];if(item[5]==='braise')return [prep,'锅中加少量油，将主料表面煎香；再加入配菜翻炒片刻。',`加入${seasoningText}和约 400 毫升热水煮开，转小火加盖慢炖。`,'按食材耐煮程度调整时间，确认肉类熟透、汤汁浓度合适后出锅。'];if(item[5]==='soup')return [prep,'肉类先焯水去浮沫；蔬菜切成适口大小。',`主料加约 800 毫升清水和${seasoningText}煮沸，转小火炖至主料熟软。`,'加入易熟配料再煮数分钟，确认肉类熟透后调味盛出。'];if(item[5]==='steam')return [prep,`主料放入蒸盘，加入${seasoningText}拌匀或淋在表面，腌 10 分钟。`,'蒸锅水烧开后放入蒸盘，盖盖以中大火蒸 12–25 分钟，时间按厚度调整。','确认肉类或鱼肉中心熟透，出锅后拌匀盘中汤汁。'];if(item[5]==='rice')return [prep,'大米或米饭按菜式准备；蔬菜切丁，肉类切小块并先炒熟。','热锅加入少量油，炒香配菜；加入米饭或主食及适量水。',`加入${seasoningText}调味，按主食类型焖煮或翻炒至熟透。`];if(item[5]==='cold')return [prep,'需要熟制的食材分别煮熟或焯水，捞出沥干并放凉。',`将${seasoningText}调匀成凉拌汁，按口味调整咸酸度。`,'淋在食材上拌匀，冷藏片刻后食用。'];if(item[5]==='grill')return [prep,`主料用${seasoningText}腌 10–15 分钟；平底锅或烤盘预热。`,'刷薄油后以中火煎烤，翻面至两面上色；蔬菜可同时煎熟。','肉类中心确认熟透后出锅，静置 2 分钟再切。'];if(item[5]==='deepfry')return [prep,`按菜式将主料裹粉、蛋液或面包糠；油温加热至约 170°C。`,'分批下锅炸至金黄熟透，避免一次放入过多导致油温下降。',`捞出沥油，撒上${seasoningText}调味后趁热食用。`];if(item[5]==='bake')return [prep,'烤箱预热至 190°C；将主料按菜式铺入烤盘，表面刷少量油。',`撒上${seasoningText}，烘烤至表面上色；时间按食材厚度调整。`,'确认肉类中心熟透或蔬菜软熟后取出，稍微放凉再上桌。'];if(item[5]==='pasta')return [prep,'意面或通心粉放入沸水，加少许盐煮至有嚼劲，留少量煮面水。','另起锅加入油和配料，炒熟肉类或蔬菜后加入奶油、番茄或奶酪酱。',`放入沥好的面和${seasoningText}，加少量煮面水翻匀；肉类确认熟透后出锅。`];if(item[5]==='griddle')return [prep,'按菜式将主料切碎或调成面糊；平底锅预热后刷薄油。','倒入面糊或铺上主料，中小火煎至底面定型并上色后翻面。',`加入${seasoningText}调味，继续煎至中心熟透即可。`];return [prep,'将食材切成适口大小并预热锅具。',`加入${seasoningText}，按菜式分批烹调并适时翻面。`,'确认所有食材熟透、调味均匀后盛出。']};
+    const regionalLightRecipeIds=new Set(['steamed-sea-bass','spinach-tofu-soup','shandong-salad','vinegar-cabbage','wood-ear-egg','northeast-cold-salad','jp-miso-salmon-soup','jp-salmon-grill','jp-chawanmushi','jp-hiyayakko','west-roasted-vegetables','west-pumpkin-soup','fr-ratatouille','fr-nicoise','fr-salmon-papillote','fr-lentil-salad','tr-menemen','tr-lentil-soup','tr-cacik','tr-eggplant-yogurt','tr-baked-seabass']);
+    extraRegionalRecipes.forEach(item=>{const [region,id,name,emoji,time,style,description,ingredients]=item,seasonings=[...regionalSeasonings[style],...(region==='sichuan'?[['豆瓣酱',8],['辣椒油',3]]:region==='korean'?[['韩式辣酱',12],['香油',3]]:[]),...(regionalFlavorSeasonings[region]||[]),...(regionalSpecialSeasonings[id]||[])],tags=['regional',region],label=[regionalNames[region],regionalStyleNames[style]];if(style==='meatstir'){tags.push('stirfry','meat');label.push('肉菜')}if(style==='vegstir'){tags.push('stirfry','vegetarian');label.push('素菜');tags.push('light');label.push('减脂餐')}if(style==='soup'){tags.push('soup')}if(regionalLightRecipeIds.has(id)&&!tags.includes('light')){tags.push('light');label.push('减脂餐')}const steps=regionalMethod(item,seasonings);recipes.push({id,name,emoji,time,kcal:0,tags,label,description,ingredients,steps});recipeSeasonings[id]=seasonings;recipeMethods[id]=steps});
+    const uniqueRecipesByName=new Map();recipes.forEach(recipe=>{const key=recipe.name.normalize('NFKC').toLocaleLowerCase().replace(/[\s·\-—]/g,'');const existing=uniqueRecipesByName.get(key);if(!existing){uniqueRecipesByName.set(key,recipe);return}recipe.tags.forEach(tag=>{if(!existing.tags.includes(tag))existing.tags.push(tag)});recipe.label.forEach(label=>{if(!existing.label.includes(label))existing.label.push(label)});delete recipeSeasonings[recipe.id];delete recipeMethods[recipe.id]});recipes.splice(0,recipes.length,...uniqueRecipesByName.values());
+    const starter = [];
+    function expiryDateKey(item){const d=new Date(item.added);d.setHours(0,0,0,0);d.setDate(d.getDate()+Number(item.expiry));return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+    function supportsMilliliters(name){return foods.find(item=>item.name===name)?.category==='饮料'}
+    function updateCustomFoodUnitOptions(preferredUnit){const category=$('custom-food-category').value,select=$('custom-food-unit'),oldUnit=select.value,units=[['g','克'],['kg','千克'],...(category==='饮料'?[['ml','毫升']]:[])];select.innerHTML=units.map(([value,label])=>`<option value="${value}">${label}</option>`).join('');select.value=units.some(([value])=>value===preferredUnit)?preferredUnit:category==='饮料'?'ml':'g';if(oldUnit&&oldUnit!==select.value&&$('custom-food-calorie-basis')?.value==='package')$('custom-food-calorie-reference').value='';updateCustomFoodCalorieFields()}
+    function updateCustomFoodCalorieFields(){const basis=$('custom-food-calorie-basis').value,isPackage=basis==='package',unit=$('custom-food-unit').value,unitName={g:'克',kg:'千克',ml:'毫升'}[unit]||'克';$('custom-food-calorie-reference-field').hidden=!isPackage;$('custom-food-piece-grams-field').hidden=isPackage;if(isPackage)$('custom-food-piece-grams').value='';$('custom-food-kcal-label').textContent=isPackage?'热量（千卡/整份）':'热量（千卡/100克）';$('custom-food-kcal').max=isPackage?'100000':'900';$('custom-food-calorie-reference-label').textContent=`总热量对应净含量（${unitName}）`}
+    function foodCaloriesLabel(food){return food.calorieBasis==='package'?`${food.kcal} 千卡/${food.calorieReferenceAmount} ${({g:'克',kg:'千克',ml:'毫升'})[food.calorieReferenceUnit]||'克'}`:`${food.kcal} 千卡/100克`}
+    function foodKcalPer100g(food,name){if(food.calorieBasis!=='package')return Number(food.kcal)||0;const referenceGrams=(Number(food.calorieReferenceAmount)||0)*gramsPerUnit(food.calorieReferenceUnit||food.defaultUnit||'g',name);return referenceGrams>0?(Number(food.kcal)||0)*100/referenceGrams:0}
+    function mergeInventory(arr){const cleaned=[];(Array.isArray(arr)?arr:[]).forEach(item=>{const w=Number(item.weight);if(!(w>0.5))return;if(item.unit==='piece'&&foodPieceGrams[item.name]&&w<foodPieceGrams[item.name])return;cleaned.push({...item,unit:item.unit==='ml'&&!supportsMilliliters(item.name)?'g':item.unit})});const groups=new Map();cleaned.forEach(item=>{const key=`${item.name}|${expiryDateKey(item)}`;if(groups.has(key)){const g=groups.get(key);g.weight+=Number(item.weight);if(item.unit==='piece')g.unit='piece';else if(item.unit!=='ml'||g.unit!=='ml')g.unit='g'}else{groups.set(key,{...item,weight:Number(item.weight)})}});return [...groups.values()].sort((a,b)=>b.added-a.added)}
+    const readStore=()=>{try{const stored=JSON.parse(localStorage.getItem('fridge-foods-v2'))||starter;return mergeInventory(stored)}catch{return starter}};
+    let inventory=readStore(), activeFilters=new Set(['all']), selectedRecipeIds=new Set(),recipeShowAll=false;
+    const $=id=>document.getElementById(id);
+    const getFood=name=>foods.find(f=>f.name===name)||{name,emoji:'🥫',kcal:0,category:'其他',color:'#eff0e9'};
+    // Milliliters use an approximate 1 ml = 1 g conversion for shared inventory math.
+    function gramsPerUnit(unit,name){return unit==='kg'?1000:unit==='piece'?(foodPieceGrams[name]||1):1}
+    function updateFoodUnitOptions(preferredUnit){const name=$('food-select').value,unit=$('weight-unit'),units=[['g','克'],['kg','千克'],...(supportsMilliliters(name)?[['ml','毫升']]:[]),['piece','个']];unit.innerHTML=units.map(([value,label])=>`<option value="${value}" ${value==='piece'&&!foodPieceGrams[name]?'disabled':''}>${label}</option>`).join('');const next=preferredUnit&&units.some(([value])=>value===preferredUnit)&&!(preferredUnit==='piece'&&!foodPieceGrams[name])?preferredUnit:(foodPieceGrams[name]?'piece':'g');unit.value=next;unit.dataset.currentUnit=next;unit.setAttribute('aria-label',next==='piece'?'数量单位':next==='ml'?'容量单位':'重量单位');$('weight-label').textContent=next==='piece'?'食物数量':next==='ml'?'食物容量':'食物重量';$('weight').min=next==='kg'?'0.001':'1';$('weight').step=next==='kg'?'0.001':'1';$('weight').inputMode=next==='piece'?'numeric':'decimal'}
+    function inventoryQuantityHtml(item){const grams=Number(item.weight)||0,pieceGrams=foodPieceGrams[item.name];if(item.unit==='piece'&&pieceGrams)return `${Math.max(1,Math.round(grams/pieceGrams))}<small>个</small>`;if(item.unit==='ml')return `${Math.round(grams).toLocaleString()}<small>毫升</small>`;return `${Math.round(grams).toLocaleString()}<small>克</small>`}
+    function inventoryUsesPieces(name){const entries=inventory.filter(item=>item.name===name);return entries.length>0&&entries.every(item=>item.unit==='piece')}
+    function foodAmountText(name,grams,approximate=true){const pieceGrams=foodPieceGrams[name];if(!pieceGrams)return `${Math.round(grams)} 克`;if(inventoryUsesPieces(name)){if(grams<=0)return '0 个';const count=Math.max(1,Math.round(grams/pieceGrams));return `${approximate?'约 ':''}${count} 个`}const weight=`${Math.round(grams)} 克`;if(grams<=0)return weight;const count=Math.max(1,Math.round(grams/pieceGrams));return `${weight}（约 ${count} 个）`}
+    const save=()=>{inventory=mergeInventory(inventory);localStorage.setItem('fridge-foods-v2',JSON.stringify(inventory))};
+    function remainingDays(item){const addedDate=new Date(item.added);addedDate.setHours(0,0,0,0);const today=new Date();today.setHours(0,0,0,0);const elapsed=Math.floor((today-addedDate)/86400000);return Number(item.expiry)-elapsed}
+    function recipeIngredientKcal(recipe,mult=1){return recipe.ingredients.reduce((sum,[name,grams])=>sum+grams*foodKcalPer100g(getFood(name),name)/100,0)*mult}
+    function recipeSeasoningKcal(recipe,mult=1){return (recipeSeasonings[recipe.id]||[]).reduce((sum,[name,grams])=>sum+grams*(seasoningKcal[name]||0)/100,0)*mult}
+    function recipeTotalKcal(recipe,mult=1){return Math.round(recipeIngredientKcal(recipe,mult)+recipeSeasoningKcal(recipe,mult))}
+    function formatGrams(grams){return Number.isInteger(grams)?String(grams):String(Number(grams.toFixed(1)))}
+    function spoonText(name,grams){const spoonGrams=seasoningTeaspoonGrams[name];if(!spoonGrams)return '';const halves=Math.max(1,Math.round(grams/spoonGrams*2)),whole=Math.floor(halves/2),half=halves%2,numerals={1:'一',2:'两',3:'三',4:'四',5:'五'};let label;if(whole===0)label='半勺';else if(half)label=`${numerals[whole]||whole}勺半`;else label=`${numerals[whole]||whole}勺`;return `（约${label}）`}
+    function expiryText(item){const days=remainingDays(item);return days<0?`保质期已过 ${Math.abs(days)} 天`:days===0?'保质期今天到期':`保质期还有 ${days} 天`}
+    function addedDateText(item){const d=new Date(item.added);return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日加入冰箱 · ${expiryText(item)}`}
+    const totalWeight=()=>inventory.reduce((s,f)=>s+Number(f.weight),0);
+    function escapeHtml(value){return String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]))}
+    function renderFoodOptions(selectedName){const select=$('food-select'),selected=selectedName||select.value||foods[0].name,recentNames=[...new Set([...inventory].sort((a,b)=>b.added-a.added).map(item=>item.name))],recentFoods=recentNames.map(name=>foods.find(food=>food.name===name)).filter(Boolean),recentSet=new Set(recentFoods.map(food=>food.name)),ordered=[...recentFoods,...foods.filter(food=>!recentSet.has(food.name))];select.innerHTML=ordered.map(f=>`<option value="${escapeHtml(f.name)}">${f.emoji} ${escapeHtml(f.name)} · ${escapeHtml(f.category)} · ${foodCaloriesLabel(f)}</option>`).join('');if(ordered.some(f=>f.name===selected))select.value=selected}
+    function renderInventory(){
+      $('food-count').textContent=new Set(inventory.map(x=>x.name)).size;
+      $('inventory-total').textContent=`食材总重量 ${totalWeight().toLocaleString()} 克`;
+      $('inventory-caption').textContent=`共 ${inventory.length} 份食材`;
+      const sorted=[...inventory].sort((a,b)=>remainingDays(a)-remainingDays(b));
+      $('inventory-list').innerHTML=sorted.length?sorted.map(item=>{const f=getFood(item.name),days=remainingDays(item),expiredDays=Math.abs(days),expiryLabel=days<0?`已过期 ${expiredDays} 天`:days===0?'今天到期':`${days} 天后到期`,expiryClass=days<0?`inventory-expired-${Math.min(expiredDays,5)}`:days===0?'inventory-due-0':days===1?'inventory-due-1':days===2?'inventory-due-2':'';return `<div class="recent-shell" data-entry="${item.added}"><button class="share-item-action" data-share-entry="${item.added}" type="button" aria-label="共享${escapeHtml(item.name)}">共享</button><button class="delete-item" type="button" aria-label="删除${escapeHtml(item.name)}">删除</button><div class="food-row ${expiryClass}"><div class="food-emoji" style="background:${f.color}">${f.emoji}</div><div class="food-info"><div class="food-name">${escapeHtml(item.name)}</div><div class="food-meta">${escapeHtml(f.category)} · ${expiryLabel}</div></div><div class="food-qty">${inventoryQuantityHtml(item)}</div></div></div>`}).join(''):'<div class="empty">冰箱空空的，先添加几样食材吧 🥬</div>';
+      renderRecipes();
+    }
+    function renderRecent(){const latest=[...inventory].sort((a,b)=>remainingDays(a)-remainingDays(b)||b.added-a.added);$('recent-list').innerHTML=latest.length?latest.map(x=>`<div class="recent-shell" data-entry="${x.added}"><button class="share-item-action" data-share-entry="${x.added}" type="button" aria-label="共享${escapeHtml(x.name)}">共享</button><button class="delete-item" type="button" aria-label="删除${escapeHtml(x.name)}">删除</button><div class="food-row"><div class="food-emoji" style="background:${getFood(x.name).color}">${getFood(x.name).emoji}</div><div class="food-info"><div class="food-name">${escapeHtml(x.name)}</div><div class="food-meta">${escapeHtml(addedDateText(x))}</div></div><div class="food-qty">${inventoryQuantityHtml(x)}</div></div></div>`).join(''):'<div class="empty">添加后的食材会显示在这里</div>'}
+    function calculateKcal(){const name=$('food-select').value,food=getFood(name),unit=$('weight-unit').value,grams=(Number($('weight').value)||0)*gramsPerUnit(unit,name);$('calorie-total').textContent=Math.round(grams*foodKcalPer100g(food,name)/100).toLocaleString();$('calorie-hint').textContent=food.calorieBasis==='package'?`按整份/整包装热量和净含量比例估算。${unit==='ml'?'毫升按 1 毫升≈1 克估算；液体密度会影响实际热量。':''}`:unit==='piece'?`按每个约 ${foodPieceGrams[name]} 克估算重量和热量；实际大小会有差异。`:unit==='ml'?'毫升按 1 毫升≈1 克估算；不同液体密度会影响实际重量和热量。':'营养数据为常见食物的估算值，实际热量会因品种和处理方式略有差异。'}
+    function renderFoodSearch(query){const results=$('food-search-results'),q=query.trim().toLocaleLowerCase().replace(/\s+/g,'');if(!q){results.hidden=true;return}const matches=foods.filter(f=>foodSearchTerms(f).some(term=>term.toLocaleLowerCase().replace(/\s+/g,'').includes(q)));results.innerHTML=matches.length?matches.map(f=>`<button class="search-result" type="button" role="option" data-food="${escapeHtml(f.name)}">${f.emoji} ${escapeHtml(f.name)} · ${escapeHtml(f.category)} · ${foodCaloriesLabel(f)}</button>`).join(''):'<div class="search-empty">没有找到这个食物</div>';results.hidden=false}
+    function dateAfter(days){const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()+days);return d}
+    function dateValue(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+    function syncExpiryDisplay(){const days=Number($('expiry-slider').value),d=dateAfter(days);$('expiry-date').textContent=`${d.getMonth()+1}月${d.getDate()}日`;$('expiry-days').textContent=days===0?'今天':`${days} 天后`;return dateValue(d)}
+    function updateExpirySuggestion(){const guide=getShelfGuide($('food-select').value);$('expiry-slider').value=guide.days;$('expiry-hint').textContent=`建议期限：${guide.range}。${guide.note} 商品包装标示优先；可滑动调整日期。`;syncExpiryDisplay()}
+    const pastryRecipes=[
+      {id:'har-gow',name:'虾饺',emoji:'🥟',time:40,kcal:0,tags:['pastry','seafood'],label:['糕点','粤式点心'],description:'澄皮透亮、虾仁弹牙的广式早茶经典。',ingredients:[['虾仁',150],['面粉',100],['胡萝卜',30]],steps:['虾仁切丁、胡萝卜切末，加盐和少许淀粉拌匀成馅。','面粉用开水烫熟，揉成面团后擀成薄圆皮。','包入虾馅捏成饺子形，大火蒸 7 分钟。']},
+      {id:'siu-mai',name:'烧卖',emoji:'🥟',time:35,kcal:0,tags:['pastry','meat'],label:['糕点','粤式点心'],description:'肉馅鲜香、皮薄多汁的广式茶点。',ingredients:[['猪绞肉',120],['虾仁',60],['面粉',80],['蘑菇',30]],steps:['猪绞肉、虾仁和蘑菇末加盐、生抽拌匀上劲。','面粉加水和成较硬面团，擀成烧卖皮。','包入肉馅收口不封死，大火蒸 8 分钟。']},
+      {id:'cheung-fun',name:'肠粉',emoji:'🍜',time:30,kcal:0,tags:['pastry','light'],label:['糕点','粤式点心'],description:'滑嫩米香，配虾仁鸡蛋的经典肠粉。',ingredients:[['面粉',80],['鸡蛋',50],['虾仁',60],['生菜',30]],steps:['面粉加水调成稀糊，鸡蛋打散。','蒸盘刷油，倒入米浆铺平，放虾仁和生菜。','大火蒸 3 分钟卷起，淋豉油即可。']},
+      {id:'char-siu-bao',name:'叉烧包',emoji:'🥟',time:90,kcal:0,tags:['pastry','meat'],label:['糕点','粤式点心'],description:'松软面皮包裹甜咸叉烧馅。',ingredients:[['猪绞肉',100],['面粉',120]],steps:['猪绞肉加甜面酱炒成叉烧味肉馅，放凉。','面粉加酵母发酵，分成小剂子擀皮。','包入叉烧馅二次醒发，大火蒸 12 分钟。']},
+      {id:'custard-bao',name:'奶黄包',emoji:'🥟',time:90,kcal:0,tags:['pastry','vegetarian'],label:['糕点','粤式点心'],description:'奶香浓郁、绵密流心的甜包子。',ingredients:[['面粉',120],['鸡蛋',40],['牛奶',50],['黄油',20]],steps:['鸡蛋、牛奶、黄油和糖隔水加热成奶黄馅。','面粉加酵母发面，分成小剂子。','包入奶黄馅醒发后，大火蒸 10 分钟。']},
+      {id:'egg-tart',name:'蛋挞',emoji:'🥧',time:50,kcal:0,tags:['pastry','vegetarian'],label:['糕点','粤式点心'],description:'酥脆挞皮配嫩滑蛋奶馅。',ingredients:[['面粉',100],['鸡蛋',60],['牛奶',80],['黄油',20]],steps:['黄油和面粉搓成酥皮，压入挞模。','鸡蛋、牛奶和糖调成蛋挞液并过筛。','倒入挞皮，200 度烤 20 分钟。']},
+      {id:'ma-lai-go',name:'马拉糕',emoji:'🍰',time:45,kcal:0,tags:['pastry','vegetarian'],label:['糕点','粤式点心'],description:'松软弹润、红糖香气的蒸蛋糕。',ingredients:[['面粉',120],['鸡蛋',60],['牛奶',60],['黄油',15]],steps:['鸡蛋、牛奶、糖和面粉拌成面糊。','加入黄油拌匀后倒入模具。','大火蒸 25 分钟，放凉切块。']},
+      {id:'turnip-cake',name:'萝卜糕',emoji:'🍥',time:60,kcal:0,tags:['pastry','light'],label:['糕点','粤式点心'],description:'萝卜清甜，煎后外脆里软。',ingredients:[['白萝卜',250],['面粉',80],['虾仁',40]],steps:['白萝卜刨丝，虾仁切粒。','萝卜丝、面粉和水拌成糕浆蒸熟。','放凉切片，煎至两面金黄。']},
+      {id:'pork-bun',name:'肉包子',emoji:'🥟',time:90,kcal:0,tags:['pastry','meat'],label:['糕点','包子'],description:'暄软面皮包着多汁猪肉馅。',ingredients:[['猪绞肉',150],['面粉',200],['大白菜',100]],steps:['大白菜切末挤水，和猪绞肉拌成馅。','面粉加酵母发面，分成小剂子擀皮。','包入肉馅醒发后，大火蒸 15 分钟。']},
+      {id:'pork-dumpling',name:'猪肉饺子',emoji:'🥟',time:60,kcal:0,tags:['pastry','meat'],label:['糕点','饺子'],description:'皮薄馅大的家常猪肉水饺。',ingredients:[['猪绞肉',150],['面粉',200],['韭菜',50]],steps:['猪绞肉和韭菜末加盐、生抽调成饺子馅。','面粉加水和成面团，擀成饺子皮。','包好饺子，水开下锅煮至浮起即可。']},
+      {id:'chive-dumpling',name:'韭菜鸡蛋饺子',emoji:'🥟',time:60,kcal:0,tags:['pastry','vegetarian'],label:['糕点','饺子'],description:'清香韭菜配鸡蛋的经典素饺子。',ingredients:[['韭菜',150],['鸡蛋',100],['面粉',200]],steps:['鸡蛋炒熟打散，和韭菜末拌成馅。','面粉和成面团，擀成饺子皮。','包好饺子，水开下锅煮熟。']},
+      {id:'xiaolongbao',name:'小笼包',emoji:'🥟',time:90,kcal:0,tags:['pastry','meat'],label:['糕点','包子'],description:'皮薄汤汁足，一口一个的江南风味。',ingredients:[['猪绞肉',150],['面粉',180],['大白菜',60]],steps:['猪绞肉加姜末、盐和清水搅打上劲。','面粉和成软面，擀成薄皮。','包入肉馅，大火蒸 8 分钟。']},
+      {id:'laobing',name:'烙饼',emoji:'🫓',time:25,kcal:0,tags:['pastry','vegetarian'],label:['糕点','饼'],description:'外酥里软、麦香十足的北方家常烙饼。',ingredients:[['面粉',200],['大葱',20]],steps:['面粉加温水和成软面团，醒 20 分钟。','擀开抹薄油、撒葱花后卷起再擀成饼。','平底锅烙至两面金黄鼓起即可。']},
+      {id:'youtiao',name:'油条',emoji:'🥖',time:40,kcal:0,tags:['pastry','vegetarian'],label:['糕点','油炸'],description:'金黄蓬松、外脆内软的传统早餐油条。',ingredients:[['面粉',200],['鸡蛋',50]],steps:['面粉、鸡蛋和盐加水揉成软面团，静置醒发。','拉成长条，两条叠压后下油锅。','炸至金黄膨胀捞出控油。']},
+      {id:'jianbing',name:'煎饼果子',emoji:'🌯',time:20,kcal:0,tags:['pastry','light'],label:['糕点','卷饼'],description:'薄饼裹蛋、加生菜和脆饼的街头早餐。',ingredients:[['面粉',80],['鸡蛋',60],['生菜',40],['大葱',10]],steps:['面粉加水调成稀面糊。','平底锅摊成薄饼，打入鸡蛋抹开。','放生菜和葱花，卷起即可。']},
+      {id:'scallion-pancake',name:'葱油饼',emoji:'🫓',time:30,kcal:0,tags:['pastry','vegetarian'],label:['糕点','饼'],description:'层层起酥、葱香浓郁的经典葱油饼。',ingredients:[['面粉',180],['大葱',30]],steps:['面粉加温水和成软面团，大葱切末。','擀开后刷油撒葱花，卷起盘成圆再擀开。','平底锅烙至两面金黄。']},
+      {id:'hua-juan',name:'花卷',emoji:'🥐',time:80,kcal:0,tags:['pastry','vegetarian'],label:['糕点','蒸点'],description:'松软带葱香，造型好看的传统蒸面点。',ingredients:[['面粉',200],['大葱',20]],steps:['面粉加酵母发面，大葱切末拌油。','面团擀开铺葱花，卷起切段扭成花卷。','二次醒发后大火蒸 12 分钟。']},
+      {id:'mantou',name:'馒头',emoji:'🍞',time:80,kcal:0,tags:['pastry','vegetarian'],label:['糕点','蒸点'],description:'白净暄软、麦香浓郁的北方主食馒头。',ingredients:[['面粉',200]],steps:['面粉加酵母和温水揉成光滑面团。','醒发至两倍大后揉匀，分成剂子搓圆。','二次醒发后大火蒸 15 分钟。']}
+    ];
+    pastryRecipes.forEach(r=>recipes.push(r));
+
+    const primaryFilterTags=new Set(['all','light','soup','hotpot','stirfry','regional','pastry']);
+    const recipePhotoById={
+      'chicken-broccoli':'assets/recipes/chicken-broccoli.jpg',
+      'tomato-egg':'assets/recipes/tomato-egg.jpg',
+      'tofu-soup':'assets/recipes/tofu-soup.jpg',
+      'corn-soup':'assets/recipes/corn-soup.jpg',
+      'mushroom-spinach':'assets/recipes/mushroom-spinach.jpg',
+      'beef-tomato-stew':'assets/recipes/beef-tomato-stew.jpg',
+      'beef-enoki-hotpot':'assets/recipes/beef-enoki-hotpot.jpg',
+      'tomato-beef-hotpot':'assets/recipes/tomato-beef-hotpot.jpg',
+      'mushroom-chicken-hotpot':'assets/recipes/mushroom-chicken-hotpot.jpg',
+      'sauerkraut-pork-hotpot':'assets/recipes/sauerkraut-pork-hotpot.jpg',
+      'spicy-tripe-hotpot':'assets/recipes/spicy-tripe-hotpot.jpg',
+      'chaoshan-beef-hotpot':'assets/recipes/chaoshan-beef-hotpot.jpg',
+      'lamb-radish-soup':'assets/recipes/lamb-radish-soup.jpg',
+      'mushroom-chicken':'assets/recipes/mushroom-chicken.jpg',
+      'pork-cabbage-tofu':'assets/recipes/pork-cabbage-tofu.jpg',
+      'pepper-beef':'assets/recipes/pepper-beef.jpg',
+      'garlic-broccoli-mushroom':'assets/recipes/garlic-broccoli-mushroom.jpg',
+      'pork-rib-potato-soup':'assets/recipes/pork-rib-potato-soup.jpg',
+      'eggplant-pork':'assets/recipes/eggplant-pork.jpg',
+      'mushroom-egg':'assets/recipes/mushroom-egg.jpg',
+      'fruit-bowl':'assets/recipes/fruit-bowl.jpg',
+      'fish-fragrant-pork':'assets/recipes/fish-fragrant-pork.jpg',
+      'mapo-tofu':'assets/recipes/mapo-tofu.jpg',
+      'twice-cooked-pork':'assets/recipes/twice-cooked-pork.jpg',
+      'mushu-pork':'assets/recipes/mushu-pork.jpg',
+      'sweet-sour-pork':'assets/recipes/sweet-sour-pork.jpg',
+      'scallion-tofu':'assets/recipes/scallion-tofu.jpg',
+      'cantonese-choy-sum':'assets/recipes/cantonese-choy-sum.jpg',
+      'cantonese-soy-chicken':'assets/recipes/cantonese-soy-chicken.png',
+      'cantonese-steamed-ribs':'assets/recipes/cantonese-steamed-ribs.jpg',
+      'garlic-water-spinach':'assets/recipes/garlic-water-spinach.jpg',
+      'shiitake-bokchoy':'assets/recipes/shiitake-bokchoy.jpg',
+      'celery-beef':'assets/recipes/celery-beef.jpg',
+      'garlic-chicken-wings':'assets/recipes/garlic-chicken-wings.jpg',
+      'kungpao-chicken':'assets/recipes/kungpao-chicken.jpg',
+      'water-boiled-beef':'assets/recipes/water-boiled-beef.jpg',
+      'fish-fragrant-eggplant':'assets/recipes/fish-fragrant-eggplant.jpg',
+      'dry-fried-beans':'assets/recipes/dry-fried-beans.jpg',
+      'sour-spicy-potato':'assets/recipes/sour-spicy-potato.jpg',
+      'chongqing-chicken':'assets/recipes/chongqing-chicken.jpg',
+      'dry-pot-cauliflower':'assets/recipes/dry-pot-cauliflower.jpg',
+      'sauerkraut-fish':'assets/recipes/sauerkraut-fish.jpg',
+      'mala-xiangguo':'assets/recipes/mala-xiangguo.jpg',
+      'water-boiled-fish':'assets/recipes/water-boiled-fish.jpg',
+      'mouthwatering-chicken':'assets/recipes/mouthwatering-chicken.jpg',
+      'garlic-pork-slices':'assets/recipes/garlic-pork-slices.jpg',
+      'sweet-sour-carp':'assets/recipes/sweet-sour-carp.jpg',
+      'four-joy-meatballs':'assets/recipes/four-joy-meatballs.jpg',
+      'dezhou-chicken':'assets/recipes/dezhou-chicken.jpg',
+      'oil-braised-shrimp':'assets/recipes/oil-braised-shrimp.jpg',
+      'wok-collapsed-tofu':'assets/recipes/wok-collapsed-tofu.jpg',
+      'scallion-lamb':'assets/recipes/scallion-lamb.jpg',
+      'yellow-braised-chicken':'assets/recipes/yellow-braised-chicken.jpg',
+      'shandong-salad':'assets/recipes/shandong-salad.jpg',
+      'spinach-tofu-soup':'assets/recipes/spinach-tofu-soup.jpg',
+      'braised-pork-trotter':'assets/recipes/braised-pork-trotter.jpg',
+      'vinegar-cabbage':'assets/recipes/vinegar-cabbage.jpg',
+      'wood-ear-egg':'assets/recipes/wood-ear-egg.jpg',
+      'steamed-sea-bass':'assets/recipes/steamed-sea-bass.jpg',
+      'white-cut-chicken':'assets/recipes/white-cut-chicken.png',
+      'wintermelon-rib-soup':'assets/recipes/wintermelon-rib-soup.jpg',
+      'beef-broccoli':'assets/recipes/beef-broccoli.jpg',
+      'pineapple-sweet-pork':'assets/recipes/pineapple-sweet-pork.jpg',
+      'shrimp-scrambled-egg':'assets/recipes/shrimp-egg.jpg',
+      'ginger-scallion-fish':'assets/recipes/ginger-scallion-fish.jpg',
+      'chicken-congee':'assets/recipes/chicken-congee.jpg',
+      'soy-tofu':'assets/recipes/soy-tofu.jpg',
+      'braised-beef-brisket':'assets/recipes/braised-beef-brisket.jpg',
+      'black-bean-ribs':'assets/recipes/black-bean-ribs.jpg',
+      'cantonese-fried-rice':'assets/recipes/cantonese-fried-rice.jpg',
+      'guobaorou':'assets/recipes/guobaorou.jpg',
+      'di-san-xian':'assets/recipes/di-san-xian.jpg',
+      'pork-vermicelli':'assets/recipes/pork-vermicelli.jpg',
+      'chicken-mushroom-stew':'assets/recipes/chicken-mushroom-stew.jpg',
+      'northeast-stew':'assets/recipes/northeast-stew.jpg',
+      'sauerkraut-pork':'assets/recipes/sauerkraut-pork.jpg',
+      'liu-rou-duan':'assets/recipes/liu-rou-duan.jpg',
+      'harvest-stew':'assets/recipes/corn-rib-stew.jpg',
+      'blood-sausage-stew':'assets/recipes/blood-sausage-stew.jpg',
+      'sauce-bones':'assets/recipes/sauce-bones.jpg',
+      'sauerkraut-ribs':'assets/recipes/sauerkraut-ribs.jpg',
+      'eggplant-potato-stew':'assets/recipes/eggplant-potato-stew.png',
+      'egg-sauce-vegetables':'assets/recipes/egg-sauce-vegetables.jpg',
+      'northeast-cold-salad':'assets/recipes/northeast-cold-salad.jpg',
+      'corn-rib-stew':'assets/recipes/corn-rib-stew.jpg',
+      'northeast-chicken-potato':'assets/recipes/northeast-chicken-potato.jpg',
+      'hongshao-pork':'assets/recipes/hongshao-pork.jpg',
+      'oil-braised-bamboo':'assets/recipes/oil-braised-bamboo.jpg',
+      'shanghai-sweet-ribs':'assets/recipes/shanghai-sweet-ribs.jpg',
+      'shanghai-smoked-fish':'assets/recipes/shanghai-smoked-fish.jpg',
+      'scallion-oil-chicken':'assets/recipes/scallion-oil-chicken.jpg',
+      'shanghai-greens-mushroom':'assets/recipes/shanghai-greens-mushroom.jpg',
+      'shanghai-borscht':'assets/recipes/shanghai-borscht.jpg',
+      'yanduxian-home':'assets/recipes/yanduxian-home.jpg',
+      'crab-tofu':'assets/recipes/crab-tofu.jpg',
+      'shanghai-rice':'assets/recipes/shanghai-rice.jpg',
+      'scallion-noodles':'assets/recipes/scallion-noodles.jpg',
+      'oil-fried-shrimp':'assets/recipes/oil-fried-shrimp.jpg',
+      'green-pepper-pork':'assets/recipes/green-pepper-pork.jpg',
+      'shanghai-braised-ribs':'assets/recipes/shanghai-braised-ribs.jpg',
+      'bulgogi':'assets/recipes/bulgogi.jpg',
+      'spicy-pork':'assets/recipes/spicy-pork.jpg',
+      'kimchi-pork':'assets/recipes/kimchi-pork.jpg',
+      'bibimbap':'assets/recipes/bibimbap.jpg',
+      'tteokbokki':'assets/recipes/tteokbokki.jpg',
+      'soft-tofu-stew':'assets/recipes/soft-tofu-stew.jpg',
+      'korean-fried-chicken':'assets/recipes/korean-fried-chicken.jpg',
+      'japchae':'assets/recipes/japchae.jpg',
+      'korean-egg-roll':'assets/recipes/korean-egg-roll.jpg',
+      'seafood-pancake':'assets/recipes/seafood-pancake.jpg',
+      'kimchi-fried-rice':'assets/recipes/kimchi-fried-rice.jpg',
+      'steamed-egg':'assets/recipes/steamed-egg.jpg',
+      'korean-bbq-pork':'assets/recipes/korean-bbq-pork.jpg',
+      'potato-pancake':'assets/recipes/potato-pancake.jpg',
+      'fishcake-soup':'assets/recipes/fishcake-soup.jpg',
+      'jp-teriyaki-chicken':'assets/recipes/jp-teriyaki-chicken.jpg',
+      'jp-oyakodon':'assets/recipes/jp-oyakodon.jpg',
+      'jp-gyudon':'assets/recipes/jp-gyudon.jpg',
+      'jp-tonkatsu':'assets/recipes/jp-tonkatsu.jpg',
+      'jp-curry-chicken':'assets/recipes/jp-curry-chicken.jpg',
+      'jp-nikujaga':'assets/recipes/jp-nikujaga.jpg',
+      'jp-salmon-grill':'assets/recipes/jp-salmon-grill.jpg',
+      'jp-miso-salmon-soup':'assets/recipes/jp-miso-salmon-soup.jpg',
+      'jp-yakisoba':'assets/recipes/jp-yakisoba.jpg',
+      'jp-tempura-shrimp':'assets/recipes/jp-tempura-shrimp.jpg',
+      'jp-karaage':'assets/recipes/jp-karaage.jpg',
+      'jp-okonomiyaki':'assets/recipes/jp-okonomiyaki.jpg',
+      'jp-tuna-onigiri':'assets/recipes/jp-tuna-onigiri.jpg',
+      'jp-chawanmushi':'assets/recipes/jp-chawanmushi.jpg',
+      'jp-hiyayakko':'assets/recipes/jp-hiyayakko.jpg',
+      'west-pepper-steak':'assets/recipes/west-pepper-steak.jpg',
+      'west-beef-pasta':'assets/recipes/west-beef-pasta.jpg',
+      'west-mushroom-pasta':'assets/recipes/west-mushroom-pasta.jpg',
+      'west-carbonara':'assets/recipes/west-carbonara.jpg',
+      'west-caesar-salad':'assets/recipes/west-caesar-salad.jpg',
+      'west-fish-chips':'assets/recipes/west-fish-chips.jpg',
+      'west-chicken-pizza':'assets/recipes/west-chicken-pizza.jpg',
+      'west-shepherd-pie':'assets/recipes/west-shepherd-pie.jpg',
+      'west-roast-chicken':'assets/recipes/west-roast-chicken.jpg',
+      'west-salmon-asparagus':'assets/recipes/west-salmon-asparagus.jpg',
+      'west-pumpkin-soup':'assets/recipes/west-pumpkin-soup.jpg',
+      'west-tuna-melt':'assets/recipes/west-tuna-melt.jpg',
+      'west-shrimp-mac':'assets/recipes/west-shrimp-mac.jpg',
+      'west-roasted-vegetables':'assets/recipes/west-roasted-vegetables.jpg',
+      'west-meatball-spaghetti':'assets/recipes/west-meatball-spaghetti.jpg',
+      'fr-onion-soup':'assets/recipes/fr-onion-soup.jpg',
+      'fr-bourguignon':'assets/recipes/fr-bourguignon.jpg',
+      'fr-ratatouille':'assets/recipes/fr-ratatouille.jpg',
+      'fr-quiche-lorraine':'assets/recipes/fr-quiche-lorraine.jpg',
+      'fr-mushroom-soup':'assets/recipes/fr-mushroom-soup.jpg',
+      'fr-meuniere':'assets/recipes/fr-meuniere.jpg',
+      'fr-mustard-chicken':'assets/recipes/fr-mustard-chicken.jpg',
+      'fr-gratin-dauphinois':'assets/recipes/fr-gratin-dauphinois.jpg',
+      'fr-crepes':'assets/recipes/fr-crepes.jpg',
+      'fr-nicoise':'assets/recipes/fr-nicoise.jpg',
+      'fr-orange-duck':'assets/recipes/fr-orange-duck.jpg',
+      'fr-salmon-papillote':'assets/recipes/fr-salmon-papillote.jpg',
+      'fr-lentil-salad':'assets/recipes/fr-lentil-salad.jpg',
+      'fr-herb-chicken':'assets/recipes/fr-herb-chicken.jpg',
+      'fr-apple-tart':'assets/recipes/fr-apple-tart.jpg',
+      'tr-menemen':'assets/recipes/tr-menemen.jpg',
+      'tr-adana-kebab':'assets/recipes/tr-adana-kebab.jpg',
+      'tr-kofte':'assets/recipes/tr-kofte.jpg',
+      'tr-iskender':'assets/recipes/tr-iskender.jpg',
+      'tr-imam-bayildi':'assets/recipes/tr-imam-bayildi.jpg',
+      'tr-lentil-soup':'assets/recipes/tr-lentil-soup.jpg',
+      'tr-chicken-shish':'assets/recipes/tr-chicken-shish.jpg',
+      'tr-pide':'assets/recipes/tr-pide.jpg',
+      'tr-stuffed-peppers':'assets/recipes/tr-stuffed-peppers.jpg',
+      'tr-cacik':'assets/recipes/tr-cacik.jpg',
+      'tr-eggplant-yogurt':'assets/recipes/tr-eggplant-yogurt.jpg',
+      'tr-bulgur-pilaf':'assets/recipes/tr-bulgur-pilaf.jpg',
+      'tr-rice-pilaf':'assets/recipes/tr-rice-pilaf.jpg',
+      'tr-baked-seabass':'assets/recipes/tr-baked-seabass.jpg',
+      'tr-spinach-borek':'assets/recipes/tr-spinach-borek.jpg',
+      'har-gow':'assets/recipes/pastry-har-gow.jpg',
+      'siu-mai':'assets/recipes/pastry-siu-mai.jpg',
+      'cheung-fun':'assets/recipes/pastry-cheung-fun.jpg',
+      'char-siu-bao':'assets/recipes/pastry-char-siu-bao.jpg',
+      'custard-bao':'assets/recipes/pastry-custard-bao.jpg',
+      'egg-tart':'assets/recipes/pastry-egg-tart.jpg',
+      'ma-lai-go':'assets/recipes/pastry-ma-lai-go.jpg',
+      'turnip-cake':'assets/recipes/pastry-turnip-cake.jpg',
+      'pork-bun':'assets/recipes/pastry-pork-bun.jpg',
+      'pork-dumpling':'assets/recipes/pastry-pork-dumpling.jpg',
+      'chive-dumpling':'assets/recipes/pastry-chive-dumpling.jpg',
+      'xiaolongbao':'assets/recipes/pastry-xiaolongbao.jpg',
+      'laobing':'assets/recipes/pastry-laobing.jpg',
+      'youtiao':'assets/recipes/pastry-youtiao.jpg',
+      'jianbing':'assets/recipes/pastry-jianbing.jpg',
+      'scallion-pancake':'assets/recipes/pastry-scallion-pancake.jpg',
+      'hua-juan':'assets/recipes/pastry-hua-juan.jpg',
+      'mantou':'assets/recipes/pastry-mantou.jpg',
+    };
+    function recipePhotoFor(recipe){return recipePhotoById[recipe.id]||''}
+    function recipePhotoMarkup(recipe,className,overlay=''){const photo=recipePhotoFor(recipe),eager=className==='sheet-hero';return `<div class="${className}">${photo?`<img src="${photo}" alt="${recipe.name}" loading="${eager?'eager':'lazy'}" decoding="${eager?'sync':'async'}"${eager?' fetchpriority="high"':''} referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling.hidden=false">`:''}<span class="recipe-photo-fallback" ${photo?'hidden':''}>${recipe.emoji}</span>${overlay}</div>`}
+    function renderSubfilters(){const parent=activeFilters.has('stirfry')?'stirfry':activeFilters.has('regional')?'regional':'';const target=$('subfilters');if(!parent){target.innerHTML='';target.hidden=true;return}const options=parent==='stirfry'?[['vegetarian','素菜'],['meat','肉菜']]:[['sichuan','川菜'],['shandong','鲁菜'],['cantonese','粤菜'],['northeast','东北菜'],['shanghai','上海菜'],['korean','韩国料理'],['japanese','日本菜'],['western','西餐'],['french','法餐'],['turkish','土耳其菜']],child=[...activeFilters].find(tag=>!primaryFilterTags.has(tag))||'';target.hidden=false;target.innerHTML=`<button type="button" class="subchip ${child?'':'selected'}" data-subfilter="">全部${parent==='stirfry'?'炒菜':'地方菜'}</button>${options.map(([key,label])=>`<button type="button" class="subchip ${child===key?'selected':''}" data-subfilter="${key}">${label}</button>`).join('')}`}
+    function renderRecipes(){
+      const primary=[...activeFilters].find(tag=>primaryFilterTags.has(tag))||'all',secondary=[...activeFilters].find(tag=>!primaryFilterTags.has(tag)),q=($('recipe-search').value||'').trim().toLocaleLowerCase(),available=recipes.filter(r=>(primary==='all'||r.tags.includes(primary))&&(!secondary||r.tags.includes(secondary))&&(!q||r.name.toLocaleLowerCase().includes(q)||(r.description||'').toLocaleLowerCase().includes(q)||r.ingredients.some(([name])=>name.toLocaleLowerCase().includes(q))));
+      const people=Number($('servings').value)||2,mult=people/2,dishCount=Number($('dish-count').value)||2;
+      const stock=new Map();inventory.forEach(item=>stock.set(item.name,(stock.get(item.name)||0)+Number(item.weight)));
+      const urgency=new Map();inventory.forEach(item=>urgency.set(item.name,(urgency.get(item.name)||0)+Math.max(0,5-remainingDays(item))));
+      const ranked=available.map(recipe=>{const status=recipe.ingredients.map(([name,grams])=>{const need=Math.round(grams*mult),have=stock.get(name)||0;return {name,need,have,shortage:Math.max(0,need-have)}}),missing=status.filter(x=>x.shortage>0).length,needGrams=status.reduce((sum,x)=>sum+x.need,0),covered=status.reduce((sum,x)=>sum+Math.min(x.have,x.need),0),soon=status.reduce((sum,x)=>sum+(x.have>0?(urgency.get(x.name)||0):0),0);return {recipe,status,missing,coverage:needGrams?covered/needGrams:0,soon}}).sort((a,b)=>a.missing-b.missing||b.coverage-a.coverage||b.soon-a.soon||a.recipe.time-b.recipe.time);
+      const topPicks=new Set(ranked.slice(0,dishCount).map(x=>x.recipe.id));
+      $('recommendation-meta').innerHTML=`${people} 人 · 推荐 ${Math.min(dishCount,ranked.length)} 道 · 共 ${ranked.length} 道可选 <button type="button" id="recipe-more-toggle" style="border:0;background:var(--mint);color:var(--green);border-radius:8px;padding:3px 8px;font-size:11px;font-weight:650;margin-left:4px">${recipeShowAll?'收起':'查看全部'}</button>`;
+      $('recommendation-summary').textContent=inventory.length?`按冰箱库存优先排序；勾选菜品加入菜单，可查看每道菜用料和合并后的缺料清单。`:'冰箱目前没有食材；先展示所需食材较少的菜，添加库存后会自动重排。';
+      $('recipe-list').innerHTML=(recipeShowAll?ranked:ranked.slice(0,dishCount)).map(({recipe:r,status,missing})=>{
+        const missingItems=status.filter(x=>x.shortage>0),haveNames=status.filter(x=>x.have>0).map(x=>x.name);
+        const hint=missing===0?`冰箱食材齐全：${haveNames.join('、')}`:inventory.length?`还缺：${missingItems.map(x=>`${x.name} ${foodAmountText(x.name,x.shortage,false)}`).join('、')}`:'所需食材：'+status.map(x=>`${x.name} ${foodAmountText(x.name,x.need)}`).join('、');
+        const selected=selectedRecipeIds.has(r.id),recommended=topPicks.has(r.id);
+        return `<article class="recipe-card" data-recipe="${r.id}">${recipePhotoMarkup(r,'recipe-hero',`<span class="recipe-time">◷ ${r.time} 分钟</span>`)}<div class="recipe-content"><div class="recipe-top"><div class="recipe-title">${r.name}</div><div class="recipe-kcal">整道约 ${recipeTotalKcal(r,mult)} 千卡</div></div><div class="recipe-desc">${r.description}</div><div class="recipe-stock">${hint}</div><div class="recipe-bottom"><div class="tags">${r.label.map(x=>`<span class="tag">${x}</span>`).join('')}</div><span class="match">${missing===0?'库存可做':`缺 ${missing} 种`}</span></div><label class="recipe-choice"><input type="checkbox" data-select-recipe="${r.id}" ${selected?'checked':''}><span>${selected?'已加入菜单':'加入本次菜单'}</span>${recommended?'<small>优先推荐</small>':''}</label></div></article>`
+      }).join('')||'<div class="empty">当前筛选下没有可推荐的菜谱</div>';
+      document.querySelectorAll('[data-recipe]').forEach(card=>card.addEventListener('click',e=>{if(e.target.closest('.recipe-choice'))return;openRecipe(card.dataset.recipe)}));const _mt=$('recipe-more-toggle');if(_mt)_mt.addEventListener('click',()=>{recipeShowAll=!recipeShowAll;renderRecipes()});
+      updateMenuShortcut();
+    }
+    const menuPurchaseKey='fridge-menu-purchase-v1';
+    function readMenuPurchase(){try{return JSON.parse(localStorage.getItem(menuPurchaseKey)||'null')}catch{return null}}
+    function menuFingerprint(selected,people){return `${people}|${selected.map(recipe=>recipe.id).sort().join(',')}`}
+    function purchaseAmountText(item){if(item.unit==='piece')return `${formatGrams(item.amount)} 个`;if(item.unit==='kg')return `${formatGrams(item.amount)} 千克`;return `${Math.round(item.grams).toLocaleString()} 克`}
+    function menuPurchaseNotice(selected,people){const receipt=readMenuPurchase();if(!receipt||!receipt.items||!receipt.items.length)return '';const date=new Date(receipt.purchasedAt),dateText=`${date.getFullYear()}年${date.getMonth()+1}月${date.getDate()}日`,purchased=receipt.items.map(item=>`${getFood(item.name).emoji} ${item.name} ${purchaseAmountText(item)}`).join('、'),used=(receipt.usedItems||[]).map(item=>`${getFood(item.name).emoji} ${item.name} ${foodAmountText(item.name,item.grams,false)}`).join('、');return `<div class="menu-purchase-note"><strong>最近一次采购已登记，菜单食材已预扣</strong>实际购买：${purchased}<br>本次菜单扣减：${used||'无'}<br>${dateText} · ${receipt.recipeNames.join('、')}</div>`}
+    function renderSelectedMenu(){
+      const selected=recipes.filter(recipe=>selectedRecipeIds.has(recipe.id)),people=Number($('servings').value)||2,mult=people/2,totals=new Map(),notice=menuPurchaseNotice(selected,people);
+      if(!selected.length){$('selected-menu').innerHTML=`${notice}<div class="empty menu-empty">还没有加入菜品。<br><button class="secondary" type="button" id="menu-go-recipes" style="margin-top:12px">去菜谱勾选</button></div>`;$('menu-go-recipes').addEventListener('click',()=>showView('recipes'));return}
+      const dishes=selected.map(recipe=>{const amounts=recipe.ingredients.map(([name,grams])=>{const need=Math.round(grams*mult),entry=totals.get(name)||{need:0};entry.need+=need;totals.set(name,entry);return `${getFood(name).emoji} ${name} ${foodAmountText(name,need)}`});return `<div class="menu-dish"><strong>${recipe.name}</strong><div>${amounts.join(' · ')}</div></div>`}).join('');
+      const shortages=[...totals.entries()].map(([name,{need}])=>{const have=inventory.filter(item=>item.name===name).reduce((sum,item)=>sum+Number(item.weight),0);return {name,need,have,shortage:Math.max(0,need-have)}}).filter(item=>item.shortage>0);
+      const combined=[...totals.entries()].map(([name,{need}])=>{const have=inventory.filter(item=>item.name===name).reduce((sum,item)=>sum+Number(item.weight),0),shortage=Math.max(0,need-have),status=shortage?`库存 ${foodAmountText(name,have,false)} · 缺 ${foodAmountText(name,shortage,false)}`:`库存 ${foodAmountText(name,have,false)} ✓`;return `<div class="ingredient-row"><span>${getFood(name).emoji} ${name} · 需 ${foodAmountText(name,need)}</span><span>${status}</span></div>`}).join('');
+      $('selected-menu').innerHTML=`${notice}<div class="menu-plan"><div class="section-heading"><h2>本次菜单 · ${selected.length} 道</h2><button class="menu-clear" type="button" id="clear-menu">清空</button></div><div class="menu-dishes">${dishes}</div><div class="section-heading"><h2>合并食材与缺料</h2></div>${combined}${shortages.length?'<button class="secondary purchase-missing" type="button" id="buy-missing-btn">已购买缺少材料，加入冰箱</button>':''}<div id="purchase-form-slot"></div><button class="primary" id="menu-cook-btn" ${shortages.length?'disabled':''}>${shortages.length?'补齐缺料后即可扣减':'做完本次菜单，扣减食材'}</button></div>`;
+      $('clear-menu').addEventListener('click',()=>{selectedRecipeIds.clear();renderRecipes();renderSelectedMenu()});
+      if(shortages.length)$('buy-missing-btn').addEventListener('click',()=>renderPurchaseForm(selected,people,shortages));else $('menu-cook-btn').addEventListener('click',cookSelectedMenu);
+    }
+    function menuRequirements(selected,people){const needs=new Map(),mult=people/2;selected.forEach(recipe=>recipe.ingredients.forEach(([name,grams])=>needs.set(name,(needs.get(name)||0)+Math.round(grams*mult))));return needs}
+    function renderPurchaseForm(selected,people,shortages){const slot=$('purchase-form-slot'),rows=shortages.map(({name,shortage})=>{const pieceGrams=foodPieceGrams[name],unit=pieceGrams?'piece':'g',amount=pieceGrams?Math.ceil(shortage/pieceGrams):Math.ceil(shortage),options=[['g','克'],['kg','千克'],...(pieceGrams?[['piece','个']]:[])].map(([value,label])=>`<option value="${value}" ${unit===value?'selected':''}>${label}</option>`).join('');return `<div class="purchase-line" data-name="${name}" data-shortage="${shortage}" data-unit="${unit}"><strong>${getFood(name).emoji} ${name}</strong><span class="purchase-need">至少还需 ${foodAmountText(name,shortage,false)}</span><div class="unit-input"><input class="field purchase-amount" type="number" min="0.001" step="${unit==='piece'?'1':'any'}" value="${amount}" inputmode="${unit==='piece'?'numeric':'decimal'}"><select class="unit-select purchase-unit" aria-label="${name}购买单位">${options}</select></div></div>`}).join('');slot.innerHTML=`<div class="purchase-form"><h3>填写实际购买量</h3><p>确认后会先登记购买量，再扣除本次菜单所需食材；扣减后的剩余量留在冰箱。</p>${rows}<div class="purchase-actions"><button type="button" class="secondary" id="cancel-purchase">返回菜单</button><button type="button" class="primary" id="confirm-purchase">加入冰箱并扣除本次用量</button></div><div class="purchase-validation" id="purchase-validation"></div></div>`;const update=()=>{const entries=[...slot.querySelectorAll('.purchase-line')].map(row=>({row,amount:Number(row.querySelector('.purchase-amount').value)||0,unit:row.querySelector('.purchase-unit').value,grams:(Number(row.querySelector('.purchase-amount').value)||0)*gramsPerUnit(row.querySelector('.purchase-unit').value,row.dataset.name),shortage:Number(row.dataset.shortage)})),invalid=entries.some(item=>item.grams+0.001<item.shortage||item.grams<=0||(item.unit==='piece'&&!Number.isInteger(item.amount)));$('confirm-purchase').disabled=invalid;$('purchase-validation').textContent=invalid?'购买量需要至少覆盖缺少量；按“个”购买请填写整数。':''};slot.querySelectorAll('.purchase-line').forEach(row=>{const input=row.querySelector('.purchase-amount'),unit=row.querySelector('.purchase-unit');input.addEventListener('input',update);unit.addEventListener('change',()=>{const grams=(Number(input.value)||0)*gramsPerUnit(row.dataset.unit,row.dataset.name),next=unit.value;row.dataset.unit=next;input.step=next==='piece'?'1':'any';input.inputMode=next==='piece'?'numeric':'decimal';input.value=grams?String(next==='kg'?Number((grams/1000).toFixed(3)):next==='piece'?Math.ceil(grams/gramsPerUnit(next,row.dataset.name)):Math.ceil(grams)):'';update()})});$('cancel-purchase').addEventListener('click',()=>{slot.innerHTML=''});$('confirm-purchase').addEventListener('click',()=>completeMenuPurchase(selected,people));update();slot.scrollIntoView({behavior:'smooth',block:'nearest'})}
+    function completeMenuPurchase(selected,people){const needs=menuRequirements(selected,people),purchased=[...document.querySelectorAll('.purchase-line')].map(row=>{const name=row.dataset.name,unit=row.querySelector('.purchase-unit').value,amount=Number(row.querySelector('.purchase-amount').value)||0;return {name,unit,amount,grams:amount*gramsPerUnit(unit,name)}});if(purchased.some(item=>item.grams+0.001<Math.max(0,(needs.get(item.name)||0)-inventory.filter(row=>row.name===item.name).reduce((sum,row)=>sum+Number(row.weight),0)))){toast('购买量不足，请重新确认');return}const now=Date.now();purchased.forEach((item,index)=>{inventory.unshift({name:item.name,weight:item.grams,unit:item.unit==='piece'?'piece':'g',expiry:getShelfGuide(item.name).days,added:now+index})});for(const [name,need] of needs){let remaining=need;for(const item of inventory.filter(row=>row.name===name)){const take=Math.min(Number(item.weight),remaining);item.weight-=take;remaining-=take;if(remaining<=0)break}if(remaining>0.001){toast(`${name}库存不足，未完成扣减`);return}}inventory=inventory.filter(item=>item.weight>0.001);const receipt={fingerprint:menuFingerprint(selected,people),recipeNames:selected.map(recipe=>recipe.name),people,items:purchased,usedItems:[...needs].map(([name,grams])=>({name,grams})),purchasedAt:now};localStorage.setItem(menuPurchaseKey,JSON.stringify(receipt));save();selected.forEach(recipe=>recordMeal(recipe,people/2));renderFoodOptions($('food-select').value);renderInventory();renderRecent();selectedRecipeIds.clear();renderRecipes();renderSelectedMenu();showView('inventory');toast('采购量已加入冰箱，并扣除了本次菜单用量')}
+    function updateMenuShortcut(){$('menu-count').textContent=selectedRecipeIds.size;$('menu-shortcut').setAttribute('aria-label',`打开本次菜单，已选 ${selectedRecipeIds.size} 道菜`)}
+    let barcodeStream=null,barcodeReader=null,barcodeControls=null,barcodeLibraryPromise=null,barcodeScanHintTimer=0;
+    function stopBarcodeScan(){if(barcodeScanHintTimer)clearTimeout(barcodeScanHintTimer);barcodeScanHintTimer=0;if(barcodeControls){try{barcodeControls.stop()}catch{}barcodeControls=null}if(barcodeReader){try{barcodeReader.reset()}catch{}barcodeReader=null}if(barcodeStream)barcodeStream.getTracks().forEach(track=>track.stop());barcodeStream=null;const video=$('barcode-video');if(video)video.srcObject=null;const panel=$('barcode-scanner');if(panel)panel.hidden=true}
+    function loadZXingBrowser(){if(window.ZXingBrowser?.BrowserMultiFormatReader)return Promise.resolve(window.ZXingBrowser);if(barcodeLibraryPromise)return barcodeLibraryPromise;const sources=['https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js','https://unpkg.com/@zxing/browser@0.1.5/umd/zxing-browser.min.js'];barcodeLibraryPromise=new Promise((resolve,reject)=>{let index=0;const loadNext=()=>{if(index>=sources.length){barcodeLibraryPromise=null;reject(new Error('scanner-library'));return}const script=document.createElement('script');script.src=sources[index++];script.async=true;script.onload=()=>{if(window.ZXingBrowser?.BrowserMultiFormatReader)resolve(window.ZXingBrowser);else{script.remove();loadNext()}};script.onerror=()=>{script.remove();loadNext()};document.head.appendChild(script)};loadNext()});return barcodeLibraryPromise}
+    const preloadBarcodeReader=()=>loadZXingBrowser().catch(()=>{});if('requestIdleCallback'in window)requestIdleCallback(preloadBarcodeReader,{timeout:1800});else window.addEventListener('load',()=>setTimeout(preloadBarcodeReader,300),{once:true});
+    function lookupBarcode(){const code=$('barcode-input').value.replace(/[\s-]/g,'');$('barcode-input').value=code;if(!/^\d{8,14}$/.test(code)){toast('请输入 8 至 14 位数字条码');$('barcode-input').focus();return}resolveBarcode(code)}
+    async function resolveBarcode(code){const status=$('barcode-status');if(status){status.hidden=false;status.textContent='正在查询商品信息…'}const localName=readBarcodeFoodNames()[code];if(localName){const localFood=foods.find(food=>food.name===localName);if(localFood){$('food-select').value=localFood.name;$('food-select').dispatchEvent(new Event('change'));if(status)status.textContent=`本地已保存：${localFood.name}`;toast('已使用本地保存的商品名称');return}}try{const cacheKey=`off-product-${code}`,cached=localStorage.getItem(cacheKey);let product=cached?JSON.parse(cached):null;if(!product){const url=`https://world.openfoodfacts.org/api/v3/product/${encodeURIComponent(code)}.json?lc=zh&cc=cn&fields=code,product_name,product_name_zh,abbreviated_product_name,generic_name,brands,quantity,nutriments,categories_tags`;const response=await fetch(url,{headers:{Accept:'application/json'}});if(!response.ok)throw new Error('lookup');const data=await response.json();if(!data.product)throw new Error(data.status===0?'missing':'lookup');product=data.product;localStorage.setItem(cacheKey,JSON.stringify(product))}const name=(product.product_name_zh||product.product_name||product.abbreviated_product_name||product.generic_name||'').trim();if(!name){openManualBarcodeFood(code);throw new Error('no-name')}const exact=foods.find(food=>food.name.toLocaleLowerCase()===name.toLocaleLowerCase());if(exact){$('food-select').value=exact.name;$('food-select').dispatchEvent(new Event('change'))}else{$('custom-food-name').value=name;$('custom-food-kcal').value=String(Math.round(Number(product.nutriments?.['energy-kcal_100g']||product.nutriments?.['energy-kcal']||((Number(product.nutriments?.energy_100g)||0)/4.184))));const categoryText=(product.categories_tags||[]).join(' ').toLowerCase(),category=/beverages|drinks|water|dairy|milk|yogurt|cheese/.test(categoryText)?'饮料':/fruit/.test(categoryText)?'水果':/vegetable/.test(categoryText)?'蔬菜':/meat|fish|seafood/.test(categoryText)?'肉类':'其他';$('custom-food-category').value=category;$('custom-food-category').dispatchEvent(new Event('change'));saveCustomFood()}$('food-search').value='';$('barcode-input').value=code;if(status)status.textContent=`识别到：${name}${product.brands?` · ${product.brands}`:''}${product.quantity?` · ${product.quantity}`:''}。请核对后填写数量。`;stopBarcodeScan();toast('已识别商品，请确认名称并填写数量')}catch(error){if(status){status.hidden=false;status.textContent=error.message==='missing'?'数据库中没有这个条码，可手动选择或添加食材。':error.message==='no-name'?'找到了商品条码，但数据库没有商品名称。':'查询失败，请检查网络后重试。'}if(error.message==='missing')toast('数据库里没有这件商品');else if(error.message==='no-name')toast('商品资料缺少名称');else toast('条码查询失败')}}
+    async function startBarcodeScan(){if(!navigator.mediaDevices?.getUserMedia){toast('当前环境无法访问相机，请使用 HTTPS 或本机 localhost');return}try{barcodeStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:false});const video=$('barcode-video');video.srcObject=barcodeStream;$('barcode-scanner').hidden=false;$('barcode-status').hidden=false;$('barcode-status').textContent='正在启动条码识别…';const track=barcodeStream.getVideoTracks()[0];const capabilities=track?.getCapabilities?.();if(capabilities?.focusMode?.includes('continuous')){try{await track.applyConstraints({advanced:[{focusMode:'continuous'}]})}catch{}}await video.play();const ZXingBrowser=await loadZXingBrowser();const Reader=ZXingBrowser.BrowserMultiFormatOneDReader||ZXingBrowser.BrowserMultiFormatReader;barcodeReader=new Reader(undefined,{delayBetweenScanAttempts:200,delayBetweenScanSuccess:300});barcodeControls=await barcodeReader.decodeFromStream(barcodeStream,video,(result)=>{if(!result||!barcodeStream)return;const code=result.getText().replace(/[\s-]/g,'');if(!/^\d{8,14}$/.test(code))return;$('barcode-input').value=code;stopBarcodeScan();resolveBarcode(code)});if(barcodeStream){$('barcode-status').textContent='正在快速识别：将条形码横向对准绿色框线';barcodeScanHintTimer=setTimeout(()=>{if(barcodeStream){$('barcode-status').textContent='还没识别到：将条码放在绿色框内，移近或稍微移远并保持手机平行；也可手动输入数字查询';}},7000)}}catch(error){stopBarcodeScan();if(error.name==='NotAllowedError')toast('请允许浏览器使用相机后重试');else if(error.message==='scanner-library')toast('扫码组件加载失败，请检查网络后手动输入条码');else toast('无法启动相机，请检查设备权限')}}
+    function showView(name){if(name!=='add-food')stopBarcodeScan();if(name==='nearby'){syncShareChoices(sharePrefillAdded);sharePrefillAdded=null;if(nearbyMap)setTimeout(()=>nearbyMap.invalidateSize(),180)}document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===`view-${name}`));const navView=name==='menu'?'recipes':name;document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.view===navView));$('menu-shortcut').classList.toggle('active',name==='menu');if(name==='profile'){toggleDietMeals(false);renderDietSummary();}window.scrollTo({top:0,behavior:'smooth'})}
+    let toastTimer;function toast(message){const el=$('toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),1900)}
+    function openRecipe(id){const r=recipes.find(x=>x.id===id), people=Number($('servings').value)||2, mult=people/2,totalKcal=recipeTotalKcal(r,mult),ingredientKcal=Math.round(recipeIngredientKcal(r,mult)),seasoningTotalKcal=Math.round(recipeSeasoningKcal(r,mult));
+      $('sheet-title').textContent=r.name;
+      const ing=r.ingredients.map(([name,grams])=>{const target=Math.round(grams*mult),have=inventory.filter(x=>x.name===name).reduce((s,x)=>s+Number(x.weight),0),ok=have>=target,stockText=`库存 ${foodAmountText(name,have,false)} ${ok?'✓':'· 缺 '+foodAmountText(name,target-have,false)}`;return `<div class="ingredient-row"><span>${getFood(name).emoji} ${name} ${foodAmountText(name,target)}</span><span>${stockText}</span></div>`}).join('');
+      const hasShortage=r.ingredients.some(([name,grams])=>{const need=Math.round(grams*mult),have=inventory.filter(x=>x.name===name).reduce((s,x)=>s+Number(x.weight),0);return have<need});const seasonings=recipeSeasonings[r.id]||[],seasoningRows=seasonings.length?seasonings.map(([name,grams])=>{const amount=grams*mult,kcal=Math.round(grams*(seasoningKcal[name]||0)/100*mult);return `<div class="ingredient-row"><span>🧂 ${name}</span><span>${formatGrams(amount)} 克 ${spoonText(name,amount)} <em>· 约 ${kcal} 千卡</em></span></div>`}).join(''):'<div class="ingredient-row"><span>无需额外调料</span><span>0 千卡</span></div>';
+      const methods=recipeMethods[r.id]||r.steps;
+      $('sheet-body').innerHTML=`${recipePhotoMarkup(r,'sheet-hero')}<div class="calorie-box"><span>${people} 人份 · 食材 ${ingredientKcal} 千卡 + 调料 ${seasoningTotalKcal} 千卡</span><div class="calorie-value"><b>${totalKcal}</b> <small>千卡</small></div></div><div class="subtle" style="margin-top:8px">整道菜约 ${totalKcal} 千卡 · 每人约 ${Math.round(totalKcal/people)} 千卡 · ${r.time} 分钟</div><div class="section-heading"><h2>所需食材</h2><span class="subtle">完成后从库存扣减</span></div>${ing}<div class="section-heading"><h2>调味料与热量</h2></div>${seasoningRows}<p class="helper">勺量按约 5 毫升换算，不同调料的密度和装勺方式会有差异；请以克数为准。热量按调料克数估算。</p><div class="section-heading"><h2>详细做法</h2></div><ol class="steps">${methods.map(s=>`<li>${s}</li>`).join('')}</ol><p class="helper">热量根据食材估算值和调料克数计算；油、糖、酱料品牌及实际用量会造成差异。调料不计入冰箱库存扣减。</p><button class="primary" id="cook-btn">${hasShortage?'已购买所缺食材，添加并且扣减':'我做好了，扣减食材'}</button>`;
+      $('recipe-overlay').classList.add('open');$('cook-btn').addEventListener('click',()=>hasShortage?renderRecipePurchase(r,mult):cook(r,mult));
+    }
+    function cook(recipe,mult){let shortage=[];recipe.ingredients.forEach(([name,grams])=>{const need=Math.round(grams*mult),have=inventory.filter(x=>x.name===name).reduce((s,x)=>s+Number(x.weight),0);if(have<need)shortage.push(`${name}差${need-have}克`)});if(shortage.length){toast('库存不足：'+shortage.join('、'));return}
+      recipe.ingredients.forEach(([name,grams])=>{let remaining=Math.round(grams*mult);for(const item of inventory.filter(x=>x.name===name)){const take=Math.min(item.weight,remaining);item.weight-=take;remaining-=take;if(remaining<=0)break}inventory=inventory.filter(x=>x.weight>0.001)});save();recordMeal(recipe,mult);renderInventory();renderRecent();$('recipe-overlay').classList.remove('open');showView('inventory');toast('已完成！食材库存已更新');
+    }
+    function cookSelectedMenu(){const mult=(Number($('servings').value)||2)/2,needs=new Map();recipes.filter(recipe=>selectedRecipeIds.has(recipe.id)).forEach(recipe=>recipe.ingredients.forEach(([name,grams])=>needs.set(name,(needs.get(name)||0)+Math.round(grams*mult))));const shortages=[...needs.entries()].map(([name,need])=>{const have=inventory.filter(item=>item.name===name).reduce((sum,item)=>sum+Number(item.weight),0);return {name,need,have}}).filter(item=>item.have<item.need);if(shortages.length){toast('库存不足：'+shortages.map(item=>`${item.name}缺${Math.round(item.need-item.have)}克`).join('、'));return}needs.forEach((need,name)=>{let remaining=need;for(const item of inventory.filter(x=>x.name===name)){const take=Math.min(Number(item.weight),remaining);item.weight-=take;remaining-=take;if(remaining<=0)break}});inventory=inventory.filter(item=>item.weight>0.001);save();recipes.filter(recipe=>selectedRecipeIds.has(recipe.id)).forEach(recipe=>recordMeal(recipe,mult));renderInventory();renderRecent();selectedRecipeIds.clear();renderRecipes();showView('inventory');toast('本次菜单食材已从冰箱扣减')}
+    function closeCustomFoodPanel(){const panel=$('custom-food-panel'),toggle=$('custom-food-toggle');panel.hidden=true;toggle.setAttribute('aria-expanded','false');pendingBarcodeFoodCode=''}
+    function saveCustomFood(){const name=$('custom-food-name').value.trim().replace(/\s+/g,' '),category=$('custom-food-category').value,kcal=Number($('custom-food-kcal').value),pieceGrams=Number($('custom-food-piece-grams').value)||0,defaultUnit=$('custom-food-unit').value,calorieBasis=$('custom-food-calorie-basis').value,calorieReferenceAmount=Number($('custom-food-calorie-reference').value)||0;if(!isValidCustomFoodName(name)){toast('请填写食材名称，暂不支持特殊符号');$('custom-food-name').focus();return}if(!customFoodCategories.includes(category)||!Number.isFinite(kcal)||kcal<0||kcal>(calorieBasis==='package'?100000:900)){toast(calorieBasis==='package'?'请检查整份总热量':'请检查每 100 克热量');return}if(!['g','kg'].includes(defaultUnit)&&!(category==='饮料'&&defaultUnit==='ml')){toast('请检查添加时单位');return}if(calorieBasis==='package'&&(!Number.isFinite(calorieReferenceAmount)||calorieReferenceAmount<=0)){toast('请填写总热量对应的包装净含量');$('custom-food-calorie-reference').focus();return}if(pieceGrams<0||pieceGrams>10000){toast('单个重量请填写 1 到 10000 克');return}if(pendingBarcodeFoodCode){const barcodeNames=readBarcodeFoodNames();barcodeNames[pendingBarcodeFoodCode]=name;localStorage.setItem(barcodeFoodStorageKey,JSON.stringify(barcodeNames));pendingBarcodeFoodCode=''}const existing=foods.find(food=>food.name.toLocaleLowerCase()===name.toLocaleLowerCase());if(existing){$('food-select').value=existing.name;$('food-select').dispatchEvent(new Event('change'));closeCustomFoodPanel();toast('目录中已有这个名称，已为你选中');return}const meta=customFoodCategoryMeta[category],record={name,category,kcal,pieceGrams,defaultUnit,calorieBasis,calorieReferenceAmount:calorieBasis==='package'?calorieReferenceAmount:0,calorieReferenceUnit:defaultUnit};customFoodRecords.push(record);foods.push({...record,emoji:meta.emoji,color:meta.color});if(pieceGrams>0)foodPieceGrams[name]=pieceGrams;localStorage.setItem(customFoodStorageKey,JSON.stringify(customFoodRecords));renderFoodOptions(name);$('food-select').value=name;$('food-select').dispatchEvent(new Event('change'));$('custom-food-name').value='';$('custom-food-kcal').value='0';$('custom-food-calorie-reference').value='';$('custom-food-calorie-basis').value='per100';updateCustomFoodCalorieFields();$('custom-food-piece-grams').value='';closeCustomFoodPanel();toast(`${name}已保存；填写数量后点“加入冰箱”`)}
+    const profileStorageKey='fridge-profile-v1';
+    function readProfile(){try{const p=JSON.parse(localStorage.getItem(profileStorageKey)||'{}');return {name:typeof p.name==='string'?p.name.slice(0,20):'',height:Number(p.height)>0?Number(p.height):0,weight:Number(p.weight)>0?Number(p.weight):0,age:Number(p.age)>0?Number(p.age):0,gender:p.gender==='female'?'female':'male',activity:Number(p.activity)>0?Number(p.activity):1.55,goal:p.goal==='cut'?'cut':p.goal==='bulk'?'bulk':'maintain'}}catch{return {name:'',height:0,weight:0,age:0,gender:'male',activity:1.55,goal:'maintain'}}}
+    function saveProfile(p){localStorage.setItem(profileStorageKey,JSON.stringify(p))}
+    function exportBackup(){const backup={app:'fridge-manager',version:1,exportedAt:new Date().toISOString(),profile:readProfile(),inventory,customFoods:customFoodRecords,menuPurchase:readMenuPurchase()};const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`冰箱数据备份-${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('备份已导出')}
+    function importBackup(file){const reader=new FileReader();reader.onload=()=>{try{const d=JSON.parse(reader.result);if(!d||!Array.isArray(d.inventory))throw new Error('bad');const items=d.inventory.filter(x=>x&&typeof x.name==='string'&&Number.isFinite(Number(x.weight))&&Number(x.weight)>0).map(x=>({name:x.name,weight:Number(x.weight),unit:x.unit==='piece'?'piece':'g',expiry:Number.isFinite(Number(x.expiry))?Number(x.expiry):3,added:Number.isFinite(Number(x.added))?Number(x.added):Date.now()}));localStorage.setItem('fridge-foods-v2',JSON.stringify(items));if(Array.isArray(d.customFoods))localStorage.setItem(customFoodStorageKey,JSON.stringify(d.customFoods));if(d.menuPurchase)localStorage.setItem(menuPurchaseKey,JSON.stringify(d.menuPurchase));else localStorage.removeItem(menuPurchaseKey);if(d.profile&&typeof d.profile.name==='string')localStorage.setItem(profileStorageKey,JSON.stringify(d.profile));toast('导入成功，正在刷新');setTimeout(()=>location.reload(),600)}catch(e){toast('导入失败：文件格式不正确')}};reader.readAsText(file)}
+
+    const categoryMacros={'肉类':{carbs:0,protein:20,fat:12},'鱼类':{carbs:0,protein:20,fat:5},'海鲜':{carbs:1,protein:18,fat:2},'蛋奶':{carbs:5,protein:10,fat:8},'蔬菜':{carbs:5,protein:2,fat:0.3},'水果':{carbs:12,protein:0.6,fat:0.3},'主食':{carbs:25,protein:4,fat:1},'豆制品':{carbs:4,protein:8,fat:4},'豆类':{carbs:20,protein:9,fat:1},'调味品':{carbs:10,protein:1,fat:8},'坚果':{carbs:16,protein:18,fat:50},'乳制品':{carbs:5,protein:6,fat:10},'其他':{carbs:10,protein:5,fat:5}};
+    function getFoodMacros(name){return categoryMacros[getFood(name).category]||categoryMacros['其他']}
+    function recipeMacros(recipe,mult=1){let carbs=0,protein=0,fat=0;recipe.ingredients.forEach(([name,grams])=>{const m=getFoodMacros(name),g=grams*mult/100;carbs+=m.carbs*g;protein+=m.protein*g;fat+=m.fat*g});(recipeSeasonings[recipe.id]||[]).forEach(([name,grams])=>{if(name.includes('油'))fat+=grams*mult/100});return {carbs:Math.round(carbs),protein:Math.round(protein),fat:Math.round(fat)}}
+    const dietTargets={kcal:2000,carbs:250,protein:75,fat:65};
+    function calcTargets(p){const w=Number(p.weight);if(!w||w<=0)return dietTargets;const h=Number(p.height),age=Number(p.age),act=Number(p.activity)||1.55,goal=p.goal||'maintain';let bmr;if(h>0&&age>0){bmr=p.gender==='female'?10*w+6.25*h-5*age-161:10*w+6.25*h-5*age+5}else{bmr=22*w}const kcal=Math.max(1200,Math.round(bmr*act*(goal==='cut'?0.8:goal==='bulk'?1.1:1))),protein=Math.max(50,Math.round(w*(goal==='maintain'?1.4:1.8))),fat=Math.max(35,Math.round(kcal*0.25/9)),carbs=Math.max(100,Math.round((kcal-protein*4-fat*9)/4));return {kcal,carbs,protein,fat}}
+    function getDietTargets(){return calcTargets(readProfile())}
+    function updateProfileInfo(){const p={height:Number($('profile-height').value),weight:Number($('profile-weight').value),age:Number($('profile-age').value),gender:$('profile-gender').value,activity:Number($('profile-activity').value),goal:$('profile-goal').value};let txt='';if(p.height>0&&p.weight>0){const bmi=p.weight/((p.height/100)*(p.height/100)),cat=bmi<18.5?'偏瘦':bmi<24?'正常':bmi<28?'超重':'肥胖',t=calcTargets(p);txt=`BMI ${bmi.toFixed(1)}（${cat}） · 每日约 ${t.kcal} 千卡 · 碳水 ${t.carbs}g · 蛋白 ${t.protein}g · 脂肪 ${t.fat}g`}else{txt='填写身高体重后，自动计算 BMI 和每日营养目标。'}$('profile-bmi').innerHTML=`<p class="helper">${txt}</p>`}
+
+    const dietLogKey='fridge-diet-log-v2';
+    function todayStr(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+    function readDietLogs(){try{const l=JSON.parse(localStorage.getItem(dietLogKey)||'{}');return (l&&typeof l==='object'&&!Array.isArray(l))?l:{}}catch{return {}}}
+    function saveDietLogs(logs){localStorage.setItem(dietLogKey,JSON.stringify(logs))}
+    function dietLogFor(date){const logs=readDietLogs();return {date,meals:(logs[date]||{}).meals||[]}}
+    function recordMeal(recipe,mult){const logs=readDietLogs(),d=todayStr(),day=logs[d]||{meals:[]},m=recipeMacros(recipe,mult);day.meals.push({id:recipe.id,name:recipe.name,emoji:recipe.emoji,kcal:recipeTotalKcal(recipe,mult),carbs:m.carbs,protein:m.protein,fat:m.fat,at:Date.now()});logs[d]=day;saveDietLogs(logs)}
+    function dietTotals(log){return log.meals.reduce((a,m)=>({kcal:a.kcal+(m.kcal||0),carbs:a.carbs+(m.carbs||0),protein:a.protein+(m.protein||0),fat:a.fat+(m.fat||0)}),{kcal:0,carbs:0,protein:0,fat:0})}
+    function macroRing(label,have,target,color){const pct=Math.min(1,Math.max(0,target>0?have/target:0)),r=42,C=2*Math.PI*r,offset=C*(1-pct),gap=target-have,status=gap>0?`还差 ${Math.round(gap)} 克`:(gap<0?`超出 ${Math.round(-gap)} 克`:'已达标'),sc=gap>0?'#c07b3a':(gap<0?'#c07b3a':'var(--green)');return `<div style="text-align:center;min-width:0"><div style="position:relative;width:78px;height:78px;margin:0 auto"><svg width="78" height="78" viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="#e6f0e6" stroke-width="9"/><circle cx="50" cy="50" r="42" fill="none" stroke="${color}" stroke-width="9" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${offset}" transform="rotate(-90 50 50)"/></svg><div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.25"><b style="font-size:15px">${Math.round(have)}</b><span style="font-size:10px;color:var(--muted)">/ ${Math.round(target)}克</span></div></div><div style="font-size:12px;margin-top:6px;font-weight:650">${label}</div><div style="font-size:10px;margin-top:2px;color:${sc}">${status}</div></div>`}
+    function dietAdvice(log){const t=getDietTargets(),total=dietTotals(log),gaps=[['碳水','carbs'],['蛋白质','protein'],['脂肪','fat']].filter(([label,key])=>t[key]-total[key]>5).map(([label,key])=>({label,key,need:t[key]-total[key]})),logged=new Set(log.meals.map(m=>m.id));if(!gaps.length)return '<p class="helper">今日营养摄入基本达标，继续保持均衡饮食。</p>';const recs=[];gaps.forEach(g=>{recipes.filter(r=>!logged.has(r.id)).map(r=>({r,v:recipeMacros(r,1)[g.key]})).sort((a,b)=>b.v-a.v).slice(0,2).forEach(x=>{if(!recs.some(y=>y.id===x.r.id))recs.push({id:x.r.id,name:x.r.name,emoji:x.r.emoji})})});return `<p class="helper">${gaps.map(g=>`${g.label}还差约 ${Math.round(g.need)} 克`).join('、')}，可优先考虑：</p>${recs.slice(0,4).map(x=>`<button type="button" class="subchip" data-advice-recipe="${x.id}">${x.emoji} ${x.name}</button>`).join('')}`}
+    function renderAchievements(){const logs=readDietLogs(),days=Object.values(logs).filter(day=>Array.isArray(day?.meals)&&day.meals.length>0).length,meals=Object.values(logs).reduce((sum,day)=>sum+(Array.isArray(day?.meals)?day.meals.length:0),0),foodTypes=new Set(inventory.map(item=>item.name)).size,shareCount=nearbyShareCount,rankNames=['木制','铁质','铜质','白银','铂金','黄金','钻石','大师'],rankColors=[['#ad8050','#80562f'],['#b9c1c7','#7c878e'],['#c98754','#92582f'],['#d7e0e8','#8294a3'],['#8ad8d4','#378e91'],['#f5ca50','#bd8125'],['#b6a4f7','#7056bd'],['#ff8ec5','#bd387c']];const achievements=[{icon:'🥄',name:'首次入库',condition:'冰箱里至少保存过 1 种食材',unit:'种食材',value:foodTypes,thresholds:[1,2,3,5,8,12,20,30]},{icon:'🥗',name:'食材多样家',condition:'冰箱中不同食材的种类数',unit:'种食材',value:foodTypes,thresholds:[1,3,5,10,20,30,50,100]},{icon:'📔',name:'饮食记录员',condition:'有饮食记录的天数',unit:'天',value:days,thresholds:[1,3,7,14,30,60,100,365]},{icon:'👩‍🍳',name:'料理达人',condition:'累计记录的餐食份数',unit:'份餐食',value:meals,thresholds:[1,5,10,25,50,100,250,500]},{icon:'🤝',name:'共享食材',condition:'成功发布共享食材的次数',unit:'次共享',value:shareCount,thresholds:[1,2,5,10,20,50,100,200]}];const levels=achievements.map(item=>item.thresholds.filter(threshold=>item.value>=threshold).length),totalLevels=levels.reduce((sum,level)=>sum+level,0);$('achievement-summary').textContent=`奖牌等级 ${totalLevels}/40`;$('achievement-list').innerHTML=achievements.map((item,index)=>{const level=levels[index],palette=rankColors[Math.max(0,level-1)],nextThreshold=item.thresholds[level],progress=level===8?'满级':`${item.value}/${nextThreshold}`;return `<button type="button" class="achievement-card ${level?'earned':'unearned'}" data-achievement-index="${index}" aria-label="查看${item.name}成就条件"><div class="achievement-medal" style="--medal:${palette[0]};--ribbon:${palette[1]}"><div class="achievement-coin">${item.name}</div></div><div class="achievement-progress">${progress}</div></button>`}).join('');$('achievement-list').querySelectorAll('[data-achievement-index]').forEach(card=>card.addEventListener('click',()=>{const item=achievements[Number(card.dataset.achievementIndex)],level=levels[Number(card.dataset.achievementIndex)],rows=item.thresholds.map((threshold,index)=>{const done=item.value>=threshold,status=done?'已解锁':`还差 ${threshold-item.value} ${item.unit}`;return `<div class="achievement-condition-row"><span class="achievement-condition-rank" style="color:${rankColors[index][1]}">${rankNames[index]}奖牌</span><span>${threshold} ${item.unit}</span><span class="achievement-condition-status ${done?'done':''}">${status}</span></div>`}).join('');$('sheet-title').textContent=`${item.icon} ${item.name} · ${level}/8 级`;$('sheet-body').innerHTML=`<p class="helper">${item.condition}，达到对应数量即可逐级升级：</p>${rows}`;$('recipe-overlay').classList.add('open')}))}
+    function renderDietSummary(){const view=currentDietDate(),log=dietLogFor(view),t=getDietTargets(),total=dietTotals(log);$('diet-meals').innerHTML=log.meals.length?log.meals.map(m=>`<div class="menu-dish"><strong>${m.emoji} ${m.name}</strong><div>${m.kcal} 千卡 · 碳水 ${m.carbs}g · 蛋白 ${m.protein}g · 脂肪 ${m.fat}g</div></div>`).join(''):'<p class="helper">这一天还没有记录。</p>';$('diet-kcal').textContent=total.kcal;$('diet-macros').innerHTML=`<div style="display:flex;justify-content:space-around;gap:8px;padding:4px 0">${macroRing('碳水',total.carbs,t.carbs,'#286548')}${macroRing('蛋白质',total.protein,t.protein,'#3b82c4')}${macroRing('脂肪',total.fat,t.fat,'#dd8a45')}</div>`;$('diet-advice').innerHTML=dietAdvice(log);renderPeriodSummary(view);renderDietCalendar();renderAchievements()}
+
+    let adviceRecipeList=[];
+    function dietAdvice(log){const t=getDietTargets(),total=dietTotals(log),logged=new Set(log.meals.map(m=>m.id)),dims=[['碳水','carbs'],['蛋白质','protein'],['脂肪','fat'],['热量','kcal']];let h='';dims.forEach(([label,key])=>{const need=t[key]-total[key],unit=key==='kcal'?'千卡':'克';if(need<=0){h+=`<div class="calorie-box" style="margin-top:8px"><span>${label}</span><span class="match" style="color:var(--green)">已达标</span></div>`;return}const recs=recipes.filter(r=>!logged.has(r.id)).map(r=>({r,v:key==='kcal'?recipeTotalKcal(r,1):recipeMacros(r,1)[key]})).sort((a,b)=>b.v-a.v).slice(0,2);h+=`<div class="calorie-box" style="margin-top:8px"><span>${label}还差约 ${Math.round(need)} ${unit}</span><span class="match" style="color:#c07b3a">优先补充</span></div><p class="helper" style="margin:6px 2px 0">${recs.length?recs.map(x=>`<button type="button" class="subchip" data-advice-recipe="${x.r.id}">${x.r.emoji} ${x.r.name}</button>`).join(''):'暂无合适推荐'}</p>`});return h}
+    function purchaseAndCookRecipes(list,people){if(!list.length)return;const mult=people/2,needs=new Map();list.forEach(r=>r.ingredients.forEach(([name,grams])=>needs.set(name,(needs.get(name)||0)+Math.round(grams*mult))));const now=Date.now();[...needs.entries()].forEach(([name,need],idx)=>{const have=inventory.filter(x=>x.name===name).reduce((s,x)=>s+Number(x.weight),0);if(have<need)inventory.unshift({name,weight:need-have,unit:'g',expiry:getShelfGuide(name).days,added:now+idx})});needs.forEach((need,name)=>{let remaining=need;for(const item of inventory.filter(x=>x.name===name)){const take=Math.min(Number(item.weight),remaining);item.weight-=take;remaining-=take;if(remaining<=0)break}});inventory=inventory.filter(x=>x.weight>0.001);save();list.forEach(r=>recordMeal(r,mult));renderInventory();renderRecent();renderFoodOptions($('food-select').value);renderDietSummary();toast('已加入冰箱并记入今日饮食记录')}
+
+    function purchaseAndCookSingle(recipe,mult){const now=Date.now();recipe.ingredients.forEach(([name,grams],idx)=>{const need=Math.round(grams*mult),have=inventory.filter(x=>x.name===name).reduce((s,x)=>s+Number(x.weight),0);if(have<need)inventory.unshift({name,weight:need-have,unit:'g',expiry:getShelfGuide(name).days,added:now+idx})});recipe.ingredients.forEach(([name,grams])=>{let remaining=Math.round(grams*mult);for(const item of inventory.filter(x=>x.name===name)){const take=Math.min(Number(item.weight),remaining);item.weight-=take;remaining-=take;if(remaining<=0)break}inventory=inventory.filter(x=>x.weight>0)});save();recordMeal(recipe,mult);renderInventory();renderRecent();$('recipe-overlay').classList.remove('open');showView('inventory');toast('已购买缺料并记入今日饮食记录')}
+
+    function renderRecipePurchase(r,mult){const body=$('sheet-body'),shortages=r.ingredients.map(([name,grams])=>{const need=Math.round(grams*mult),have=inventory.filter(x=>x.name===name).reduce((s,x)=>s+Number(x.weight),0);return {name,shortage:Math.max(0,need-have)}}).filter(x=>x.shortage>0),rows=shortages.map(({name,shortage})=>{const pieceGrams=foodPieceGrams[name],unit=pieceGrams?'piece':'g',amount=pieceGrams?Math.ceil(shortage/pieceGrams):Math.ceil(shortage),options=[['g','克'],['kg','千克'],...(pieceGrams?[['piece','个']]:[])].map(([value,label])=>`<option value="${value}" ${unit===value?'selected':''}>${label}</option>`).join('');return `<div class="purchase-line" data-name="${name}" data-shortage="${shortage}" data-unit="${unit}"><strong>${getFood(name).emoji} ${name}</strong><span class="purchase-need">至少还需 ${foodAmountText(name,shortage,false)}</span><div class="unit-input"><input class="field purchase-amount" type="number" min="0.001" step="${unit==='piece'?'1':'any'}" value="${amount}" inputmode="${unit==='piece'?'numeric':'decimal'}"><select class="unit-select purchase-unit" aria-label="${name}购买单位">${options}</select></div></div>`}).join('');body.innerHTML=`<div class="purchase-form"><h3>填写实际购买量</h3><p>这次缺的食材，请填写实际购买量；确认后先登记购买量，再扣除这道菜所需，剩余量留在冰箱。</p>${rows}<div class="purchase-actions"><button type="button" class="secondary" id="recipe-cancel-purchase">返回</button><button type="button" class="primary" id="recipe-confirm-purchase">加入冰箱并扣除用量</button></div><div class="purchase-validation" id="recipe-purchase-validation"></div></div>`;const update=()=>{const entries=[...body.querySelectorAll('.purchase-line')].map(row=>({amount:Number(row.querySelector('.purchase-amount').value)||0,unit:row.querySelector('.purchase-unit').value,grams:(Number(row.querySelector('.purchase-amount').value)||0)*gramsPerUnit(row.querySelector('.purchase-unit').value,row.dataset.name),shortage:Number(row.dataset.shortage)})),invalid=entries.some(item=>item.grams+0.001<item.shortage||item.grams<=0||(item.unit==='piece'&&!Number.isInteger(item.amount)));$('recipe-confirm-purchase').disabled=invalid;$('recipe-purchase-validation').textContent=invalid?'购买量需要至少覆盖缺少量；按“个”购买请填写整数。':''};body.querySelectorAll('.purchase-line').forEach(row=>{const input=row.querySelector('.purchase-amount'),unit=row.querySelector('.purchase-unit');input.addEventListener('input',update);unit.addEventListener('change',()=>{const grams=(Number(input.value)||0)*gramsPerUnit(row.dataset.unit,row.dataset.name),next=unit.value;row.dataset.unit=next;input.step=next==='piece'?'1':'any';input.inputMode=next==='piece'?'numeric':'decimal';input.value=grams?String(next==='kg'?Number((grams/1000).toFixed(3)):next==='piece'?Math.ceil(grams/gramsPerUnit(next,row.dataset.name)):Math.ceil(grams)):'';update()})});$('recipe-cancel-purchase').addEventListener('click',()=>openRecipe(r.id));$('recipe-confirm-purchase').addEventListener('click',()=>completeRecipePurchase(r,mult));update()}
+    function completeRecipePurchase(r,mult){const body=$('sheet-body'),needs=new Map();r.ingredients.forEach(([name,grams])=>needs.set(name,(needs.get(name)||0)+Math.round(grams*mult)));const purchased=[...body.querySelectorAll('.purchase-line')].map(row=>{const name=row.dataset.name,unit=row.querySelector('.purchase-unit').value,amount=Number(row.querySelector('.purchase-amount').value)||0;return {name,unit,amount,grams:amount*gramsPerUnit(unit,name)}});if(purchased.some(item=>item.grams+0.001<Math.max(0,(needs.get(item.name)||0)-inventory.filter(x=>x.name===item.name).reduce((s,x)=>s+Number(x.weight),0)))){toast('购买量不足，请重新确认');return}const now=Date.now();purchased.forEach((item,index)=>{inventory.unshift({name:item.name,weight:item.grams,unit:item.unit==='piece'?'piece':'g',expiry:getShelfGuide(item.name).days,added:now+index})});for(const [name,need] of needs){let remaining=need;for(const item of inventory.filter(x=>x.name===name)){const take=Math.min(Number(item.weight),remaining);item.weight-=take;remaining-=take;if(remaining<=0)break}if(remaining>0.001){toast(`${name}库存不足，未完成扣减`);return}}inventory=inventory.filter(item=>item.weight>0.001);const receipt={fingerprint:`${r.id}|${mult}`,recipeNames:[r.name],people:Math.round(mult*2),items:purchased,usedItems:[...needs].map(([name,grams])=>({name,grams})),purchasedAt:now};localStorage.setItem(menuPurchaseKey,JSON.stringify(receipt));save();recordMeal(r,mult);renderInventory();renderRecent();$('recipe-overlay').classList.remove('open');showView('inventory');toast('采购量已加入冰箱，并记入今日饮食记录')}
+
+    const dietMinDate='2026-10-10';let dietViewDate=null,dietCursor=todayStr().slice(0,7);
+    function pad2(n){return String(n).padStart(2,'0')}
+    function dateStrOf(d){return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`}
+    function parseDateStr(str){const [y,m,dd]=str.split('-').map(Number);return new Date(y,m-1,dd)}
+    function currentDietDate(){return dietViewDate||todayStr()}
+    function sumPeriod(dates){const logs=readDietLogs();let kcal=0,carbs=0,protein=0,fat=0,days=0;dates.forEach(d=>{const day=(logs[d]||{}).meals||[];if(!day.length)return;days++;day.forEach(m=>{kcal+=m.kcal||0;carbs+=m.carbs||0;protein+=m.protein||0;fat+=m.fat||0})});return {days,kcal,carbs,protein,fat}}
+    function weekDates(str){const d=parseDateStr(str),diff=(d.getDay()+6)%7,mon=new Date(d);mon.setDate(d.getDate()-diff);return Array.from({length:7},(_,i)=>{const x=new Date(mon);x.setDate(mon.getDate()+i);return dateStrOf(x)})}
+    function monthDates(str){const d=parseDateStr(str),y=d.getFullYear(),m=d.getMonth(),last=new Date(y,m+1,0).getDate();return Array.from({length:last},(_,i)=>`${y}-${pad2(m+1)}-${pad2(i+1)}`)}
+    function periodLine(label,sum){return `<div class="calorie-box" style="margin-top:8px"><span>${label}</span><div class="calorie-value" style="font-size:15px">${sum.days} 天 · ${sum.kcal}<small> 千卡</small></div></div><p class="helper" style="margin:6px 2px 0">碳水 ${sum.carbs}g · 蛋白 ${sum.protein}g · 脂肪 ${sum.fat}g</p>`}
+    function renderPeriodSummary(dateStr){const week=sumPeriod(weekDates(dateStr)),month=sumPeriod(monthDates(dateStr));$('diet-period-summary').innerHTML=periodLine('本周汇总',week)+periodLine('本月汇总',month)}
+    function shiftCalMonth(delta){const [y,m]=dietCursor.split('-').map(Number),d=new Date(y,m-1+delta,1),next=`${d.getFullYear()}-${pad2(d.getMonth()+1)}`;if(next<dietMinDate.slice(0,7))return;dietCursor=next;renderDietCalendar()}
+    function renderDietCalendar(){const [y,m]=dietCursor.split('-').map(Number),first=new Date(y,m-1,1),lead=(first.getDay()+6)%7,days=new Date(y,m,0).getDate(),logs=readDietLogs(),view=currentDietDate();let h=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><button type="button" class="secondary" id="cal-prev" style="padding:6px 11px;margin:0">◀</button><strong style="font-size:13px">${y}年${m}月</strong><button type="button" class="secondary" id="cal-next" style="padding:6px 11px;margin:0">▶</button></div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center">`;['一','二','三','四','五','六','日'].forEach(w=>h+=`<span style="font-size:10px;color:var(--muted);padding:3px 0">${w}</span>`);for(let i=0;i<lead;i++)h+=`<span></span>`;for(let d=1;d<=days;d++){const ds=`${y}-${pad2(m)}-${pad2(d)}`,dis=ds<dietMinDate,sel=ds===view,has=!!logs[ds];let bg='transparent',color=dis?'#d3d8d3':'var(--ink)',fw='';if(sel){bg='var(--green)';color='#fff';fw='font-weight:700'}else if(!dis&&has){bg='var(--mint)';fw='font-weight:600'}h+=`<button type="button" class="cal-day" data-day="${ds}" ${dis?'disabled':''} style="padding:6px 0;border-radius:8px;border:0;background:${bg};color:${color};font-size:12px;${fw}">${d}</button>`}h+=`</div>`;$('diet-calendar').innerHTML=h;$('cal-prev').addEventListener('click',()=>shiftCalMonth(-1));$('cal-next').addEventListener('click',()=>shiftCalMonth(1));document.querySelectorAll('.cal-day:not([disabled])').forEach(b=>b.addEventListener('click',()=>{dietViewDate=b.dataset.day;dietCursor=b.dataset.day.slice(0,7);renderDietSummary()}))}
+
+    let dietMealsOpen=false;
+    function toggleDietMeals(force){dietMealsOpen=(force===undefined)?(!dietMealsOpen):force;const meals=$('diet-meals');if(meals)meals.hidden=!dietMealsOpen;const arrow=$('diet-kcal-arrow');if(arrow)arrow.textContent=dietMealsOpen?'▴':'▾';}
+
+    let nearbyMap=null,nearbyMarker=null,shareMarkers=[],nearbyPosition=null,shareClient=null,shareRows=[],myShareRows=[],nearbyUserId=null,nearbyShareCount=0;
+    const NEARBY_RADIUS_KM=10;
+    const nearbyReady=()=>!!(window.supabase?.createClient&&window.FRIDGE_SUPABASE_URL&&window.FRIDGE_SUPABASE_PUBLISHABLE_KEY);
+    function initNearbySharing(){const status=$('share-connection');ensureNearbyMap();$('locate-nearby').addEventListener('click',locateNearby);$('refresh-shares').addEventListener('click',refreshNearbyShares);$('publish-share').addEventListener('click',publishFoodShare);$('share-item').addEventListener('change',syncShareUnits);syncShareChoices();if(!nearbyReady()){status.textContent='共享服务尚未配置。地图页面已就绪，接入 Supabase 后即可与其他用户互通。';return}shareClient=window.supabase.createClient(window.FRIDGE_SUPABASE_URL,window.FRIDGE_SUPABASE_PUBLISHABLE_KEY);status.textContent='正在建立匿名安全会话…';shareClient.auth.getSession().then(async({data,error})=>{if(error)throw error;let session=data.session;if(!session){const result=await shareClient.auth.signInAnonymously();if(result.error)throw result.error;session=result.data.session}nearbyUserId=session?.user?.id||null;if(!nearbyUserId)throw new Error('anonymous session unavailable');status.textContent='共享服务已连接。可查看 10 公里内的共享食材。';await Promise.all([refreshShareAchievementCount(),loadMyShares()]);if(nearbyPosition)await loadNearbyShares()}).catch(()=>{status.textContent='连接失败，请检查 Supabase 配置及匿名登录设置。';$('my-share-list').innerHTML='<div class="empty">共享服务连接失败，暂时无法管理发布记录</div>'});}
+    let sharePrefillAdded=null;
+    function syncShareChoices(preferredAdded){const select=$('share-item');if(!select)return;const items=inventory.filter(item=>remainingDays(item)>=0&&remainingDays(item)<=3);select.innerHTML=items.length?items.map((item,index)=>`<option value="${index}">${escapeHtml(item.name)} · ${escapeHtml(expiryText(item))} · ${escapeHtml(inventoryQuantityHtml(item).replace(/<[^>]*>/g,''))}</option>`).join(''):'<option value="">没有 3 天内到期的冰箱食品</option>';select._shareItems=items;if(preferredAdded!==undefined&&preferredAdded!==null){const index=items.findIndex(item=>Number(item.added)===Number(preferredAdded));if(index<0){toast('该食材不在 3 天内到期的共享范围中');return}select.value=String(index)}syncShareUnits();}
+    function openShareFromInventory(added){const item=inventory.find(entry=>Number(entry.added)===Number(added));if(!item)return;sharePrefillAdded=item.added;showView('nearby');$('share-item').scrollIntoView({behavior:'smooth',block:'center'});toast(`已选择 ${item.name}，确认数量和共享信息后发布`)}
+    function syncShareUnits(){const item=$('share-item')?.selectedOptions[0],entry=$('share-item')?._shareItems?.[Number(item?.value)];const unit=$('share-unit');if(!entry){unit.innerHTML='<option value="g">克</option>';return}const liquid=entry.unit==='ml',count=!!foodPieceGrams[entry.name]&&entry.unit==='piece';unit.innerHTML=liquid?'<option value="ml">毫升</option>':`<option value="g">克</option>${count?'<option value="piece">个</option>':''}`;unit.value=liquid?'ml':count?'piece':'g';const amount=liquid?Math.max(1,Math.floor(Number(entry.weight))):count?Math.max(1,Math.floor(Number(entry.weight)/foodPieceGrams[entry.name])):Math.max(1,Math.floor(Number(entry.weight)));$('share-quantity').max=String(amount);$('share-quantity').value=String(amount);}
+    function ensureNearbyMap(){if(nearbyMap||!window.L)return;nearbyMap=L.map('nearby-map',{zoomControl:true}).setView([36.5,127.8],5);L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,referrerPolicy:'strict-origin-when-cross-origin',attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'}).addTo(nearbyMap);}
+    function obscureCoords(lat,lng){return {lat:Number((Math.round(lat*100)/100).toFixed(2)),lng:Number((Math.round(lng*100)/100).toFixed(2))}}
+    function locateNearby(){if(!navigator.geolocation){toast('此浏览器不支持定位');return}toast('正在获取位置…');navigator.geolocation.getCurrentPosition(pos=>{nearbyPosition={lat:pos.coords.latitude,lng:pos.coords.longitude};ensureNearbyMap();if(!nearbyMap){toast('地图组件未加载，请检查网络');return}nearbyMap.setView([nearbyPosition.lat,nearbyPosition.lng],12);if(nearbyMarker)nearbyMarker.remove();nearbyMarker=L.circleMarker([nearbyPosition.lat,nearbyPosition.lng],{radius:8,color:'#286548',fillColor:'#6eae77',fillOpacity:.85}).addTo(nearbyMap).bindPopup('你的位置（仅此设备显示）');nearbyMarker.openPopup();refreshNearbyShares();toast('已定位');},err=>toast(err.code===1?'你拒绝了定位权限':'定位失败，请检查浏览器权限'),{enableHighAccuracy:false,timeout:12000,maximumAge:60000})}
+    async function refreshNearbyShares(){await Promise.all([loadNearbyShares(),loadMyShares()])}
+    async function loadNearbyShares(){if(!shareClient){toast('共享服务尚未配置');return}if(!nearbyPosition){toast('请先定位查看附近');return}const latDelta=NEARBY_RADIUS_KM/111.32,lonDelta=NEARBY_RADIUS_KM/(111.32*Math.max(.01,Math.cos(nearbyPosition.lat*Math.PI/180))),{data,error}=await shareClient.from('food_shares').select('id,food_name,quantity,unit,expires_at,note,latitude,longitude,created_at').eq('status','open').gt('expires_at',new Date().toISOString()).gte('latitude',Math.max(-90,nearbyPosition.lat-latDelta)).lte('latitude',Math.min(90,nearbyPosition.lat+latDelta)).gte('longitude',Math.max(-180,nearbyPosition.lng-lonDelta)).lte('longitude',Math.min(180,nearbyPosition.lng+lonDelta)).limit(500);if(error){toast('读取共享信息失败，请确认数据库迁移已运行');return}shareRows=(data||[]).map(row=>({...row,distance:distanceKm(nearbyPosition.lat,nearbyPosition.lng,row.latitude,row.longitude)})).filter(row=>row.distance<=NEARBY_RADIUS_KM).sort((a,b)=>a.distance-b.distance);renderNearbyShares();}
+    function renderNearbyShares(){const list=$('share-list');shareMarkers.forEach(marker=>marker.remove());shareMarkers=[];if(nearbyMap)shareRows.forEach(row=>{const marker=L.marker([row.latitude,row.longitude]).addTo(nearbyMap).bindPopup(`<strong>${escapeHtml(row.food_name)}</strong><br>${escapeHtml(row.quantity)} ${escapeHtml(row.unit)} · ${escapeHtml(new Date(row.expires_at).toLocaleDateString())}<br>${escapeHtml(row.note||'附近自取')}`);shareMarkers.push(marker)});list.innerHTML=shareRows.length?shareRows.map(row=>{const owned=myShareRows.some(own=>own.id===row.id);return `<article class="food-row"><div class="food-emoji">🥬</div><div class="food-info"><div class="food-name">${escapeHtml(row.food_name)} · ${escapeHtml(row.quantity)} ${escapeHtml(row.unit)}</div><div class="food-meta">约 ${Math.round(row.distance*10)/10} 公里 · ${escapeHtml(row.note||'附近自取')}</div></div><div class="nearby-share-actions"><button class="secondary" type="button" data-share-map="${escapeHtml(row.id)}">地图</button>${owned?'<span class="nearby-share-status">你发布的</span>':`<button class="secondary" type="button" data-claim-share="${escapeHtml(row.id)}" ${nearbyUserId?'':'disabled'}>我要领取</button>`}</div></article>`}).join(''):'<div class="empty">10 公里内暂时没有可领取的食材</div>';list.querySelectorAll('[data-share-map]').forEach(button=>button.addEventListener('click',()=>{const row=shareRows.find(item=>item.id===button.dataset.shareMap);if(row&&nearbyMap){nearbyMap.setView([row.latitude,row.longitude],15);const marker=shareMarkers.find(m=>{const p=m.getLatLng();return p.lat===row.latitude&&p.lng===row.longitude});marker?.openPopup()}}));list.querySelectorAll('[data-claim-share]').forEach(button=>button.addEventListener('click',()=>claimFoodShare(button.dataset.claimShare)));}
+    function distanceKm(lat1,lon1,lat2,lon2){const r=Math.PI/180,dLat=(lat2-lat1)*r,dLon=(lon2-lon1)*r,a=Math.sin(dLat/2)**2+Math.cos(lat1*r)*Math.cos(lat2*r)*Math.sin(dLon/2)**2;return 6371*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))}
+    async function loadMyShares(){const list=$('my-share-list');if(!shareClient||!nearbyUserId){list.innerHTML='<div class="empty">连接共享服务后显示你发布的食材</div>';return}const {data,error}=await shareClient.from('food_shares').select('id,food_name,quantity,unit,expires_at,note,status,closed_reason,created_at').eq('owner_id',nearbyUserId).order('created_at',{ascending:false}).limit(100);if(error){list.innerHTML='<div class="empty">读取发布记录失败，请先运行附近共享数据库更新 SQL</div>';return}myShareRows=data||[];renderMyShares();renderNearbyShares()}
+    function renderMyShares(){const list=$('my-share-list');if(!myShareRows.length){list.innerHTML='<div class="empty">你还没有发布共享食材</div>';return}list.innerHTML=myShareRows.map(row=>{const expired=new Date(row.expires_at)<=new Date(),open=row.status==='open'&&!expired,status=open?'共享中':row.status==='closed'?(row.closed_reason==='claimed'?'已领取':'已撤下'):'已过期';return `<article class="food-row"><div class="food-emoji">${row.closed_reason==='claimed'?'🤝':'🥬'}</div><div class="food-info"><div class="food-name">${escapeHtml(row.food_name)} · ${escapeHtml(row.quantity)} ${escapeHtml(row.unit)}</div><div class="food-meta">${status} · 到期 ${escapeHtml(new Date(row.expires_at).toLocaleDateString())}${row.note?` · ${escapeHtml(row.note)}`:''}</div></div>${open?`<div class="nearby-share-actions"><button class="secondary" type="button" data-close-share="${escapeHtml(row.id)}" data-close-reason="claimed">已领取</button><button class="secondary" type="button" data-close-share="${escapeHtml(row.id)}" data-close-reason="withdrawn">撤下</button></div>`:`<span class="nearby-share-status">${status}</span>`}</article>`}).join('');list.querySelectorAll('[data-close-share]').forEach(button=>button.addEventListener('click',()=>closeOwnShare(button.dataset.closeShare,button.dataset.closeReason)))}
+    async function refreshShareAchievementCount(){if(!shareClient||!nearbyUserId)return;const {count,error}=await shareClient.from('food_shares').select('id',{count:'exact',head:true}).eq('owner_id',nearbyUserId);if(error)return;nearbyShareCount=count||0;renderAchievements()}
+    async function closeOwnShare(id,reason){const claimed=reason==='claimed';if(!confirm(claimed?'确认将这份食材标记为已领取？':'确认撤下这份共享食材？'))return;const {data,error}=await shareClient.from('food_shares').update({status:'closed',closed_reason:reason}).eq('id',id).eq('owner_id',nearbyUserId).eq('status','open').select('id').maybeSingle();if(error||!data){toast('这条共享已被处理，或更新失败');await refreshNearbyShares();return}toast(claimed?'已标记为领取完成':'已撤下共享');await refreshNearbyShares()}
+    async function claimFoodShare(id){const row=shareRows.find(item=>item.id===id);if(!row||!nearbyUserId)return;if(!confirm(`领取「${row.food_name}」后，这条共享会立即从可领取列表中移除。请先确认取货说明：${row.note||'附近自取'}`))return;const {data,error}=await shareClient.rpc('claim_food_share',{p_share_id:id});if(error){toast('领取失败，请确认数据库更新 SQL 已运行');return}if(!data){toast('这份食材已被领取或撤下');await refreshNearbyShares();return}toast('已领取，请按取货说明完成交接');await refreshNearbyShares()}
+    async function publishFoodShare(){if(!shareClient||!nearbyUserId){toast('共享服务尚未连接，请稍后再试');return}if(!nearbyPosition){toast('请先点击定位并查看附近');return}if(!$('share-consent').checked){toast('请先确认共享信息和模糊位置');return}const entry=$('share-item')._shareItems?.[Number($('share-item').value)];if(!entry){toast('没有可分享的临期食品');return}const qty=Number($('share-quantity').value),unit=$('share-unit').value,max=unit==='piece'?Math.floor(entry.weight/foodPieceGrams[entry.name]):Math.floor(entry.weight);if(!(qty>0&&qty<=max)){toast('分享数量超过当前库存');return}const coords=obscureCoords(nearbyPosition.lat,nearbyPosition.lng),expires=new Date();expires.setDate(expires.getDate()+remainingDays(entry));expires.setHours(23,59,59,999);const {error}=await shareClient.from('food_shares').insert({food_name:entry.name,quantity:qty,unit,expires_at:expires.toISOString(),note:$('share-note').value.trim(),latitude:coords.lat,longitude:coords.lng});if(error){toast('发布失败，请确认数据库表和权限已配置');return}$('share-note').value='';$('share-consent').checked=false;toast('已发布到附近共享');await refreshShareAchievementCount();await refreshNearbyShares()}
+    function init(){
+      const d=new Date();$('today').textContent=`${d.getMonth()+1}月${d.getDate()}日 · ${['日','一','二','三','四','五','六'][d.getDay()]}`;
+      renderFoodOptions(foods[0].name);updateFoodUnitOptions('g');
+      $('start-barcode-scan').addEventListener('click',startBarcodeScan);$('stop-barcode-scan').addEventListener('click',stopBarcodeScan);$('lookup-barcode').addEventListener('click',lookupBarcode);$('barcode-input').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();lookupBarcode()}});
+      $('custom-food-toggle').addEventListener('click',()=>{const panel=$('custom-food-panel'),open=panel.hidden;panel.hidden=!open;$('custom-food-toggle').setAttribute('aria-expanded',String(open));if(open)setTimeout(()=>$('custom-food-name').focus(),0)});$('cancel-custom-food').addEventListener('click',closeCustomFoodPanel);$('save-custom-food').addEventListener('click',saveCustomFood);$('custom-food-name').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();saveCustomFood()}});$('custom-food-category').addEventListener('change',()=>updateCustomFoodUnitOptions($('custom-food-category').value==='饮料'?'ml':'g'));$('custom-food-unit').addEventListener('change',()=>{if($('custom-food-calorie-basis').value==='package')$('custom-food-calorie-reference').value='';updateCustomFoodCalorieFields()});$('custom-food-calorie-basis').addEventListener('change',updateCustomFoodCalorieFields);updateCustomFoodUnitOptions('g');
+      $('food-search').addEventListener('input',e=>renderFoodSearch(e.target.value));$('food-search').addEventListener('keydown',e=>{if(e.key==='Enter'){const first=$('food-search-results').querySelector('[data-food]');if(first){e.preventDefault();first.click()}}});$('food-search-results').addEventListener('click',e=>{const result=e.target.closest('[data-food]');if(!result)return;$('food-select').value=result.dataset.food;$('food-select').dispatchEvent(new Event('change'));$('food-search').value='';$('food-search-results').hidden=true});document.addEventListener('click',e=>{if(!e.target.closest('.food-search-wrap'))$('food-search-results').hidden=true});
+      $('food-select').addEventListener('change',()=>{const name=$('food-select').value,food=foods.find(item=>item.name===name),preferredUnit=food?.defaultUnit||(supportsMilliliters(name)?'ml':foodPieceGrams[name]?'piece':'g');updateFoodUnitOptions(preferredUnit);$('weight').value=foodPieceGrams[name]?'1':'300';calculateKcal();updateExpirySuggestion()});$('weight').addEventListener('input',calculateKcal);$('weight-unit').addEventListener('change',()=>{const input=$('weight'),select=$('weight-unit'),name=$('food-select').value,oldUnit=select.dataset.currentUnit||'g',amount=Number(input.value)||0,grams=amount*gramsPerUnit(oldUnit,name),newUnit=select.value;select.dataset.currentUnit=newUnit;select.setAttribute('aria-label',newUnit==='piece'?'数量单位':newUnit==='ml'?'容量单位':'重量单位');$('weight-label').textContent=newUnit==='piece'?'食物数量':newUnit==='ml'?'食物容量':'食物重量';input.min=newUnit==='kg'?'0.001':'1';input.step=newUnit==='kg'?'0.001':'1';input.value=grams?String(newUnit==='kg'?Number((grams/1000).toFixed(3)):newUnit==='piece'?Number((grams/gramsPerUnit(newUnit,name)).toFixed(2)):Math.round(grams)):'';calculateKcal()});$('expiry-slider').addEventListener('input',()=>{syncExpiryDisplay();const guide=getShelfGuide($('food-select').value);$('expiry-hint').textContent=`当前设置：${guide.range}。${guide.note} 商品包装标示优先。`});calculateKcal();updateExpirySuggestion();
+      $('add-food').addEventListener('click',()=>{const name=$('food-select').value,amount=Number($('weight').value),unit=$('weight-unit').value,weight=amount*gramsPerUnit(unit,name);if(!weight||weight<=0){toast('请输入有效数量');return}const days=Number($('expiry-slider').value);inventory.unshift({name,weight,unit:unit==='piece'?'piece':unit==='ml'?'ml':'g',expiry:days,added:Date.now()});save();renderFoodOptions(name);renderInventory();renderRecent();$('weight').value=unit==='piece'?'1':unit==='kg'?'0.3':'300';calculateKcal();toast(`${name} ${amount} ${unit==='piece'?'个':unit==='kg'?'千克':unit==='ml'?'毫升':'克'}已加入冰箱`);showView('inventory')});
+      let swipeStart=null,suppressRecentClick=false;const attachSwipe=el=>{el.addEventListener('pointerdown',e=>{const shell=e.target.closest('.recent-shell');if(!shell||e.target.closest('.delete-item,.share-item-action'))return;swipeStart={shell,x:e.clientX,y:e.clientY}});el.addEventListener('pointerup',e=>{if(!swipeStart)return;const dx=e.clientX-swipeStart.x,dy=e.clientY-swipeStart.y;if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>35){swipeStart.shell.classList.toggle('swiped',dx<0);swipeStart.shell.classList.toggle('share-swiped',dx>0);suppressRecentClick=true;setTimeout(()=>suppressRecentClick=false,350)}swipeStart=null});el.addEventListener('pointercancel',()=>swipeStart=null);el.addEventListener('click',e=>{if(suppressRecentClick){e.preventDefault();return}const shell=e.target.closest('.recent-shell');if(!shell)return;if(e.target.closest('.delete-item')){const entry=Number(shell.dataset.entry);inventory=inventory.filter(x=>Number(x.added)!==entry);save();renderInventory();renderRecent();toast('食材已删除');return}const share=e.target.closest('.share-item-action');if(share){openShareFromInventory(share.dataset.shareEntry);return}if(!e.target.closest('button')){shell.classList.remove('swiped','share-swiped')}})};attachSwipe($('recent-list'));attachSwipe($('inventory-list'));
+      document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
+      document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.go)));
+      $('recipe-search').addEventListener('input',renderRecipes);
+      $('filters').addEventListener('click',e=>{const b=e.target.closest('[data-filter]');if(!b)return;activeFilters=new Set([b.dataset.filter]);renderSubfilters();document.querySelectorAll('[data-filter]').forEach(x=>x.classList.toggle('selected',activeFilters.has(x.dataset.filter)));renderRecipes()});
+      $('subfilters').addEventListener('click',e=>{const b=e.target.closest('[data-subfilter]');if(!b)return;const parent=activeFilters.has('stirfry')?'stirfry':'regional',child=b.dataset.subfilter;activeFilters=child?new Set([parent,child]):new Set([parent]);renderSubfilters();renderRecipes()});
+      $('recipe-list').addEventListener('change',e=>{const checkbox=e.target.closest('[data-select-recipe]');if(!checkbox)return;checkbox.checked?selectedRecipeIds.add(checkbox.dataset.selectRecipe):selectedRecipeIds.delete(checkbox.dataset.selectRecipe);renderRecipes()});$('servings').addEventListener('change',renderRecipes);$('dish-count').addEventListener('change',renderRecipes);$('close-sheet').addEventListener('click',()=>$('recipe-overlay').classList.remove('open'));$('recipe-overlay').addEventListener('click',e=>{if(e.target===$('recipe-overlay'))$('recipe-overlay').classList.remove('open')});
+      $('menu-shortcut').addEventListener('click',()=>{renderSelectedMenu();showView('menu')});
+      const p0=readProfile();$('profile-name').value=p0.name;$('profile-height').value=p0.height||'';$('profile-weight').value=p0.weight||'';$('profile-age').value=p0.age||'';$('profile-gender').value=p0.gender;$('profile-activity').value=p0.activity;$('profile-goal').value=p0.goal;
+      $('save-profile').addEventListener('click',()=>{saveProfile({name:$('profile-name').value.trim().slice(0,20),height:Number($('profile-height').value)||0,weight:Number($('profile-weight').value)||0,age:Number($('profile-age').value)||0,gender:$('profile-gender').value,activity:Number($('profile-activity').value)||1.55,goal:$('profile-goal').value});updateProfileInfo();renderDietSummary();toast('个人信息已保存')});$('profile-height').addEventListener('input',updateProfileInfo);$('profile-weight').addEventListener('input',updateProfileInfo);$('profile-age').addEventListener('input',updateProfileInfo);$('profile-gender').addEventListener('change',updateProfileInfo);$('profile-activity').addEventListener('change',updateProfileInfo);$('profile-goal').addEventListener('change',updateProfileInfo);updateProfileInfo();
+      $('export-backup').addEventListener('click',exportBackup);
+      $('import-backup').addEventListener('click',()=>$('import-file').click());
+      $('import-file').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(f)importBackup(f);e.target.value=''});
+      document.addEventListener('click',e=>{const b=e.target.closest('[data-advice-recipe]');if(b){showView('recipes');openRecipe(b.dataset.adviceRecipe)}});
+      let deleteArm=false;$('diet-delete').addEventListener('click',()=>{if(!deleteArm){deleteArm=true;$('diet-delete').textContent='再次点击确认删除';setTimeout(()=>{deleteArm=false;$('diet-delete').textContent='删除当天记录'},3000);return}deleteArm=false;const logs=readDietLogs(),d=currentDietDate();delete logs[d];saveDietLogs(logs);renderDietSummary();toast('已删除 '+d+' 的记录')});
+      $('diet-kcal-box').addEventListener('click',()=>toggleDietMeals());
+      renderDietSummary();
+      initNearbySharing();
+      renderInventory();renderRecent();
+    }
+    init();
+  </script>
+  <script>
+    document.addEventListener('gesturestart', function (e) { e.preventDefault(); });
+    document.addEventListener('gesturechange', function (e) { e.preventDefault(); });
+    const APP_VERSION='2.2';
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', async function () {
+        try {
+          const registration=await navigator.serviceWorker.register('sw.js',{updateViaCache:'none'});
+          const notice=$('update-notice');
+          const showUpdate=()=>{ $('update-version').textContent=`v${APP_VERSION}`; notice.hidden=false; };
+          registration.addEventListener('updatefound',()=>{
+            const installing=registration.installing;
+            if(!installing)return;
+            installing.addEventListener('statechange',()=>{
+              if(installing.state==='installed'&&navigator.serviceWorker.controller)showUpdate();
+            });
+          });
+          if(registration.waiting&&navigator.serviceWorker.controller)showUpdate();
+          $('update-apply').addEventListener('click',()=>{
+            if(registration.waiting)registration.waiting.postMessage({type:'SKIP_WAITING'});
+            else registration.update().catch(()=>{});
+          });
+          $('update-later').addEventListener('click',()=>{notice.hidden=true;});
+          let refreshing=false;
+          navigator.serviceWorker.addEventListener('controllerchange',()=>{
+            if(refreshing)return;
+            refreshing=true;
+            window.location.reload();
+          });
+          registration.update().catch(()=>{});
+        } catch (_) {}
+      });
+    }
+  </script>
+</body>
+</html>
