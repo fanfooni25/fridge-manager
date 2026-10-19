@@ -1,4 +1,4 @@
-# Fridge Manager v2.2
+# Fridge Manager v1.4
 
 本版本修正地图瓦片地址，补全 OpenStreetMap 署名，并设置跨站来源标识。
 

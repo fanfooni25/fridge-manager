@@ -177,12 +177,12 @@
         </div>
         <div class="form-card">
           <div class="section-heading" style="margin:0 0 10px"><h2 style="margin:0">更新记录</h2></div>
-          <div class="update-log-item"><strong>v2.2 · 2026-10-19</strong><br>修正地图瓦片服务地址，补全 OpenStreetMap 署名并设置网页来源标识，改善地图底图被拦截的问题。</div>
-          <div class="update-log-item"><strong>v2.1 · 2026-10-19</strong><br>附近共享范围调整为 10 公里，并按距离由近到远排序；新增领取、撤下和已领取状态管理；共享成就改为读取云端记录。</div>
+          <div class="update-log-item"><strong>v1.4 · 2026-10-19</strong><br>修正地图瓦片服务地址，补全 OpenStreetMap 署名并设置网页来源标识，改善地图底图被拦截的问题。</div>
+          <div class="update-log-item"><strong>v1.3 · 2026-10-18</strong><br>附近共享范围调整为 10 公里，并按距离由近到远排序；新增领取、撤下和已领取状态管理；共享成就改为读取云端记录。</div>
           <div class="update-log-item"><strong>v1.2 · 2026-10-16</strong><br>修复 Edge 浏览器无法使用扫码的问题；缩小扫码预览并增加绿色定位框和操作提示；改善相机清晰度、自动对焦与扫码响应速度。</div>
           <div class="update-log-item"><strong>v1.1 · 2026-10-15</strong><br>添加独立食物页面与条码扫描/查询；食材名称支持韩语和英语；饮料可选择毫升；自定义食材支持热量录入方式；新增网页版本更新提示和更新记录。</div>
         </div>
-        <p class="helper" style="text-align:center;margin:10px 0 4px">Fridge Manager-version<span id="app-version">2.2</span></p>
+        <p class="helper" style="text-align:center;margin:10px 0 4px">Fridge Manager-version<span id="app-version">1.4</span></p>
       </section>
     </main>
     <nav aria-label="主导航">
@@ -197,7 +197,7 @@
   <div class="overlay" id="recipe-overlay"><div class="sheet"><div class="sheet-handle"></div><div class="sheet-head"><h2 id="sheet-title"></h2><button class="close" id="close-sheet" aria-label="关闭">×</button></div><div id="sheet-body"></div></div></div>
   <div class="toast" id="toast"></div>
   <div class="update-notice" id="update-notice" role="status" aria-live="polite" hidden>
-    <div class="update-notice-row"><div class="update-notice-copy"><strong>发现新版本 <span id="update-version">v2.2</span></strong>本次更新内容：</div><div class="update-notice-actions"><button class="update-later" id="update-later" type="button">稍后</button><button class="update-apply" id="update-apply" type="button">立即更新</button></div></div>
+    <div class="update-notice-row"><div class="update-notice-copy"><strong>发现新版本 <span id="update-version">v1.4</span></strong>本次更新内容：</div><div class="update-notice-actions"><button class="update-later" id="update-later" type="button">稍后</button><button class="update-apply" id="update-apply" type="button">立即更新</button></div></div>
     <ol class="update-notice-content"><li>修正地图瓦片地址，提升地图加载兼容性。</li><li>补全 OpenStreetMap 版权署名，并设置网页来源标识。</li></ol>
   </div>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -983,7 +983,7 @@
   <script>
     document.addEventListener('gesturestart', function (e) { e.preventDefault(); });
     document.addEventListener('gesturechange', function (e) { e.preventDefault(); });
-    const APP_VERSION='2.2';
+    const APP_VERSION='1.4';
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', async function () {
         try {

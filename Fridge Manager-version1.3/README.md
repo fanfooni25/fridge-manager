@@ -1,4 +1,4 @@
-# Fridge Manager v2.1
+# Fridge Manager v1.3
 
 本版本归档包含网页、图标、菜谱图片和离线缓存文件。
 
