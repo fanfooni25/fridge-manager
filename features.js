@@ -94,9 +94,13 @@
     let nearbyMap=null,nearbyMarker=null,shareMarkers=[],nearbyPosition=null,shareClient=null,shareRows=[],myShareRows=[],nearbyUserId=null,nearbyShareCount=0;
     const NEARBY_RADIUS_KM=10;
     const nearbyReady=()=>!!(window.supabase?.createClient&&window.FRIDGE_SUPABASE_URL&&window.FRIDGE_SUPABASE_PUBLISHABLE_KEY);
-    function renderAccountStatus(user){
-      const status=$('account-status'),bind=$('bind-account-email'),login=$('login-account-email');if(!status)return;
-      if(!nearbyReady()){status.textContent='账号服务尚未配置。';if(bind)bind.disabled=true;if(login)login.disabled=true;return}
+    function renderAccountStatus(user,error){
+      const status=$('account-status'),bind=$('bind-account-email'),login=$('login-account-email'),retry=$('retry-account-session');if(!status)return;
+      if(window.FRIDGE_SUPABASE_LOAD_ERROR){status.textContent='登录组件加载失败，请检查网络并重新打开应用。';if(bind)bind.disabled=true;if(login)login.disabled=true;return}
+      if(window.FRIDGE_SUPABASE_CONFIG_ERROR){status.textContent='Supabase 配置文件未加载，请重新部署应用配置。';if(bind)bind.disabled=true;if(login)login.disabled=true;return}
+      if(!nearbyReady()){status.textContent='账号服务未配置，请检查 Supabase 地址和 Publishable key。';if(bind)bind.disabled=true;if(login)login.disabled=true;return}
+      if(retry)retry.hidden=!error;
+      if(error){status.textContent=error.message==='auth-timeout'?'连接账号超时。请检查网络，或点下方重新检查。':'读取账号状态失败。请检查网络和 Supabase Authentication 设置后重试。';if(bind)bind.disabled=true;if(login)login.disabled=true;return}
       if(!shareClient){status.textContent='正在连接账号服务…';return}
       if(!user){status.textContent='尚未建立本机账号。';return}
       if(user.email){$('account-email').value=user.email;status.textContent=user.is_anonymous?`本机临时身份：${user.email}。建议绑定邮箱以便以后找回。`:`已绑定邮箱：${user.email}。当前数据仍只保存在本机，云端同步将在后续步骤接入。`;if(bind){bind.disabled=!user.is_anonymous;bind.textContent=user.is_anonymous?'绑定邮箱，保留本机身份':'邮箱已绑定'}if(login)login.disabled=!user.is_anonymous;return}
@@ -113,18 +117,31 @@
         try{const emailRedirectTo=accountRedirectUrl(),{error}=await shareClient.auth.signInWithOtp({email,options:{emailRedirectTo,shouldCreateUser:false}});if(error)throw error;toast('登录邮件已发送，请在此设备打开邮件链接')}
         catch(error){toast(error.message?.includes('HTTPS')?error.message:'登录邮件发送失败，请检查邮箱地址和 Supabase 邮件设置')}
       });
+      $('retry-account-session').addEventListener('click',connectAccountSession);
       renderAccountStatus(null);
+    }
+    function withTimeout(promise,ms,label){let timer;return Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error(label)),ms)})]).finally(()=>clearTimeout(timer))}
+    async function connectAccountSession(){
+      if(!shareClient)return;
+      const status=$('account-status'),shareStatus=$('share-connection');status.textContent='正在检查账号状态…';$('retry-account-session').hidden=true;
+      try{
+        const {data,error}=await withTimeout(shareClient.auth.getSession(),12000,'auth-timeout');if(error)throw error;
+        let session=data.session;
+        if(!session){const result=await withTimeout(shareClient.auth.signInAnonymously(),12000,'auth-timeout');if(result.error)throw result.error;session=result.data.session}
+        nearbyUserId=session?.user?.id||null;if(!nearbyUserId)throw new Error('missing-user');
+        renderAccountStatus(session.user);shareStatus.textContent='共享与账号服务已连接。';
+        await Promise.all([refreshShareAchievementCount(),loadMyShares()]);if(nearbyPosition)await loadNearbyShares();
+      }catch(error){renderAccountStatus(null,error);shareStatus.textContent=error.message==='auth-timeout'?'账号连接超时，请检查网络后重试。':'账号连接失败，请检查 Supabase 配置和 Authentication 设置。';$('my-share-list').innerHTML='<div class="empty">账号服务暂时不可用，检查网络后可重新连接</div>'}
     }
     function initNearbySharing(){
       const status=$('share-connection');ensureNearbyMap();$('locate-nearby').addEventListener('click',locateNearby);$('refresh-shares').addEventListener('click',refreshNearbyShares);$('publish-share').addEventListener('click',publishFoodShare);$('share-item').addEventListener('change',syncShareUnits);syncShareChoices();
       if(!nearbyReady()){status.textContent='共享服务尚未配置。地图页面已就绪，接入 Supabase 后即可与其他用户互通。';renderAccountStatus(null);return}
-      shareClient=window.supabase.createClient(window.FRIDGE_SUPABASE_URL,window.FRIDGE_SUPABASE_PUBLISHABLE_KEY);
+      try{shareClient=window.supabase.createClient(window.FRIDGE_SUPABASE_URL,window.FRIDGE_SUPABASE_PUBLISHABLE_KEY)}catch(error){renderAccountStatus(null,error);status.textContent='Supabase 配置无效，请检查项目地址和 Publishable key。';return}
       shareClient.auth.onAuthStateChange((_event,session)=>{
         renderAccountStatus(session?.user||null);
         setTimeout(()=>{const nextUserId=session?.user?.id||null;if(nextUserId&&nextUserId!==nearbyUserId){nearbyUserId=nextUserId;Promise.all([refreshShareAchievementCount(),loadMyShares()]);if(nearbyPosition)loadNearbyShares()}},0);
       });
-      status.textContent='正在建立账号会话…';
-      shareClient.auth.getSession().then(async({data,error})=>{if(error)throw error;let session=data.session;if(!session){const result=await shareClient.auth.signInAnonymously();if(result.error)throw result.error;session=result.data.session}nearbyUserId=session?.user?.id||null;if(!nearbyUserId)throw new Error('account session unavailable');renderAccountStatus(session.user);status.textContent='共享与账号服务已连接。';await Promise.all([refreshShareAchievementCount(),loadMyShares()]);if(nearbyPosition)await loadNearbyShares()}).catch(()=>{status.textContent='连接失败，请检查 Supabase 配置及匿名登录设置。';renderAccountStatus(null);$('my-share-list').innerHTML='<div class="empty">共享服务连接失败，暂时无法管理发布记录</div>'});
+      status.textContent='正在建立账号会话…';connectAccountSession();
     }
     let sharePrefillAdded=null;
     function syncShareChoices(preferredAdded){const select=$('share-item');if(!select)return;const items=inventory.filter(item=>remainingDays(item)>=0&&remainingDays(item)<=3);select.innerHTML=items.length?items.map((item,index)=>`<option value="${index}">${escapeHtml(item.name)} · ${escapeHtml(expiryText(item))} · ${escapeHtml(inventoryQuantityHtml(item).replace(/<[^>]*>/g,''))}</option>`).join(''):'<option value="">没有 3 天内到期的冰箱食品</option>';select._shareItems=items;if(preferredAdded!==undefined&&preferredAdded!==null){const index=items.findIndex(item=>Number(item.added)===Number(preferredAdded));if(index<0){toast('该食材不在 3 天内到期的共享范围中');return}select.value=String(index)}syncShareUnits();}
