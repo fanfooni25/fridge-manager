@@ -99,6 +99,15 @@
       </section>
       <section class="view" id="view-profile">
         <div class="headline"><div><div class="eyebrow">关于你</div><h1>个人信息</h1></div></div>
+        <div class="form-card" id="account-card">
+          <div class="section-heading" style="margin:0 0 6px"><h2 style="margin:0">账号与设备</h2></div>
+          <p class="helper" id="account-status" style="margin:0 0 12px">正在检查账号状态…</p>
+          <label class="form-label" for="account-email">邮箱</label>
+          <input class="field" id="account-email" type="email" maxlength="254" placeholder="name@example.com" autocomplete="email" inputmode="email">
+          <button class="primary" id="bind-account-email" type="button">绑定邮箱，保留本机身份</button>
+          <button class="secondary" id="login-account-email" type="button" style="width:100%;margin-top:8px">在此设备用已有邮箱账号登录</button>
+          <p class="helper" style="margin-bottom:0">绑定后可用邮箱找回这个账号。此阶段不会上传或覆盖冰箱数据；库存和记录仍保存在本机，云端同步会在后续步骤接入。</p>
+        </div>
         <div class="achievement-panel">
           <div class="section-heading" style="margin:0 3px 9px"><h2>我的成就</h2><span class="subtle" id="achievement-summary"></span></div>
           <div class="achievement-grid" id="achievement-list" aria-live="polite"></div>
@@ -165,6 +174,7 @@
           <details class="update-log">
             <summary class="section-heading update-log-summary" style="margin:0"><h2 style="margin:0">更新记录</h2><span class="subtle">展开查看</span></summary>
             <div class="update-log-list">
+              <div class="update-log-item"><strong>v1.7 · 2026-10-25</strong><br>增加邮箱绑定和已有账号登录入口；当前仅建立账号身份，个人数据暂未开始云端同步。</div>
               <div class="update-log-item"><strong>v1.6 · 2026-10-25</strong><br>增加主屏幕安装引导和添加食物快捷方式；改进离线页面缓存、网络提示和更新检查。</div>
               <div class="update-log-item"><strong>v1.4 · 2026-10-19</strong><br>修正地图瓦片服务地址，补全 OpenStreetMap 署名并设置网页来源标识，改善地图底图被拦截的问题。</div>
               <div class="update-log-item"><strong>v1.3 · 2026-10-18</strong><br>附近共享范围调整为 10 公里，并按距离由近到远排序；新增领取、撤下和已领取状态管理；共享成就改为读取云端记录。</div>
@@ -173,7 +183,7 @@
             </div>
           </details>
         </div>
-        <p class="helper" style="text-align:center;margin:10px 0 4px">Fridge Manager-version<span id="app-version">1.6</span></p>
+        <p class="helper" style="text-align:center;margin:10px 0 4px">Fridge Manager-version<span id="app-version">1.7</span></p>
       </section>
     </main>
     <nav aria-label="主导航">

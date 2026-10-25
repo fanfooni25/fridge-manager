@@ -94,7 +94,38 @@
     let nearbyMap=null,nearbyMarker=null,shareMarkers=[],nearbyPosition=null,shareClient=null,shareRows=[],myShareRows=[],nearbyUserId=null,nearbyShareCount=0;
     const NEARBY_RADIUS_KM=10;
     const nearbyReady=()=>!!(window.supabase?.createClient&&window.FRIDGE_SUPABASE_URL&&window.FRIDGE_SUPABASE_PUBLISHABLE_KEY);
-    function initNearbySharing(){const status=$('share-connection');ensureNearbyMap();$('locate-nearby').addEventListener('click',locateNearby);$('refresh-shares').addEventListener('click',refreshNearbyShares);$('publish-share').addEventListener('click',publishFoodShare);$('share-item').addEventListener('change',syncShareUnits);syncShareChoices();if(!nearbyReady()){status.textContent='共享服务尚未配置。地图页面已就绪，接入 Supabase 后即可与其他用户互通。';return}shareClient=window.supabase.createClient(window.FRIDGE_SUPABASE_URL,window.FRIDGE_SUPABASE_PUBLISHABLE_KEY);status.textContent='正在建立匿名安全会话…';shareClient.auth.getSession().then(async({data,error})=>{if(error)throw error;let session=data.session;if(!session){const result=await shareClient.auth.signInAnonymously();if(result.error)throw result.error;session=result.data.session}nearbyUserId=session?.user?.id||null;if(!nearbyUserId)throw new Error('anonymous session unavailable');status.textContent='共享服务已连接。可查看 10 公里内的共享食材。';await Promise.all([refreshShareAchievementCount(),loadMyShares()]);if(nearbyPosition)await loadNearbyShares()}).catch(()=>{status.textContent='连接失败，请检查 Supabase 配置及匿名登录设置。';$('my-share-list').innerHTML='<div class="empty">共享服务连接失败，暂时无法管理发布记录</div>'});}
+    function renderAccountStatus(user){
+      const status=$('account-status'),bind=$('bind-account-email'),login=$('login-account-email');if(!status)return;
+      if(!nearbyReady()){status.textContent='账号服务尚未配置。';if(bind)bind.disabled=true;if(login)login.disabled=true;return}
+      if(!shareClient){status.textContent='正在连接账号服务…';return}
+      if(!user){status.textContent='尚未建立本机账号。';return}
+      if(user.email){$('account-email').value=user.email;status.textContent=user.is_anonymous?`本机临时身份：${user.email}。建议绑定邮箱以便以后找回。`:`已绑定邮箱：${user.email}。当前数据仍只保存在本机，云端同步将在后续步骤接入。`;if(bind){bind.disabled=!user.is_anonymous;bind.textContent=user.is_anonymous?'绑定邮箱，保留本机身份':'邮箱已绑定'}if(login)login.disabled=!user.is_anonymous;return}
+      status.textContent='本机临时账号。绑定邮箱可保留这个身份；清除浏览器数据后将无法找回。';if(bind){bind.disabled=false;bind.textContent='绑定邮箱，保留本机身份'}if(login)login.disabled=false;
+    }
+    function accountRedirectUrl(){if(location.protocol==='file:')throw new Error('请先通过 HTTPS 网站打开应用，再使用邮箱账号');return new URL('.',location.href).href}
+    function initAccountControls(){
+      $('bind-account-email').addEventListener('click',async()=>{
+        const email=$('account-email').value.trim();if(!shareClient){toast('账号服务尚未连接');return}if(!/^\S+@\S+\.\S+$/.test(email)){toast('请输入有效的邮箱地址');$('account-email').focus();return}
+        try{const emailRedirectTo=accountRedirectUrl(),{data,error}=await shareClient.auth.updateUser({email},{emailRedirectTo});if(error)throw error;toast('验证邮件已发送，请在此设备打开邮件链接完成绑定');if(data.user)renderAccountStatus(data.user)}catch(error){toast(error.message?.includes('HTTPS')?error.message:'绑定失败：请检查邮箱服务和 Supabase 手动关联设置')}
+      });
+      $('login-account-email').addEventListener('click',async()=>{
+        const email=$('account-email').value.trim();if(!shareClient){toast('账号服务尚未连接');return}if(!/^\S+@\S+\.\S+$/.test(email)){toast('请输入有效的邮箱地址');$('account-email').focus();return}
+        try{const emailRedirectTo=accountRedirectUrl(),{error}=await shareClient.auth.signInWithOtp({email,options:{emailRedirectTo,shouldCreateUser:false}});if(error)throw error;toast('登录邮件已发送，请在此设备打开邮件链接')}
+        catch(error){toast(error.message?.includes('HTTPS')?error.message:'登录邮件发送失败，请检查邮箱地址和 Supabase 邮件设置')}
+      });
+      renderAccountStatus(null);
+    }
+    function initNearbySharing(){
+      const status=$('share-connection');ensureNearbyMap();$('locate-nearby').addEventListener('click',locateNearby);$('refresh-shares').addEventListener('click',refreshNearbyShares);$('publish-share').addEventListener('click',publishFoodShare);$('share-item').addEventListener('change',syncShareUnits);syncShareChoices();
+      if(!nearbyReady()){status.textContent='共享服务尚未配置。地图页面已就绪，接入 Supabase 后即可与其他用户互通。';renderAccountStatus(null);return}
+      shareClient=window.supabase.createClient(window.FRIDGE_SUPABASE_URL,window.FRIDGE_SUPABASE_PUBLISHABLE_KEY);
+      shareClient.auth.onAuthStateChange((_event,session)=>{
+        renderAccountStatus(session?.user||null);
+        setTimeout(()=>{const nextUserId=session?.user?.id||null;if(nextUserId&&nextUserId!==nearbyUserId){nearbyUserId=nextUserId;Promise.all([refreshShareAchievementCount(),loadMyShares()]);if(nearbyPosition)loadNearbyShares()}},0);
+      });
+      status.textContent='正在建立账号会话…';
+      shareClient.auth.getSession().then(async({data,error})=>{if(error)throw error;let session=data.session;if(!session){const result=await shareClient.auth.signInAnonymously();if(result.error)throw result.error;session=result.data.session}nearbyUserId=session?.user?.id||null;if(!nearbyUserId)throw new Error('account session unavailable');renderAccountStatus(session.user);status.textContent='共享与账号服务已连接。';await Promise.all([refreshShareAchievementCount(),loadMyShares()]);if(nearbyPosition)await loadNearbyShares()}).catch(()=>{status.textContent='连接失败，请检查 Supabase 配置及匿名登录设置。';renderAccountStatus(null);$('my-share-list').innerHTML='<div class="empty">共享服务连接失败，暂时无法管理发布记录</div>'});
+    }
     let sharePrefillAdded=null;
     function syncShareChoices(preferredAdded){const select=$('share-item');if(!select)return;const items=inventory.filter(item=>remainingDays(item)>=0&&remainingDays(item)<=3);select.innerHTML=items.length?items.map((item,index)=>`<option value="${index}">${escapeHtml(item.name)} · ${escapeHtml(expiryText(item))} · ${escapeHtml(inventoryQuantityHtml(item).replace(/<[^>]*>/g,''))}</option>`).join(''):'<option value="">没有 3 天内到期的冰箱食品</option>';select._shareItems=items;if(preferredAdded!==undefined&&preferredAdded!==null){const index=items.findIndex(item=>Number(item.added)===Number(preferredAdded));if(index<0){toast('该食材不在 3 天内到期的共享范围中');return}select.value=String(index)}syncShareUnits();}
     function openShareFromInventory(added){const item=inventory.find(entry=>Number(entry.added)===Number(added));if(!item)return;sharePrefillAdded=item.added;showView('nearby');$('share-item').scrollIntoView({behavior:'smooth',block:'center'});toast(`已选择 ${item.name}，确认数量和共享信息后发布`)}
@@ -163,6 +194,7 @@
       document.addEventListener('click',e=>{const b=e.target.closest('[data-advice-recipe]');if(b){showView('recipes');openRecipe(b.dataset.adviceRecipe)}});
       let deleteArm=false;$('diet-delete').addEventListener('click',()=>{if(!deleteArm){deleteArm=true;$('diet-delete').textContent='再次点击确认删除';setTimeout(()=>{deleteArm=false;$('diet-delete').textContent='删除当天记录'},3000);return}deleteArm=false;const logs=readDietLogs(),d=currentDietDate();delete logs[d];saveDietLogs(logs);renderDietSummary();toast('已删除 '+d+' 的记录')});
       $('diet-kcal-box').addEventListener('click',()=>toggleDietMeals());
+      initAccountControls();
       renderDietSummary();
       initNearbySharing();
       renderInventory();renderRecent();
