@@ -1,6 +1,5 @@
-const CACHE_NAME = 'fridge-v15';
+const CACHE_NAME = 'fridge-v16';
 const CORE_ASSETS = [
-  './',
   './index.html',
   './styles.css',
   './app.js',
@@ -8,14 +7,20 @@ const CORE_ASSETS = [
   './pwa.js',
   './manifest.webmanifest',
   './icons/icon-192.png',
-  './icons/icon-512.png'
+  './icons/icon-512.png',
+  './icons/apple-touch-icon.png'
 ];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => Promise.all(CORE_ASSETS.map((url) => cache.add(url).catch(() => null))))
-  );
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    try {
+      await cache.addAll(CORE_ASSETS);
+    } catch (error) {
+      await caches.delete(CACHE_NAME);
+      throw error;
+    }
+  })());
 });
 
 self.addEventListener('message', (event) => {
@@ -25,7 +30,7 @@ self.addEventListener('message', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))))
+      .then((keys) => Promise.all(keys.filter((key) => key.startsWith('fridge-') && key !== CACHE_NAME).map((key) => caches.delete(key))))
       .then(() => self.clients.claim())
   );
 });
@@ -37,50 +42,49 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
-  // 图片：缓存优先，命中直接返回，否则联网并写入缓存
   if (request.destination === 'image') {
-    event.respondWith(
-      caches.match(request).then((cached) => {
-        if (cached) return cached;
-        return fetch(request).then((response) => {
-          if (response && response.ok) {
-            const copy = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
-          }
-          return response;
-        });
-      })
-    );
-    return;
-  }
-
-  // 页面导航：网络优先，失败回退到缓存的首页
-  if (request.mode === 'navigate') {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          if (response && response.ok) {
-            const copy = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put('./index.html', copy));
-          }
-          return response;
-        })
-        .catch(() => caches.match('./index.html'))
-    );
-    return;
-  }
-
-  // 其它静态资源：先返回缓存，同时后台更新（stale-while-revalidate）
-  event.respondWith(
-    caches.match(request).then((cached) => {
-      const network = fetch(request).then((response) => {
-        if (response && response.status === 200) {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+    const cached = caches.match(request);
+    const response = cached.then((value) => {
+      if (value) return value;
+      return fetch(request).then(async (networkResponse) => {
+        if (networkResponse && networkResponse.ok) {
+          await caches.open(CACHE_NAME).then((cache) => cache.put(request, networkResponse.clone()));
         }
-        return response;
-      }).catch(() => cached);
-      return cached || network;
-    })
-  );
+        return networkResponse;
+      });
+    });
+    event.respondWith(response);
+    return;
+  }
+
+  if (request.mode === 'navigate') {
+    const cacheKey = new URL('./index.html', self.registration.scope).href;
+    const response = (async () => {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 3500);
+      try {
+        const networkResponse = await fetch(request, { signal: controller.signal });
+        if (networkResponse && networkResponse.ok) {
+          await caches.open(CACHE_NAME).then((cache) => cache.put(cacheKey, networkResponse.clone()));
+        }
+        return networkResponse;
+      } catch {
+        return (await caches.match(cacheKey)) || Response.error();
+      } finally {
+        clearTimeout(timeout);
+      }
+    })();
+    event.respondWith(response);
+    return;
+  }
+
+  const cached = caches.match(request);
+  const refresh = fetch(request).then(async (networkResponse) => {
+    if (networkResponse && networkResponse.status === 200) {
+      await caches.open(CACHE_NAME).then((cache) => cache.put(request, networkResponse.clone()));
+    }
+    return networkResponse;
+  });
+  event.waitUntil(refresh.then(() => undefined).catch(() => undefined));
+  event.respondWith(cached.then((value) => value || refresh).catch(() => Response.error()));
 });

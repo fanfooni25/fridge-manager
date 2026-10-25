@@ -18,6 +18,7 @@
 <body>
   <div class="app">
 <header class="topbar"><div class="brand"><span class="brand-mark"><svg width="16" height="18" viewBox="0 0 16 18" fill="none" stroke="#286548" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1.2" y="1" width="13.6" height="16" rx="2.5"></rect><line x1="1.2" y1="8.5" x2="14.8" y2="8.5"></line><line x1="12.3" y1="3.6" x2="12.3" y2="6.6"></line></svg></span>冰箱小管家</div><div class="date" id="today"></div></header>
+    <div class="pwa-offline-banner" id="pwa-offline-banner" role="status" hidden>当前离线：本机库存和已缓存页面仍可使用，附近共享与条码查询需要网络。</div>
     <main>
 
 
@@ -37,7 +38,7 @@
         <div class="section-heading"><h2>我发布的共享</h2></div>
         <div id="my-share-list" class="inventory-list"><div class="empty">连接共享服务后显示你发布的食材</div></div>
         <div class="section-heading"><h2>分享快过期的食品</h2></div>
-        <div class="form-card"><label class="form-label" for="share-item">选择冰箱里的食品（3 天内到期）</label><select class="field" id="share-item"></select><div class="field-row"><div><label class="form-label" for="share-quantity">分享数量</label><input class="field" id="share-quantity" type="number" min="1" step="1" value="1" inputmode="decimal"></div><div><label class="form-label" for="share-unit">单位</label><select class="field" id="share-unit"><option value="g">克</option><option value="piece">个</option></select></div></div><label class="form-label" for="share-note" style="margin-top:13px">取货说明（不要填写门牌、电话等隐私）</label><input class="field" id="share-note" maxlength="120" placeholder="例如：小区门口自取，今晚 8 点前"><label style="display:flex;gap:8px;align-items:flex-start;font-size:11px;line-height:1.5;color:#667168;margin-top:12px"><input type="checkbox" id="share-consent" style="margin:2px 0 0;accent-color:var(--green)"><span>我确认愿意公开食材名称、数量、到期时间和模糊位置，供附近用户查看。</span></label><button class="primary" id="publish-share" type="button">定位后发布共享</button><p class="helper">发布不会自动从你的冰箱库存扣除。领取交接完成后，请自行更新库存。</p></div>
+        <div class="form-card"><label class="form-label" for="share-item">选择冰箱里的食品（3 天内到期）</label><select class="field" id="share-item"></select><div class="field-row"><div><label class="form-label" for="share-quantity">分享数量</label><input class="field" id="share-quantity" type="number" min="1" step="1" value="1" inputmode="decimal"></div><div><label class="form-label" for="share-unit">单位</label><select class="field" id="share-unit"><option value="g">克</option><option value="piece">个</option></select></div></div><label class="form-label" for="share-note" style="margin-top:13px">取货说明（不要填写门牌、电话等隐私）</label><input class="field" id="share-note" maxlength="120" placeholder="例如：小区门口自取，今晚 8 点前"><label style="display:flex;gap:8px;align-items:flex-start;font-size:11px;line-height:1.5;color:#667168;margin-top:12px"><input type="checkbox" id="share-consent" style="margin:2px 0 0;accent-color:var(--green)"><span>我确认愿意公开食材名称、数量、到期时间和模糊位置，供附近用户查看。</span></label><button class="primary" id="publish-share" type="button">定位后发布共享</button><p class="helper">发布后会从本机库存中预留；撤下共享时返还库存。</p></div>
       </section>      <section class="view" id="view-add-food">
         <div class="headline"><div><div class="eyebrow">记录新鲜食材</div><h1>添加食物</h1></div></div>
         <div class="form-card">
@@ -151,10 +152,20 @@
           <button class="secondary" id="import-backup" type="button" style="width:100%;margin:0">导入备份（JSON）</button>
           <input id="import-file" type="file" accept="application/json,.json" hidden>
         </div>
+        <div class="form-card pwa-install-card" id="pwa-install-card">
+          <div class="section-heading" style="margin:0 0 6px"><h2 style="margin:0">安装到手机或电脑</h2></div>
+          <p class="helper" id="pwa-install-status" style="margin:0 0 10px">安装后可从主屏幕或应用列表快速打开，也可使用已缓存的页面。</p>
+          <button class="secondary" id="pwa-install-button" type="button" style="width:100%;margin:0 0 8px">安装应用</button>
+          <details class="pwa-install-help" id="pwa-install-help">
+            <summary>查看手动安装方法</summary>
+            <p id="pwa-install-instructions">请通过 HTTPS 网站打开本应用，然后在浏览器菜单中选择“安装应用”或“添加到主屏幕”。</p>
+          </details>
+        </div>
         <div class="form-card">
           <details class="update-log">
             <summary class="section-heading update-log-summary" style="margin:0"><h2 style="margin:0">更新记录</h2><span class="subtle">展开查看</span></summary>
             <div class="update-log-list">
+              <div class="update-log-item"><strong>v1.6 · 2026-10-25</strong><br>增加主屏幕安装引导和添加食物快捷方式；改进离线页面缓存、网络提示和更新检查。</div>
               <div class="update-log-item"><strong>v1.4 · 2026-10-19</strong><br>修正地图瓦片服务地址，补全 OpenStreetMap 署名并设置网页来源标识，改善地图底图被拦截的问题。</div>
               <div class="update-log-item"><strong>v1.3 · 2026-10-18</strong><br>附近共享范围调整为 10 公里，并按距离由近到远排序；新增领取、撤下和已领取状态管理；共享成就改为读取云端记录。</div>
               <div class="update-log-item"><strong>v1.2 · 2026-10-16</strong><br>修复 Edge 浏览器无法使用扫码的问题；缩小扫码预览并增加绿色定位框和操作提示；改善相机清晰度、自动对焦与扫码响应速度。</div>
@@ -162,7 +173,7 @@
             </div>
           </details>
         </div>
-        <p class="helper" style="text-align:center;margin:10px 0 4px">Fridge Manager-version<span id="app-version">1.4</span></p>
+        <p class="helper" style="text-align:center;margin:10px 0 4px">Fridge Manager-version<span id="app-version">1.6</span></p>
       </section>
     </main>
     <nav aria-label="主导航">
@@ -177,8 +188,8 @@
   <div class="overlay" id="recipe-overlay"><div class="sheet"><div class="sheet-handle"></div><div class="sheet-head"><h2 id="sheet-title"></h2><button class="close" id="close-sheet" aria-label="关闭">×</button></div><div id="sheet-body"></div></div></div>
   <div class="toast" id="toast"></div>
   <div class="update-notice" id="update-notice" role="status" aria-live="polite" hidden>
-    <div class="update-notice-row"><div class="update-notice-copy"><strong>发现新版本 <span id="update-version">v1.4</span></strong>本次更新内容：</div><div class="update-notice-actions"><button class="update-later" id="update-later" type="button">稍后</button><button class="update-apply" id="update-apply" type="button">立即更新</button></div></div>
-    <ol class="update-notice-content"><li>修正地图瓦片地址，提升地图加载兼容性。</li><li>补全 OpenStreetMap 版权署名，并设置网页来源标识。</li></ol>
+    <div class="update-notice-row"><div class="update-notice-copy"><strong>发现新版本 <span id="update-version">v1.6</span></strong>本次更新内容：</div><div class="update-notice-actions"><button class="update-later" id="update-later" type="button">稍后</button><button class="update-apply" id="update-apply" type="button">立即更新</button></div></div>
+    <ol class="update-notice-content"><li>改进安装引导、离线提示和应用快捷启动。</li><li>修复核心离线文件缓存不完整时仍报告安装成功的问题。</li></ol>
   </div>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

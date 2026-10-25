@@ -2,29 +2,44 @@
   "name": "冰箱小管家",
   "short_name": "冰箱",
   "description": "记录冰箱里的食材、按保质期提醒，并推荐菜谱。",
+  "id": "./",
   "lang": "zh-CN",
   "start_url": ".",
   "scope": ".",
+  "display_override": ["standalone", "minimal-ui"],
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#f6f7f2",
   "theme_color": "#286548",
+  "categories": ["food", "lifestyle"],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "icons/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "icons/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "添加食物",
+      "short_name": "添加食物",
+      "description": "快速记录新加入冰箱的食材",
+      "url": "./?view=add-food",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
     }
   ]
 }
