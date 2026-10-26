@@ -1,6 +1,6 @@
     document.addEventListener('gesturestart', function (e) { e.preventDefault(); });
     document.addEventListener('gesturechange', function (e) { e.preventDefault(); });
-    const APP_VERSION='1.9';
+    const APP_VERSION='1.10';
     $('app-version').textContent=APP_VERSION;
     const installButton=$('pwa-install-button'),installStatus=$('pwa-install-status'),installHelp=$('pwa-install-help'),installInstructions=$('pwa-install-instructions');
     let deferredInstallPrompt=null,swRegistration=null;

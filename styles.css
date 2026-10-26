@@ -24,3 +24,10 @@
     .nearby-share-actions{display:grid;gap:5px;flex:0 0 72px}.nearby-share-actions .secondary{margin:0;padding:7px 5px;font-size:10px;white-space:nowrap}.nearby-share-status{font-size:10px;color:var(--muted);white-space:nowrap}
     .pwa-offline-banner{margin:0 20px 8px;padding:9px 12px;border:1px solid #ecd7a6;border-radius:11px;background:#fff7e6;color:#795b1d;font-size:11px;line-height:1.5}.pwa-offline-banner[hidden]{display:none}
     .pwa-install-help{margin-top:4px;padding-top:8px;border-top:1px solid var(--line);font-size:11px;color:var(--muted)}.pwa-install-help summary{cursor:pointer;color:var(--green);font-weight:650}.pwa-install-help p{margin:8px 0 2px;line-height:1.6}
+.cloud-sync-box{margin-top:12px;padding:12px;border:1px solid #e6ece3;border-radius:13px;background:#f8faf6}
+.cloud-sync-dialog{width:min(430px,calc(100vw - 32px));border:1px solid #e3e9e0;border-radius:18px;padding:20px;color:var(--ink);box-shadow:0 20px 70px #1f302733}
+.cloud-sync-dialog::backdrop{background:#17201980}
+.cloud-sync-dialog h2{margin:0 0 9px;font-size:18px}
+.cloud-sync-dialog p{font-size:13px;line-height:1.6;color:#647166}
+.cloud-sync-actions{display:grid;gap:8px;margin-top:15px}
+.cloud-sync-actions button{margin:0}

@@ -1,6 +1,6 @@
     const profileStorageKey='fridge-profile-v1';
     function readProfile(){try{const p=JSON.parse(localStorage.getItem(profileStorageKey)||'{}');return {name:typeof p.name==='string'?p.name.slice(0,20):'',height:Number(p.height)>0?Number(p.height):0,weight:Number(p.weight)>0?Number(p.weight):0,age:Number(p.age)>0?Number(p.age):0,gender:p.gender==='female'?'female':'male',activity:Number(p.activity)>0?Number(p.activity):1.55,goal:p.goal==='cut'?'cut':p.goal==='bulk'?'bulk':'maintain'}}catch{return {name:'',height:0,weight:0,age:0,gender:'male',activity:1.55,goal:'maintain'}}}
-    function saveProfile(p){localStorage.setItem(profileStorageKey,JSON.stringify(p))}
+    function saveProfile(p){localStorage.setItem(profileStorageKey,JSON.stringify(p));window.FridgeCloudSync?.localChanged('profile')}
     function exportBackup(){
       const backup={app:'fridge-manager',version:2,exportedAt:new Date().toISOString(),profile:readProfile(),inventory,customFoods:customFoodRecords,menuPurchase:readMenuPurchase(),dietLogs:readDietLogs(),barcodeFoods:readBarcodeFoodNames(),shareReservations:readShareReservations()};
       const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
@@ -57,9 +57,9 @@
     const dietLogKey='fridge-diet-log-v2';
     function todayStr(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
     function readDietLogs(){try{const l=JSON.parse(localStorage.getItem(dietLogKey)||'{}');return (l&&typeof l==='object'&&!Array.isArray(l))?l:{}}catch{return {}}}
-    function saveDietLogs(logs){localStorage.setItem(dietLogKey,JSON.stringify(logs))}
+    function saveDietLogs(logs){Object.values(logs).forEach(day=>(day.meals||[]).forEach(meal=>{if(!meal.recordId)meal.recordId=createLocalId()}));localStorage.setItem(dietLogKey,JSON.stringify(logs));window.FridgeCloudSync?.localChanged('diet_meals')}
     function dietLogFor(date){const logs=readDietLogs();return {date,meals:(logs[date]||{}).meals||[]}}
-    function recordMeal(recipe,mult){const logs=readDietLogs(),d=todayStr(),day=logs[d]||{meals:[]},m=recipeMacros(recipe,mult);day.meals.push({id:recipe.id,name:recipe.name,emoji:recipe.emoji,kcal:recipeTotalKcal(recipe,mult),carbs:m.carbs,protein:m.protein,fat:m.fat,at:Date.now()});logs[d]=day;saveDietLogs(logs)}
+    function recordMeal(recipe,mult){const logs=readDietLogs(),d=todayStr(),day=logs[d]||{meals:[]},m=recipeMacros(recipe,mult);day.meals.push({recordId:createLocalId(),id:recipe.id,name:recipe.name,emoji:recipe.emoji,kcal:recipeTotalKcal(recipe,mult),carbs:m.carbs,protein:m.protein,fat:m.fat,at:Date.now()});logs[d]=day;saveDietLogs(logs)}
     function dietTotals(log){return log.meals.reduce((a,m)=>({kcal:a.kcal+(m.kcal||0),carbs:a.carbs+(m.carbs||0),protein:a.protein+(m.protein||0),fat:a.fat+(m.fat||0)}),{kcal:0,carbs:0,protein:0,fat:0})}
     function macroRing(label,have,target,color){const pct=Math.min(1,Math.max(0,target>0?have/target:0)),r=42,C=2*Math.PI*r,offset=C*(1-pct),gap=target-have,status=gap>0?`还差 ${Math.round(gap)} 克`:(gap<0?`超出 ${Math.round(-gap)} 克`:'已达标'),sc=gap>0?'#c07b3a':(gap<0?'#c07b3a':'var(--green)');return `<div style="text-align:center;min-width:0"><div style="position:relative;width:78px;height:78px;margin:0 auto"><svg width="78" height="78" viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="#e6f0e6" stroke-width="9"/><circle cx="50" cy="50" r="42" fill="none" stroke="${color}" stroke-width="9" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${offset}" transform="rotate(-90 50 50)"/></svg><div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.25"><b style="font-size:15px">${Math.round(have)}</b><span style="font-size:10px;color:var(--muted)">/ ${Math.round(target)}克</span></div></div><div style="font-size:12px;margin-top:6px;font-weight:650">${label}</div><div style="font-size:10px;margin-top:2px;color:${sc}">${status}</div></div>`}
     function dietAdvice(log){const t=getDietTargets(),total=dietTotals(log),gaps=[['碳水','carbs'],['蛋白质','protein'],['脂肪','fat']].filter(([label,key])=>t[key]-total[key]>5).map(([label,key])=>({label,key,need:t[key]-total[key]})),logged=new Set(log.meals.map(m=>m.id));if(!gaps.length)return '<p class="helper">今日营养摄入基本达标，继续保持均衡饮食。</p>';const recs=[];gaps.forEach(g=>{recipes.filter(r=>!logged.has(r.id)).map(r=>({r,v:recipeMacros(r,1)[g.key]})).sort((a,b)=>b.v-a.v).slice(0,2).forEach(x=>{if(!recs.some(y=>y.id===x.r.id))recs.push({id:x.r.id,name:x.r.name,emoji:x.r.emoji})})});return `<p class="helper">${gaps.map(g=>`${g.label}还差约 ${Math.round(g.need)} 克`).join('、')}，可优先考虑：</p>${recs.slice(0,4).map(x=>`<button type="button" class="subchip" data-advice-recipe="${x.id}">${x.emoji} ${x.name}</button>`).join('')}`}
@@ -118,6 +118,7 @@
         catch(error){toast(error.message?.includes('HTTPS')?error.message:'登录邮件发送失败，请检查邮箱地址和 Supabase 邮件设置')}
       });
       $('retry-account-session').addEventListener('click',connectAccountSession);
+      $('cloud-sync-button').addEventListener('click',()=>window.FridgeCloudSync?.start());
       renderAccountStatus(null);
     }
     function withTimeout(promise,ms,label){let timer;return Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error(label)),ms)})]).finally(()=>clearTimeout(timer))}
@@ -129,7 +130,7 @@
         let session=data.session;
         if(!session){const result=await withTimeout(shareClient.auth.signInAnonymously(),12000,'auth-timeout');if(result.error)throw result.error;session=result.data.session}
         nearbyUserId=session?.user?.id||null;if(!nearbyUserId)throw new Error('missing-user');
-        renderAccountStatus(session.user);shareStatus.textContent='共享与账号服务已连接。';
+        renderAccountStatus(session.user);shareStatus.textContent='共享与账号服务已连接。';window.FridgeCloudSync?.connect(shareClient,nearbyUserId);
         await Promise.all([refreshShareAchievementCount(),loadMyShares()]);if(nearbyPosition)await loadNearbyShares();
       }catch(error){renderAccountStatus(null,error);shareStatus.textContent=error.message==='auth-timeout'?'账号连接超时，请检查网络后重试。':'账号连接失败，请检查 Supabase 配置和 Authentication 设置。';$('my-share-list').innerHTML='<div class="empty">账号服务暂时不可用，检查网络后可重新连接</div>'}
     }
@@ -139,7 +140,7 @@
       try{shareClient=window.supabase.createClient(window.FRIDGE_SUPABASE_URL,window.FRIDGE_SUPABASE_PUBLISHABLE_KEY)}catch(error){renderAccountStatus(null,error);status.textContent='Supabase 配置无效，请检查项目地址和 Publishable key。';return}
       shareClient.auth.onAuthStateChange((_event,session)=>{
         renderAccountStatus(session?.user||null);
-        setTimeout(()=>{const nextUserId=session?.user?.id||null;if(nextUserId&&nextUserId!==nearbyUserId){nearbyUserId=nextUserId;Promise.all([refreshShareAchievementCount(),loadMyShares()]);if(nearbyPosition)loadNearbyShares()}},0);
+        setTimeout(()=>{const nextUserId=session?.user?.id||null;window.FridgeCloudSync?.connect(shareClient,nextUserId);if(nextUserId&&nextUserId!==nearbyUserId){nearbyUserId=nextUserId;Promise.all([refreshShareAchievementCount(),loadMyShares()]);if(nearbyPosition)loadNearbyShares()}else if(!nextUserId)nearbyUserId=null},0);
       });
       status.textContent='正在建立账号会话…';connectAccountSession();
     }

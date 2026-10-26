@@ -13,7 +13,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="冰箱小管家">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
-  <link rel="stylesheet" href="styles.css?v=1.9">
+  <link rel="stylesheet" href="styles.css?v=1.10">
 </head>
 <body>
   <div class="app">
@@ -107,7 +107,20 @@
           <button class="primary" id="bind-account-email" type="button">绑定邮箱，保留本机身份</button>
           <button class="secondary" id="login-account-email" type="button" style="width:100%;margin-top:8px">在此设备用已有邮箱账号登录</button>
           <button class="secondary" id="retry-account-session" type="button" style="width:100%;margin-top:8px" hidden>重新检查账号状态</button>
-          <p class="helper" style="margin-bottom:0">绑定后可用邮箱找回这个账号。此阶段不会上传或覆盖冰箱数据；库存和记录仍保存在本机，云端同步会在后续步骤接入。</p>
+          <p class="helper" style="margin-bottom:0">绑定后可用邮箱找回这个账号。首次同步前会比较本机与云端数据，并由你选择合并或使用云端数据；之后库存、自定义食材、饮食记录和个人资料会自动同步。</p>
+          <div class="cloud-sync-box">
+            <p class="helper" id="cloud-sync-status" style="margin:0 0 8px">等待账号连接…</p>
+            <button class="secondary" id="cloud-sync-button" type="button" style="width:100%;margin:0" disabled>开始云端同步</button>
+          </div>
+          <dialog id="cloud-sync-choice" class="cloud-sync-dialog">
+            <h2>首次同步</h2>
+            <p id="cloud-sync-preview"></p>
+            <div class="cloud-sync-actions">
+              <button class="primary" id="cloud-sync-merge" type="button">合并本机和云端</button>
+              <button class="secondary" id="cloud-sync-cloud" type="button">使用云端覆盖本机</button>
+              <button class="secondary" id="cloud-sync-cancel" type="button">稍后再说</button>
+            </div>
+          </dialog>
         </div>
         <div class="achievement-panel">
           <div class="section-heading" style="margin:0 3px 9px"><h2>我的成就</h2><span class="subtle" id="achievement-summary"></span></div>
@@ -175,6 +188,7 @@
           <details class="update-log">
             <summary class="section-heading update-log-summary" style="margin:0"><h2 style="margin:0">更新记录</h2><span class="subtle">展开查看</span></summary>
             <div class="update-log-list">
+              <div class="update-log-item"><strong>v1.10 · 2026-10-26</strong><br>增加本机与 Supabase 首次迁移、双向同步和冲突处理。</div>
               <div class="update-log-item"><strong>v1.9 · 2026-10-25</strong><br>修复已安装应用混用新旧缓存资源的问题，账号状态检查增加超时诊断和手动重试。</div>
               <div class="update-log-item"><strong>v1.8 · 2026-10-25</strong><br>改进应用脚本加载失败提示；账号状态检查增加超时诊断和手动重试。</div>
               <div class="update-log-item"><strong>v1.7 · 2026-10-25</strong><br>增加邮箱绑定和已有账号登录入口；当前仅建立账号身份，个人数据暂未开始云端同步。</div>
@@ -186,7 +200,7 @@
             </div>
           </details>
         </div>
-        <p class="helper" style="text-align:center;margin:10px 0 4px">Fridge Manager-version<span id="app-version">1.9</span></p>
+        <p class="helper" style="text-align:center;margin:10px 0 4px">Fridge Manager-version<span id="app-version">1.10</span></p>
       </section>
     </main>
     <nav aria-label="主导航">
@@ -201,15 +215,16 @@
   <div class="overlay" id="recipe-overlay"><div class="sheet"><div class="sheet-handle"></div><div class="sheet-head"><h2 id="sheet-title"></h2><button class="close" id="close-sheet" aria-label="关闭">×</button></div><div id="sheet-body"></div></div></div>
   <div class="toast" id="toast"></div>
   <div class="update-notice" id="update-notice" role="status" aria-live="polite" hidden>
-    <div class="update-notice-row"><div class="update-notice-copy"><strong>发现新版本 <span id="update-version">v1.9</span></strong>本次更新内容：</div><div class="update-notice-actions"><button class="update-later" id="update-later" type="button">稍后</button><button class="update-apply" id="update-apply" type="button">立即更新</button></div></div>
-    <ol class="update-notice-content"><li>修复安装版混用新旧页面脚本缓存的问题。</li><li>账号状态检查增加超时提示和手动重试。</li></ol>
+    <div class="update-notice-row"><div class="update-notice-copy"><strong>发现新版本 <span id="update-version">v1.10</span></strong>本次更新内容：</div><div class="update-notice-actions"><button class="update-later" id="update-later" type="button">稍后</button><button class="update-apply" id="update-apply" type="button">立即更新</button></div></div>
+    <ol class="update-notice-content"><li>增加本机与 Supabase 的首次数据迁移、双向同步和冲突处理。</li><li>修复安装版缓存版本不一致，并完善账号状态检查。</li></ol>
   </div>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onerror="window.FRIDGE_SUPABASE_LOAD_ERROR=true"></script>
   <script src="./nearby-config.js" onerror="window.FRIDGE_SUPABASE_CONFIG_ERROR=true"></script>
-  <script src="./app.js?v=1.9" onerror="document.getElementById('account-status').textContent='应用脚本加载失败，请检查网络并重新打开应用。'"></script>
-  <script src="./features.js?v=1.9" onerror="document.getElementById('account-status').textContent='账号功能脚本加载失败，请更新或刷新应用后重试。'"></script>
-  <script src="./pwa.js?v=1.9"></script>
+  <script src="./app.js?v=1.10" onerror="document.getElementById('account-status').textContent='应用脚本加载失败，请检查网络并重新打开应用。'"></script>
+  <script src="./cloud-sync.js?v=1.10" onerror="document.getElementById('cloud-sync-status').textContent='同步组件加载失败，请更新或刷新应用后重试。'"></script>
+  <script src="./features.js?v=1.10" onerror="document.getElementById('account-status').textContent='账号功能脚本加载失败，请更新或刷新应用后重试。'"></script>
+  <script src="./pwa.js?v=1.10"></script>
 
 
 </body>
