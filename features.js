@@ -106,7 +106,9 @@
       if(user.email){$('account-email').value=user.email;status.textContent=user.is_anonymous?`本机临时身份：${user.email}。建议绑定邮箱以便以后找回。`:`已绑定邮箱：${user.email}。当前数据仍只保存在本机，云端同步将在后续步骤接入。`;if(bind){bind.disabled=!user.is_anonymous;bind.textContent=user.is_anonymous?'绑定邮箱，保留本机身份':'邮箱已绑定'}if(login)login.disabled=!user.is_anonymous;return}
       status.textContent='本机临时账号。绑定邮箱可保留这个身份；清除浏览器数据后将无法找回。';if(bind){bind.disabled=false;bind.textContent='绑定邮箱，保留本机身份'}if(login)login.disabled=false;
     }
-    function accountRedirectUrl(){if(location.protocol==='file:')throw new Error('请先通过 HTTPS 网站打开应用，再使用邮箱账号');return new URL('.',location.href).href}
+    function accountRedirectUrl(){if(window.Capacitor?.isNativePlatform?.())return 'com.fanfooni.fridgemanager://auth-callback';if(location.protocol==='file:')throw new Error('请先通过 HTTPS 网站打开应用，再使用邮箱账号');return new URL('.',location.href).href}
+    async function handleNativeAuthUrl(rawUrl){if(!shareClient||typeof rawUrl!=='string')return;try{const url=new URL(rawUrl);if(url.protocol!=='com.fanfooni.fridgemanager:')return;const query=url.searchParams,fragment=new URLSearchParams(url.hash.replace(/^#/,'').replace(/^\?/,''));const error=query.get('error_description')||fragment.get('error_description');if(error){toast(decodeURIComponent(error.replace(/\+/g,' ')));return}const code=query.get('code');if(code){const {error:exchangeError}=await shareClient.auth.exchangeCodeForSession(code);if(exchangeError)throw exchangeError;return}const access_token=fragment.get('access_token')||query.get('access_token'),refresh_token=fragment.get('refresh_token')||query.get('refresh_token');if(access_token&&refresh_token){const {error:setSessionError}=await shareClient.auth.setSession({access_token,refresh_token});if(setSessionError)throw setSessionError}}catch(error){toast(`账号回跳失败：${error.message||'请重试'}`)}}
+    window.addEventListener('fridge-native-auth-url',event=>handleNativeAuthUrl(event.detail));
     function initAccountControls(){
       $('bind-account-email').addEventListener('click',async()=>{
         const email=$('account-email').value.trim();if(!shareClient){toast('账号服务尚未连接');return}if(!/^\S+@\S+\.\S+$/.test(email)){toast('请输入有效的邮箱地址');$('account-email').focus();return}
@@ -126,6 +128,7 @@
       if(!shareClient)return;
       const status=$('account-status'),shareStatus=$('share-connection');status.textContent='正在检查账号状态…';$('retry-account-session').hidden=true;
       try{
+        if(window.Capacitor?.isNativePlatform?.()&&window.fridgeNativeLaunchUrlPromise){const launchUrl=await window.fridgeNativeLaunchUrlPromise;if(launchUrl)await handleNativeAuthUrl(launchUrl)}
         const {data,error}=await withTimeout(shareClient.auth.getSession(),12000,'auth-timeout');if(error)throw error;
         let session=data.session;
         if(!session){const result=await withTimeout(shareClient.auth.signInAnonymously(),12000,'auth-timeout');if(result.error)throw result.error;session=result.data.session}

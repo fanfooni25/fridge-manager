@@ -2,3 +2,8 @@ tmp/
 .DS_Store
 Thumbs.db
 nearby-config.js
+node_modules/
+www/
+android/.gradle/
+android/local.properties
+android/app/build/

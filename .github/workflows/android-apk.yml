@@ -1,0 +1,61 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app.js'
+      - 'features.js'
+      - 'cloud-sync.js'
+      - 'index.html'
+      - 'styles.css'
+      - 'pwa.js'
+      - 'nearby-config.js'
+      - 'manifest.webmanifest'
+      - 'assets/**'
+      - 'data/**'
+      - 'icons/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'capacitor.config.json'
+      - 'scripts/**'
+      - '.github/workflows/android-apk.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.25.0
+          run_install: false
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Prepare web assets
+        run: pnpm run mobile:prepare
+      - name: Build debug APK
+        run: pnpm exec cap sync android && cd android && chmod +x gradlew && ./gradlew assembleDebug
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: fridge-manager-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 30

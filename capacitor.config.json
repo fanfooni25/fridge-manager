@@ -1,0 +1,11 @@
+{
+  "appId": "com.fanfooni.fridgemanager",
+  "appName": "冰箱小管家",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": false
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}

@@ -3,6 +3,8 @@
     const APP_VERSION='1.10';
     $('app-version').textContent=APP_VERSION;
     const installButton=$('pwa-install-button'),installStatus=$('pwa-install-status'),installHelp=$('pwa-install-help'),installInstructions=$('pwa-install-instructions');
+    const isNativeApp=!!window.Capacitor?.isNativePlatform?.();
+    if(isNativeApp)$('pwa-install-card').hidden=true;
     let deferredInstallPrompt=null,swRegistration=null;
     const isStandalone=()=>window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
     const isAppleMobile=()=>/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -35,7 +37,7 @@
     window.addEventListener('online',updateOfflineState);window.addEventListener('offline',updateOfflineState);updateOfflineState();
     const launchView=new URLSearchParams(location.search).get('view');
     if(launchView==='add-food')showView('add-food');
-    if('serviceWorker' in navigator){
+    if(!isNativeApp&&'serviceWorker' in navigator){
       window.addEventListener('load',async()=>{
         try{
           let hadController=!!navigator.serviceWorker.controller,refreshing=false;
