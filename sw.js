@@ -1,11 +1,11 @@
-const CACHE_NAME = 'fridge-v21';
+const CACHE_NAME = 'fridge-v22';
 const CORE_ASSETS = [
   './index.html',
-  './styles.css?v=1.11',
-  './app.js?v=1.11',
-  './cloud-sync.js?v=1.11',
-  './features.js?v=1.11',
-  './pwa.js?v=1.11',
+  './styles.css?v=1.12',
+  './app.js?v=1.12',
+  './cloud-sync.js?v=1.12',
+  './features.js?v=1.12',
+  './pwa.js?v=1.12',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',

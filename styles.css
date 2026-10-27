@@ -79,3 +79,9 @@ nav{padding-top:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom));bac
   .round-add{padding:10px 12px;font-size:12px}
   .form-card,.recipe-card{padding:16px;border-radius:19px}
 }
+
+/* Settings grouping */
+.settings-group-heading{margin:4px 3px 12px}
+.account-settings-group{margin-bottom:24px}
+.account-settings-group>.form-card{margin-bottom:11px}
+.account-settings-group>.form-card:last-of-type{margin-bottom:0}

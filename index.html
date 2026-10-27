@@ -13,7 +13,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="冰箱小管家">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
-  <link rel="stylesheet" href="styles.css?v=1.11">
+  <link rel="stylesheet" href="styles.css?v=1.12">
 </head>
 <body>
   <div class="app">
@@ -99,8 +99,10 @@
       </section>
       <section class="view" id="view-profile">
         <div class="headline"><div><div class="eyebrow">关于你</div><h1>个人信息</h1></div></div>
+        <section class="account-settings-group" aria-label="账号、设备与数据">
+          <div class="section-heading settings-group-heading"><h2>账号、设备与数据</h2></div>
         <div class="form-card" id="account-card">
-          <div class="section-heading" style="margin:0 0 6px"><h2 style="margin:0">账号与设备</h2></div>
+          <div class="section-heading" style="margin:0 0 6px"><h2 style="margin:0">账号与同步</h2></div>
           <p class="helper" id="account-status" style="margin:0 0 12px">正在检查账号状态…</p>
           <label class="form-label" for="account-email">邮箱</label>
           <input class="field" id="account-email" type="email" maxlength="254" placeholder="name@example.com" autocomplete="email" inputmode="email">
@@ -122,6 +124,23 @@
             </div>
           </dialog>
         </div>
+        <div class="form-card">
+          <div class="section-heading" style="margin:0 0 10px"><h2 style="margin:0">数据备份</h2></div>
+          <p class="helper" style="margin:0 0 12px">把冰箱数据导出成文件，换设备或换浏览器后导入即可恢复。</p>
+          <button class="secondary" id="export-backup" type="button" style="width:100%;margin:0 0 8px">导出备份（JSON）</button>
+          <button class="secondary" id="import-backup" type="button" style="width:100%;margin:0">导入备份（JSON）</button>
+          <input id="import-file" type="file" accept="application/json,.json" hidden>
+        </div>
+        <div class="form-card pwa-install-card" id="pwa-install-card">
+          <div class="section-heading" style="margin:0 0 6px"><h2 style="margin:0">安装到手机或电脑</h2></div>
+          <p class="helper" id="pwa-install-status" style="margin:0 0 10px">安装后可从主屏幕或应用列表快速打开，也可使用已缓存的页面。</p>
+          <button class="secondary" id="pwa-install-button" type="button" style="width:100%;margin:0 0 8px">安装应用</button>
+          <details class="pwa-install-help" id="pwa-install-help">
+            <summary>查看手动安装方法</summary>
+            <p id="pwa-install-instructions">请通过 HTTPS 网站打开本应用，然后在浏览器菜单中选择“安装应用”或“添加到主屏幕”。</p>
+          </details>
+        </div>
+        </section>
         <div class="achievement-panel">
           <div class="section-heading" style="margin:0 3px 9px"><h2>我的成就</h2><span class="subtle" id="achievement-summary"></span></div>
           <div class="achievement-grid" id="achievement-list" aria-live="polite"></div>
@@ -169,25 +188,10 @@
           <div id="diet-period-summary"></div>
         </div>
         <div class="form-card">
-          <div class="section-heading" style="margin:0 0 10px"><h2 style="margin:0">数据备份</h2></div>
-          <p class="helper" style="margin:0 0 12px">把冰箱数据导出成文件，换设备或换浏览器后导入即可恢复。</p>
-          <button class="secondary" id="export-backup" type="button" style="width:100%;margin:0 0 8px">导出备份（JSON）</button>
-          <button class="secondary" id="import-backup" type="button" style="width:100%;margin:0">导入备份（JSON）</button>
-          <input id="import-file" type="file" accept="application/json,.json" hidden>
-        </div>
-        <div class="form-card pwa-install-card" id="pwa-install-card">
-          <div class="section-heading" style="margin:0 0 6px"><h2 style="margin:0">安装到手机或电脑</h2></div>
-          <p class="helper" id="pwa-install-status" style="margin:0 0 10px">安装后可从主屏幕或应用列表快速打开，也可使用已缓存的页面。</p>
-          <button class="secondary" id="pwa-install-button" type="button" style="width:100%;margin:0 0 8px">安装应用</button>
-          <details class="pwa-install-help" id="pwa-install-help">
-            <summary>查看手动安装方法</summary>
-            <p id="pwa-install-instructions">请通过 HTTPS 网站打开本应用，然后在浏览器菜单中选择“安装应用”或“添加到主屏幕”。</p>
-          </details>
-        </div>
-        <div class="form-card">
           <details class="update-log">
             <summary class="section-heading update-log-summary" style="margin:0"><h2 style="margin:0">更新记录</h2><span class="subtle">展开查看</span></summary>
             <div class="update-log-list">
+              <div class="update-log-item"><strong>v1.12 · 2026-10-27</strong><br>将账号、设备安装与数据备份集中到同一分组。</div>
               <div class="update-log-item"><strong>v1.11 · 2026-10-27</strong><br>优化页面留白、卡片层次和冰箱/添加食物入口。</div>
               <div class="update-log-item"><strong>v1.10 · 2026-10-26</strong><br>增加本机与 Supabase 首次迁移、双向同步和冲突处理。</div>
               <div class="update-log-item"><strong>v1.9 · 2026-10-25</strong><br>修复已安装应用混用新旧缓存资源的问题，账号状态检查增加超时诊断和手动重试。</div>
@@ -201,7 +205,7 @@
             </div>
           </details>
         </div>
-        <p class="helper" style="text-align:center;margin:10px 0 4px">Fridge Manager-version<span id="app-version">1.11</span></p>
+        <p class="helper" style="text-align:center;margin:10px 0 4px">Fridge Manager-version<span id="app-version">1.12</span></p>
       </section>
     </main>
     <nav aria-label="主导航">
@@ -216,16 +220,16 @@
   <div class="overlay" id="recipe-overlay"><div class="sheet"><div class="sheet-handle"></div><div class="sheet-head"><h2 id="sheet-title"></h2><button class="close" id="close-sheet" aria-label="关闭">×</button></div><div id="sheet-body"></div></div></div>
   <div class="toast" id="toast"></div>
   <div class="update-notice" id="update-notice" role="status" aria-live="polite" hidden>
-    <div class="update-notice-row"><div class="update-notice-copy"><strong>发现新版本 <span id="update-version">v1.11</span></strong>本次更新内容：</div><div class="update-notice-actions"><button class="update-later" id="update-later" type="button">稍后</button><button class="update-apply" id="update-apply" type="button">立即更新</button></div></div>
-    <ol class="update-notice-content"><li>优化页面留白和卡片层次，让库存更容易浏览。</li><li>突出冰箱库存与添加食物的主要操作。</li></ol>
+    <div class="update-notice-row"><div class="update-notice-copy"><strong>发现新版本 <span id="update-version">v1.12</span></strong>本次更新内容：</div><div class="update-notice-actions"><button class="update-later" id="update-later" type="button">稍后</button><button class="update-apply" id="update-apply" type="button">立即更新</button></div></div>
+    <ol class="update-notice-content"><li>将账号、设备安装与数据备份集中到同一分组。</li><li>让相关设置更容易查找。</li></ol>
   </div>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onerror="window.FRIDGE_SUPABASE_LOAD_ERROR=true"></script>
   <script src="./nearby-config.js" onerror="window.FRIDGE_SUPABASE_CONFIG_ERROR=true"></script>
-  <script src="./app.js?v=1.11" onerror="document.getElementById('account-status').textContent='应用脚本加载失败，请检查网络并重新打开应用。'"></script>
-  <script src="./cloud-sync.js?v=1.11" onerror="document.getElementById('cloud-sync-status').textContent='同步组件加载失败，请更新或刷新应用后重试。'"></script>
-  <script src="./features.js?v=1.11" onerror="document.getElementById('account-status').textContent='账号功能脚本加载失败，请更新或刷新应用后重试。'"></script>
-  <script src="./pwa.js?v=1.11"></script>
+  <script src="./app.js?v=1.12" onerror="document.getElementById('account-status').textContent='应用脚本加载失败，请检查网络并重新打开应用。'"></script>
+  <script src="./cloud-sync.js?v=1.12" onerror="document.getElementById('cloud-sync-status').textContent='同步组件加载失败，请更新或刷新应用后重试。'"></script>
+  <script src="./features.js?v=1.12" onerror="document.getElementById('account-status').textContent='账号功能脚本加载失败，请更新或刷新应用后重试。'"></script>
+  <script src="./pwa.js?v=1.12"></script>
 
 
 </body>
