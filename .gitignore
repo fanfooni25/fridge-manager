@@ -4,6 +4,7 @@ Thumbs.db
 nearby-config.js
 node_modules/
 www/
+site/
 android/.gradle/
 android/local.properties
 android/app/build/
