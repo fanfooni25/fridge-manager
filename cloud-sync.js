@@ -8,7 +8,7 @@
   const baselinePrefix = 'fridge-cloud-baseline-v1:';
   const statusNode = () => document.getElementById('cloud-sync-status');
   const syncButton = () => document.getElementById('cloud-sync-button');
-  let client = null, userId = null, syncing = false, timer = null, initializedUser = null, preview = null;
+  let client = null, userId = null, syncing = false, timer = null, initializedUser = null, preview = null, syncQueued = false, pendingConnection = null;
 
   function setStatus(message, enabled = true, buttonText = '开始云端同步') {
     const status = statusNode(), button = syncButton();
@@ -114,7 +114,7 @@
       if (!mode) { setStatus('已取消首次同步。数据仍保留在本机。'); return; }
       await initialSync(mode);
     } catch (error) { setStatus(error.message?.includes('does not exist') || error.code === '42P01' ? '云端数据表尚未建立，请先在 Supabase SQL Editor 执行个人数据迁移。' : `首次同步失败：${error.message || '请检查网络和 RLS 配置。'}`); }
-    finally { syncing = false; refreshButton(); }
+    finally { finishSync(); }
   }
   function initialMerge(table, local, remote, preferLocal) {
     if (table === 'profile') {
@@ -220,7 +220,7 @@
       setStatus(`同步完成 · ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`, true, '立即同步');
     } catch (error) {
       setStatus(error.message === 'sync-conflict' ? '同步期间云端记录又有变化，请再次点击同步解决冲突。' : `同步失败：${error.message || '请检查网络和 RLS 配置。'}`, true, '重试同步');
-    } finally { syncing = false; refreshButton(); }
+    } finally { finishSync(); }
   }
   async function reconcile(desired, remote) {
     for (const [table, def] of Object.entries(tables)) {
@@ -264,6 +264,8 @@
     return true;
   }
   async function applyIfChanged(remote) {
+    // Preserve edits made after this sync captured its local snapshot.
+    if (syncQueued) return;
     const local = localRows(); if (snapshotsMatch(local, remote)) return;
     const custom = cloudToLocal('custom_foods', remote.custom_foods, []);
     const inv = cloudToLocal('inventory', remote.inventory, remote.custom_foods.filter(row => !row.deleted_at));
@@ -274,7 +276,7 @@
     localStorage.setItem(dietLogKey, JSON.stringify(diet));
     if (profile) localStorage.setItem(profileStorageKey, JSON.stringify(profile)); else localStorage.removeItem(profileStorageKey);
     setStatus('云端数据已应用，正在刷新页面…', false);
-    setTimeout(() => location.reload(), 250);
+    location.reload();
   }
   function refreshButton() {
     const button = syncButton(); if (!button) return;
@@ -283,6 +285,11 @@
     button.textContent = syncing ? '同步中…' : hasBaseline ? '立即同步' : '开始首次同步';
   }
   function connect(nextClient, nextUserId) {
+    if (syncing && (client !== nextClient || userId !== nextUserId)) {
+      pendingConnection = { client: nextClient, userId: nextUserId };
+      syncQueued = true;
+      return;
+    }
     if (!nextClient || !nextUserId) {
       client = null; userId = null; initializedUser = null;
       clearTimeout(timer); refreshButton();
@@ -295,8 +302,19 @@
     else setStatus('账号已连接。首次同步前会先比较本机和云端数据。', true, '开始首次同步');
   }
   function localChanged() {
-    if (syncing || !client || !userId || !readBaseline()) return;
+    if (!client || !userId) return;
+    if (syncing) { syncQueued = true; return; }
+    if (!readBaseline()) return;
     clearTimeout(timer); timer = setTimeout(() => steadySync(), 900);
+  }
+  function finishSync() {
+    syncing = false;
+    if (pendingConnection) {
+      const next = pendingConnection; pendingConnection = null; syncQueued = false; clearTimeout(timer);
+      connect(next.client, next.userId); return;
+    }
+    refreshButton();
+    if (syncQueued) { syncQueued = false; if (readBaseline()) { clearTimeout(timer); timer = setTimeout(() => steadySync(), 0); } }
   }
   function start() { if (readBaseline()) steadySync(); else previewAndStart(); }
   document.getElementById('cloud-sync-choice')?.addEventListener('close', () => { preview = null; });

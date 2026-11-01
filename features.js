@@ -103,7 +103,7 @@
       if(error){status.textContent=error.message==='auth-timeout'?'连接账号超时。请检查网络，或点下方重新检查。':'读取账号状态失败。请检查网络和 Supabase Authentication 设置后重试。';if(bind)bind.disabled=true;if(login)login.disabled=true;return}
       if(!shareClient){status.textContent='正在连接账号服务…';return}
       if(!user){status.textContent='尚未建立本机账号。';return}
-      if(user.email){$('account-email').value=user.email;status.textContent=user.is_anonymous?`本机临时身份：${user.email}。建议绑定邮箱以便以后找回。`:`已绑定邮箱：${user.email}。当前数据仍只保存在本机，云端同步将在后续步骤接入。`;if(bind){bind.disabled=!user.is_anonymous;bind.textContent=user.is_anonymous?'绑定邮箱，保留本机身份':'邮箱已绑定'}if(login)login.disabled=!user.is_anonymous;return}
+      if(user.email){$('account-email').value=user.email;status.textContent=user.is_anonymous?`本机临时身份：${user.email}。建议绑定邮箱以便以后找回。`:`已绑定邮箱：${user.email}。库存、食材、饮食记录和个人资料的同步状态请查看下方“云端同步”。`;if(bind){bind.disabled=!user.is_anonymous;bind.textContent=user.is_anonymous?'绑定邮箱，保留本机身份':'邮箱已绑定'}if(login)login.disabled=!user.is_anonymous;return}
       status.textContent='本机临时账号。绑定邮箱可保留这个身份；清除浏览器数据后将无法找回。';if(bind){bind.disabled=false;bind.textContent='绑定邮箱，保留本机身份'}if(login)login.disabled=false;
     }
     function accountRedirectUrl(){if(window.Capacitor?.isNativePlatform?.())return 'com.fanfooni.fridgemanager://auth-callback';if(location.protocol==='file:')throw new Error('请先通过 HTTPS 网站打开应用，再使用邮箱账号');return new URL('.',location.href).href}
